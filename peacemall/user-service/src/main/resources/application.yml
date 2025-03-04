@@ -1,0 +1,43 @@
+server:
+  port: 8084
+spring:
+  application:
+    name: user-service # 微服务名称
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:mysql://${pm.db.host}:${pm.db.port}/users?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${pm.db.un}
+    password: ${pm.db.pw}
+  cloud:
+    nacos:
+      server-addr: 192.168.145.134:8848
+mybatis-plus:
+  configuration:
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+  global-config:
+    db-config:
+      update-strategy: not_null
+      id-type: auto
+logging:
+  level:
+    com.peacemall: debug
+  pattern:
+    dateformat: HH:mm:ss:SSS
+  file:
+    path: "logs/${spring.application.name}"
+knife4j:
+  enable: true
+  openapi:
+    title: 和平商城用户服务接口文档
+    description: "和平商城用户服务接口文档"
+    email: chuxuebushi@gmail.com
+    concat: 小陈
+    version: v1.0.0
+    group:
+      default:
+        group-name: default
+        api-rule: package
+        api-rule-resources:
+          - com.peacemall.user.controller

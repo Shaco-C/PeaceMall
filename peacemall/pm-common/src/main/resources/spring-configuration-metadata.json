@@ -1,0 +1,68 @@
+{
+  "groups": [
+    {
+      "name": "pm.db"
+    },
+    {
+      "name": "pm.swagger"
+    }
+  ],
+  "properties": [
+    {
+      "name": "pm.db.host",
+      "type": "java.lang.String",
+      "description": "数据库地址",
+      "defaultValue": "192.168.145.134"
+    },
+    {
+      "name": "pm.db.port",
+      "type": "java.lang.Integer",
+      "description": "数据库端口",
+      "defaultValue": "3306"
+    },
+    {
+      "name": "pm.db.database",
+      "type": "java.lang.String",
+      "description": "数据库database名",
+      "defaultValue": ""
+    },
+    {
+      "name": "pm.db.un",
+      "type": "java.lang.String",
+      "description": "数据库用户名",
+      "defaultValue": "root"
+    },
+    {
+      "name": "pm.db.pw",
+      "type": "java.lang.String",
+      "description": "数据库密码",
+      "defaultValue": "123456"
+    },
+    {
+      "name": "pm.swagger.title",
+      "type": "java.lang.String",
+      "description": "接口文档标题"
+    },
+    {
+      "name": "pm.swagger.description",
+      "type": "java.lang.String",
+      "description": "接口文档描述"
+    },
+    {
+      "name": "pm.swagger.email",
+      "type": "java.lang.String",
+      "description": "接口文档联系人邮箱"
+    },
+    {
+      "name": "pm.swagger.concat",
+      "type": "java.lang.String",
+      "description": "接口文档联系人"
+    },
+    {
+      "name": "pm.swagger.package",
+      "type": "java.lang.String",
+      "description": "接口controller扫描包"
+    }
+  ],
+  "hints": []
+}
