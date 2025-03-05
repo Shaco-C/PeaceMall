@@ -1,13 +1,20 @@
 package com.peacemall.user.enums;
 
+import com.baomidou.mybatisplus.annotation.EnumValue;
+
 public enum UserRole {
-    //管理员
-    ADMIN,
+    ADMIN("ADMIN"),
+    MERCHANT("MERCHANT"),
+    USER("USER");
 
-    //商家
-    MERCHANT,
+    @EnumValue
+    private final String value;
 
-    //普通用户
-    USER
+    UserRole(String value) {
+        this.value = value;
+    }
 
+    public String getValue() {
+        return value;
+    }
 }

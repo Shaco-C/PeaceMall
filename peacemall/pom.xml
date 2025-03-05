@@ -12,6 +12,15 @@
 
         <module>user-service</module>
         <module>pm-common</module>
+        <module>wallet-service</module>
+        <module>pm-api</module>
+        <module>pm-gateway</module>
+        <module>cart-service</module>
+        <module>shop-service</module>
+        <module>log-service</module>
+        <module>review-service</module>
+        <module>order-service</module>
+        <module>coupon-service</module>
     </modules>
 
     <parent>
