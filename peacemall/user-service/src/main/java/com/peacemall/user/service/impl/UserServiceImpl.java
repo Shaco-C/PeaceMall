@@ -23,6 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
 
 @Service
 @Slf4j
@@ -218,62 +221,34 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
 
     @Override
     public R<String> updatePassword(String oldPassword, String newPassword) {
-        Long userId = UserContext.getUserId();
-
-        log.info("updatePassword: oldPassword={}, newPassword={}", oldPassword, newPassword);
-
-        // 1. 检查用户是否已登录
-        if (userId == null) {
-            log.error("用户未登录");
-            return R.error("用户未登录");
-        }
-
-        // 2. 校验旧密码是否为空
-        if (StrUtil.isEmpty(oldPassword)) {
-            log.error("用户未提供旧密码: userId={}", userId);
-            return R.error("请输入旧密码");
-        }
-
-        // 3. 校验新密码是否为空，是否符合安全要求
-        if (StrUtil.isEmpty(newPassword) || !PasswordValidator.isValid(newPassword)) {
-            log.error("新密码格式不符合要求: userId={}", userId);
-            return R.error("密码必须至少包含一个字母，一个数字，长度在8到16位");
-        }
-
-        // 4. 查询用户信息
-        Users user = this.getById(userId);
-        if (user == null) {
-            log.error("用户信息不存在: userId={}", userId);
-            return R.error("用户信息异常，请重新登录");
-        }
-
-        // 5. 校验旧密码是否正确
-        if (!PasswordUtil.matches(oldPassword, user.getPassword())) {
-            log.error("密码验证失败: userId={}", userId);
-            return R.error("旧密码错误");
-        }
-
-        // 6. 新密码不能与旧密码相同
-        if (PasswordUtil.matches(newPassword, user.getPassword())) {
-            log.error("新密码不能与旧密码相同: userId={}", userId);
-            return R.error("新密码不能与旧密码相同");
-        }
-
-        // 7. 更新密码
-        Users updateUser = new Users();
-        updateUser.setUserId(userId);
-        updateUser.setPassword(PasswordUtil.encryptPassword(newPassword));
-
-        boolean res = this.updateById(updateUser);
-        if (!res) {
-            log.error("更新密码失败: userId={}", userId);
-            return R.error("更新密码失败，请稍后重试");
-        }
-
-        log.info("用户密码更新成功: userId={}", userId);
-        return R.ok("更新密码成功");
+        return updateUserField(oldPassword, newPassword, "密码",
+                user -> user.getPassword(),
+                (user, value) -> user.setPassword(PasswordUtil.encryptPassword(value)),
+                PasswordUtil::matches);
     }
 
+    @Override
+    public R<String> updatePhoneNumber(String oldNumber, String newNumber) {
+        if (isPhoneNumberExists(newNumber)){
+            return R.error("该手机号已存在");
+        }
+
+        return updateUserField(oldNumber, newNumber, "手机号",
+                Users::getPhoneNumber,
+                Users::setPhoneNumber,
+                String::equals);
+    }
+
+    @Override
+    public R<String> updateEmail(String oldEmail, String newEmail) {
+        if (isEmailExists(newEmail)){
+            return R.error("该邮箱已存在");
+        }
+        return updateUserField(oldEmail, newEmail, "邮箱",
+                Users::getEmail,
+                Users::setEmail,
+                String::equals);
+    }
 
 
     // 获取用户信息
@@ -293,6 +268,82 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         BeanUtil.copyProperties(user, userInfoVO);
         return R.ok(userInfoVO);
     }
+
+    /**
+     * 通用更新用户字段方法
+     * @param oldValue 旧值
+     * @param newValue 新值
+     * @param fieldName 字段名称
+     * @param getter 获取当前用户字段的方法
+     * @param setter 更新用户字段的方法
+     * @param comparator 旧值和新值的比较方法
+     * @return 统一的 R<String> 响应
+     */
+    private R<String> updateUserField(String oldValue, String newValue, String fieldName,
+                                      Function<Users, String> getter, BiConsumer<Users, String> setter,
+                                      BiPredicate<String, String> comparator) {
+        Long userId = UserContext.getUserId();
+        if (userId == null) {
+            log.error("用户未登录");
+            return R.error("用户未登录");
+        }
+
+        if (StrUtil.isEmpty(newValue)) {
+            log.error("新{}不能为空", fieldName);
+            return R.error(fieldName + "不能为空");
+        }
+
+        Users user = this.getById(userId);
+        if (user == null) {
+            log.error("用户信息不存在: userId={}", userId);
+            return R.error("用户信息异常，请重新登录");
+        }
+
+        String currentValue = getter.apply(user);
+        boolean isFirstTimeSet = StrUtil.isEmpty(currentValue);
+
+        // 如果是第一次设置（当前值为空），则不需要校验旧值
+        if (!isFirstTimeSet) {
+            // 只有当不是第一次设置时，才检查旧值
+            if (StrUtil.isEmpty(oldValue)) {
+                log.error("用户未提供旧{}", fieldName);
+                return R.error("请输入旧" + fieldName);
+            }
+
+            // 校验旧值是否正确
+            if (!comparator.test(oldValue, currentValue)) {
+                log.error("{}验证失败: userId={}", fieldName, userId);
+                return R.error("旧" + fieldName + "错误");
+            }
+
+            // 新值不能与旧值相同
+            if (comparator.test(newValue, currentValue)) {
+                log.error("新{}不能与旧{}相同: userId={}", fieldName, fieldName, userId);
+                return R.error("新" + fieldName + "不能与旧" + fieldName + "相同");
+            }
+        }
+
+        // 更新字段
+        Users updateUser = new Users();
+        updateUser.setUserId(userId);
+        setter.accept(updateUser, newValue);
+
+        boolean res = this.updateById(updateUser);
+        if (!res) {
+            log.error("更新{}失败: userId={}", fieldName, userId);
+            return R.error("更新" + fieldName + "失败，请稍后重试");
+        }
+
+        String logMessage = isFirstTimeSet ? "用户首次设置{}: userId={}" : "用户{}更新成功: userId={}";
+        log.info(logMessage, fieldName, userId);
+
+        String successMessage = isFirstTimeSet ? "设置" + fieldName + "成功" : "更新" + fieldName + "成功";
+        return R.ok(successMessage);
+    }
+
+
+
+
 
     //方法类
 

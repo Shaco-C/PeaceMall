@@ -4,7 +4,7 @@ package com.peacemall.user.controller;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.IdsDTO;
 import com.peacemall.user.domain.dto.LoginFormDTO;
-import com.peacemall.user.domain.dto.VerifyPwdDTO;
+import com.peacemall.user.domain.dto.VerifyInfosDTO;
 import com.peacemall.user.domain.po.Users;
 import com.peacemall.user.domain.vo.UserInfoVO;
 import com.peacemall.user.domain.vo.UserLoginVO;
@@ -39,8 +39,8 @@ public class UsersController {
     // 用户注销
     @ApiOperation(value = "用户注销")
     @PutMapping("/closeAccount")
-    public R<String> closeAccount(@RequestBody VerifyPwdDTO verifyPwdDTO) {
-        return userService.closeAccount(verifyPwdDTO.getCurrentPassword());
+    public R<String> closeAccount(@RequestBody VerifyInfosDTO verifyPwdDTO) {
+        return userService.closeAccount(verifyPwdDTO.getCurrentInfo());
     }
 
     //更新用户信息
@@ -53,8 +53,22 @@ public class UsersController {
     //用户修改密码
     @ApiOperation(value = "用户修改密码")
     @PutMapping("/updatePassword")
-    public R<String> updatePassword(@RequestBody VerifyPwdDTO verifyPwdDTO) {
-        return userService.updatePassword(verifyPwdDTO.getCurrentPassword(), verifyPwdDTO.getNewPassword());
+    public R<String> updatePassword(@RequestBody VerifyInfosDTO verifyPwdDTO) {
+        return userService.updatePassword(verifyPwdDTO.getCurrentInfo(), verifyPwdDTO.getNewInfo());
+    }
+
+    //用户修改密码
+    @ApiOperation(value = "用户修改手机")
+    @PutMapping("/updatePhoneNumber")
+    public R<String> updatePhoneNumber(@RequestBody VerifyInfosDTO verifyPwdDTO) {
+        return userService.updatePhoneNumber(verifyPwdDTO.getCurrentInfo(), verifyPwdDTO.getNewInfo());
+    }
+
+    //用户修改密码
+    @ApiOperation(value = "用户修改邮箱")
+    @PutMapping("/updateEmail")
+    public R<String> updateEmail(@RequestBody VerifyInfosDTO verifyPwdDTO) {
+        return userService.updateEmail(verifyPwdDTO.getCurrentInfo(), verifyPwdDTO.getNewInfo());
     }
 
     //获取用户个人信息

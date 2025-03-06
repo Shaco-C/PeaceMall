@@ -30,6 +30,14 @@ public interface UserService extends IService<Users> {
     // 更新用户密码
     R<String> updatePassword(String oldPassword, String newPassword);
 
+    // 更新用户手机
+    R<String> updatePhoneNumber(String oldNumber, String newNumber);
+
+    // 更新用户邮箱
+    R<String> updateEmail(String oldEmail, String newEmail);
+
+
+
     //获取用户个人信息
     R<UserInfoVO> getUserInfo();
 }
