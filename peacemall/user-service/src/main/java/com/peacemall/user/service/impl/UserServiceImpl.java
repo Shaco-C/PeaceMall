@@ -113,7 +113,8 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
     public R<String> deleteUsersByIds(List<Long> userIds) {
         String userRole = UserContext.getUserRole();
         Long currentUserId = UserContext.getUserId();
-
+        log.info("useRole:{},userId:{}",userRole,currentUserId);
+        log.info("userIds:{}",userIds);
         // 1. 权限检查
         if (!UserRole.ADMIN.name().equals(userRole)) {
             log.error("当前用户没有管理员权限: userId={}, userRole={}", currentUserId, userRole);
@@ -144,6 +145,8 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         String userRole = UserContext.getUserRole();
         Long adminUserId = UserContext.getUserId();
 
+        log.info("userRole:{},userId:{}",userRole,adminUserId);
+
         // 1. 权限检查
         if (!UserRole.ADMIN.name().equals(userRole)) {
             log.error("当前用户没有管理员权限: userId={}, userRole={}", adminUserId, userRole);
@@ -155,7 +158,7 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         queryWrapper.eq(Users::getStatus, UserState.CLOSED.name());
 
         int deletedCount = this.baseMapper.delete(queryWrapper);
-
+        log.info("deleteUserWithClosedState: deletedCount={}", deletedCount);
         if (deletedCount == 0) {
             log.info("没有需要删除的用户: adminUserId={}", adminUserId);
             return R.ok("没有需要删除的用户");
@@ -169,6 +172,7 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
     // 更新用户信息
     @Override
     public R<String> updateUserInfos(Users users) {
+        log.info("updateUserInfos: users={}", users);
         Long userId = UserContext.getUserId();
 
         // 1. 检查是否登录
@@ -177,40 +181,46 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             return R.error("用户未登录");
         }
 
-        // 2. 检查用户是否尝试修改不允许在该方法修改的字段
+        // 2. 检查用户是否尝试修改受限字段
         if (users.getStatus() != null || users.getRole() != null ||
                 StrUtil.isNotEmpty(users.getPhoneNumber()) || StrUtil.isNotEmpty(users.getEmail())) {
             log.error("用户尝试修改受限字段: userId={}, users={}", userId, users);
             return R.error("请勿在此修改手机号、邮箱或用户权限");
         }
 
-        // 3. 仅更新允许修改的字段
-        LambdaUpdateWrapper<Users> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Users::getUserId, userId);
+        // 3. 只更新允许修改的字段
+        Users updateUser = new Users();
+        updateUser.setUserId(userId);
 
         if (StrUtil.isNotEmpty(users.getAvatarUrl())) {
-            updateWrapper.set(Users::getAvatarUrl, users.getAvatarUrl());
+            updateUser.setAvatarUrl(users.getAvatarUrl());
         }
         if (StrUtil.isNotEmpty(users.getSignature())) {
-            updateWrapper.set(Users::getSignature, users.getSignature());
+            updateUser.setSignature(users.getSignature());
+        }
+        if (StrUtil.isNotEmpty(users.getNickname())) {
+            updateUser.setNickname(users.getNickname());
         }
 
-        boolean res = this.update(updateWrapper);
+        // 4. 使用 updateById 更新
+        boolean res = this.updateById(updateUser);
 
         if (!res) {
             log.error("更新用户信息失败: userId={}", userId);
             return R.error("更新用户信息失败，请稍后重试");
         }
 
-        log.info("用户成功更新信息: userId={}, 更新字段={}", userId, updateWrapper.getSqlSet());
+        log.info("用户成功更新信息: userId={}, 更新字段={}", userId, updateUser);
         return R.ok("更新用户信息成功");
     }
 
 
-    // 更新密码
+
     @Override
     public R<String> updatePassword(String oldPassword, String newPassword) {
         Long userId = UserContext.getUserId();
+
+        log.info("updatePassword: oldPassword={}, newPassword={}", oldPassword, newPassword);
 
         // 1. 检查用户是否已登录
         if (userId == null) {
@@ -225,7 +235,7 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         }
 
         // 3. 校验新密码是否为空，是否符合安全要求
-        if (StrUtil.isEmpty(newPassword) || PasswordValidator.isValid(newPassword)) {
+        if (StrUtil.isEmpty(newPassword) || !PasswordValidator.isValid(newPassword)) {
             log.error("新密码格式不符合要求: userId={}", userId);
             return R.error("密码必须至少包含一个字母，一个数字，长度在8到16位");
         }
@@ -237,7 +247,7 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             return R.error("用户信息异常，请重新登录");
         }
 
-        // 5. 校验旧密码是否正确（修正参数顺序）
+        // 5. 校验旧密码是否正确
         if (!PasswordUtil.matches(oldPassword, user.getPassword())) {
             log.error("密码验证失败: userId={}", userId);
             return R.error("旧密码错误");
@@ -249,12 +259,12 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             return R.error("新密码不能与旧密码相同");
         }
 
-        // 7. 仅更新密码字段，避免影响其他数据
-        LambdaUpdateWrapper<Users> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Users::getUserId, userId)
-                .set(Users::getPassword, PasswordUtil.encryptPassword(newPassword));
+        // 7. 更新密码
+        Users updateUser = new Users();
+        updateUser.setUserId(userId);
+        updateUser.setPassword(PasswordUtil.encryptPassword(newPassword));
 
-        boolean res = this.update(updateWrapper);
+        boolean res = this.updateById(updateUser);
         if (!res) {
             log.error("更新密码失败: userId={}", userId);
             return R.error("更新密码失败，请稍后重试");
@@ -263,6 +273,7 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         log.info("用户密码更新成功: userId={}", userId);
         return R.ok("更新密码成功");
     }
+
 
 
     // 获取用户信息

@@ -24,6 +24,9 @@ public class Users implements Serializable {
     @TableField("username")
     private String username;
 
+    @TableField("nickname")
+    private String nickname;
+
     @TableField("email")
     private String email;
 

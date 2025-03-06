@@ -6,10 +6,10 @@ spring:
   profiles:
     active: dev
   datasource:
-    url: jdbc:mysql://192.168.145.134:3306/peacemall?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://${pm.db.host}:${pm.db.port}/peacemall?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: 123456
+    username: ${pm.db.un}
+    password: ${pm.db.pw}
   cloud:
     nacos:
       server-addr: 192.168.145.134:8848

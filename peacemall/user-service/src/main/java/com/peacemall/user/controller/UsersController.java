@@ -10,6 +10,7 @@ import com.peacemall.user.domain.vo.UserInfoVO;
 import com.peacemall.user.domain.vo.UserLoginVO;
 import com.peacemall.user.service.UserService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,36 +23,42 @@ public class UsersController {
     private final UserService userService;
 
     // 用户注册
+    @ApiOperation(value = "用户注册")
     @PostMapping("/register")
-    public R<String> register(Users users) {
+    public R<String> register(@RequestBody Users users) {
         return userService.register(users);
     }
 
     // 用户登录
+    @ApiOperation(value = "用户登录")
     @PostMapping("/login")
-    public R<UserLoginVO> login(LoginFormDTO loginFormDTO) {
+    public R<UserLoginVO> login(@RequestBody LoginFormDTO loginFormDTO) {
         return userService.login(loginFormDTO);
     }
 
     // 用户注销
+    @ApiOperation(value = "用户注销")
     @PutMapping("/closeAccount")
     public R<String> closeAccount(@RequestBody VerifyPwdDTO verifyPwdDTO) {
         return userService.closeAccount(verifyPwdDTO.getCurrentPassword());
     }
 
     //更新用户信息
+    @ApiOperation(value = "更新用户信息")
     @PutMapping("/updateUserInfo")
     public R<String> updateUserInfo(@RequestBody Users users) {
         return userService.updateUserInfos(users);
     }
 
     //用户修改密码
+    @ApiOperation(value = "用户修改密码")
     @PutMapping("/updatePassword")
     public R<String> updatePassword(@RequestBody VerifyPwdDTO verifyPwdDTO) {
         return userService.updatePassword(verifyPwdDTO.getCurrentPassword(), verifyPwdDTO.getNewPassword());
     }
 
     //获取用户个人信息
+    @ApiOperation(value = "获取用户个人信息")
     @GetMapping("/getUserInfo")
     public R<UserInfoVO> getUserInfo() {
         return userService.getUserInfo();
@@ -59,12 +66,14 @@ public class UsersController {
 
 
     //删除用户
+    @ApiOperation(value = "管理员批量删除用户")
     @DeleteMapping("/admin/deleteUsers")
     public R<String> adminDeleteUsers(@RequestBody IdsDTO idsDTO) {
-        return userService.deleteUsersByIds(idsDTO.getIds());
+        return userService.deleteUsersByIds(idsDTO.getIdsList());
     }
 
     //管理员删除注销账号的用户
+    @ApiOperation(value = "管理员一键删除注销账号的用户")
     @DeleteMapping("/admin/deleteCloseAccountUsers")
     public R<String> adminDeleteClosedAccountUsers() {
         return userService.deleteUserWithClosedState();

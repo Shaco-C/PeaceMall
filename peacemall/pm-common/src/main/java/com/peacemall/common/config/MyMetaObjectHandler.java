@@ -1,16 +1,19 @@
 package com.peacemall.common.config;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 
 @Configuration
+@Slf4j
 public class MyMetaObjectHandler implements MetaObjectHandler {
     // 在插入数据时，自动填充createdAt字段
     @Override
     public void insertFill(MetaObject metaObject) {
+        log.info("触发自动填充：insertFill");
         // 判断metaObject中是否存在createdAt字段
         if (metaObject.hasGetter("createdAt")) {
             // 使用strictInsertFill方法填充createdAt字段，类型为Timestamp，值为当前时间

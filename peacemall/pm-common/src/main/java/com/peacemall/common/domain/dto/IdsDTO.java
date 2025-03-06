@@ -6,5 +6,5 @@ import java.util.List;
 
 @Data
 public class IdsDTO {
-    List<Long> Ids;
+    List<Long> idsList;
 }
