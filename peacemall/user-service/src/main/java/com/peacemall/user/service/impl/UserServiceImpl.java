@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.utils.UserContext;
@@ -32,6 +31,7 @@ import java.util.function.Function;
 public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements UserService {
 
     // 注册用户
+    //todo 添加钱包
     @Override
     public R<String> register(Users users) {
 
@@ -340,8 +340,6 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         String successMessage = isFirstTimeSet ? "设置" + fieldName + "成功" : "更新" + fieldName + "成功";
         return R.ok(successMessage);
     }
-
-
 
 
 

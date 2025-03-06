@@ -37,7 +37,6 @@ public interface UserService extends IService<Users> {
     R<String> updateEmail(String oldEmail, String newEmail);
 
 
-
     //获取用户个人信息
     R<UserInfoVO> getUserInfo();
 }
