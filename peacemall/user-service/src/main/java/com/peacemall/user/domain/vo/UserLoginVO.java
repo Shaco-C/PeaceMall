@@ -1,6 +1,6 @@
 package com.peacemall.user.domain.vo;
 
-import com.peacemall.user.enums.UserRole;
+import com.peacemall.common.enums.UserRole;
 import lombok.Data;
 
 

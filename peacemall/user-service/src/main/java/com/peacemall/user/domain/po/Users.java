@@ -1,7 +1,7 @@
 package com.peacemall.user.domain.po;
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.peacemall.user.enums.UserRole;
+import com.peacemall.common.enums.UserRole;
 import com.peacemall.user.enums.UserState;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

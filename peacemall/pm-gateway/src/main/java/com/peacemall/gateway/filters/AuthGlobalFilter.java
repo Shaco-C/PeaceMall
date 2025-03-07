@@ -1,5 +1,6 @@
 package com.peacemall.gateway.filters;
 
+import com.peacemall.common.enums.UserRole;
 import com.peacemall.common.exception.UnauthorizedException;
 import com.peacemall.gateway.config.AuthProperties;
 import com.peacemall.gateway.util.JwtUtils;
@@ -95,7 +96,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
     // 判断是否是商家或管理员
     private boolean isMerchantOrAdmin(String role) {
-        return "MERCHANT".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role);
+        return UserRole.MERCHANT.name().equalsIgnoreCase(role) || UserRole.ADMIN.name().equalsIgnoreCase(role);
     }
 
     // 401 Unauthorized

@@ -1,4 +1,4 @@
-package com.peacemall.user.enums;
+package com.peacemall.common.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
 

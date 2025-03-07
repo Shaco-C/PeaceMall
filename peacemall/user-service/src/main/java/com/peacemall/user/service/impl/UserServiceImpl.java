@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.utils.UserContext;
@@ -11,7 +12,7 @@ import com.peacemall.user.domain.dto.LoginFormDTO;
 import com.peacemall.user.domain.po.Users;
 import com.peacemall.user.domain.vo.UserInfoVO;
 import com.peacemall.user.domain.vo.UserLoginVO;
-import com.peacemall.user.enums.UserRole;
+import com.peacemall.common.enums.UserRole;
 import com.peacemall.user.enums.UserState;
 import com.peacemall.user.mapper.UsersMapper;
 import com.peacemall.user.service.UserService;
@@ -68,6 +69,8 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             log.error("用户注册失败{}",users);
             return R.error("用户注册失败,请重试");
         }
+
+        //todo 通过openfeign为用户创建钱包
 
         return R.ok("用户注册成功");
     }
@@ -149,6 +152,10 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             return R.error("密码错误");
         }
 
+        //todo 检查用户钱包是否清零
+
+        //todo 删除用户的钱包
+
         // 4. 更新用户状态
         users.setStatus(UserState.CLOSED);
         boolean res = this.updateById(users);
@@ -156,6 +163,8 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             log.error("账户注销失败: userId={}", userId);
             return R.error("账户注销失败，请稍后重试");
         }
+
+
 
         log.info("用户成功注销账户: userId={}", userId);
         return R.ok("注销账户成功");
@@ -318,6 +327,36 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         UserInfoVO userInfoVO = new UserInfoVO();
         BeanUtil.copyProperties(user, userInfoVO);
         return R.ok(userInfoVO);
+    }
+
+    @Override
+    public R<Page<Users>> getUsersWithStatus(int page, int pageSize, UserState status) {
+        log.info("getUsersWithStatus: page={}, pageSize={}, status={}", page, pageSize, status);
+
+        Long userId = UserContext.getUserId();
+        String userRole = UserContext.getUserRole();
+
+        if (userId == null || userRole == null) {
+            log.error("用户未登录");
+
+            return R.error("用户未登录");
+        }
+
+        log.info("getUsersWithStatus: userId={}, userRole={}", userId, userRole);
+
+        if (!UserRole.ADMIN.name().equals(userRole)) {
+            log.error("用户无权限: userRole={}", userRole);
+            return R.error("用户无权限");
+        }
+
+        LambdaQueryWrapper<Users> usersLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        usersLambdaQueryWrapper.eq(Users::getStatus, status)
+                .orderByDesc(Users::getLastLogin);
+
+        Page<Users> usersPage = new Page<>(page, pageSize);
+        this.page(usersPage, usersLambdaQueryWrapper);
+
+        return R.ok(usersPage);
     }
 
     /**

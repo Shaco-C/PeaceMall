@@ -1,11 +1,13 @@
 package com.peacemall.user.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
 import com.peacemall.user.domain.dto.LoginFormDTO;
 import com.peacemall.user.domain.po.Users;
 import com.peacemall.user.domain.vo.UserInfoVO;
 import com.peacemall.user.domain.vo.UserLoginVO;
+import com.peacemall.user.enums.UserState;
 
 import java.util.List;
 
@@ -36,7 +38,9 @@ public interface UserService extends IService<Users> {
     // 更新用户邮箱
     R<String> updateEmail(String oldEmail, String newEmail);
 
-
     //获取用户个人信息
     R<UserInfoVO> getUserInfo();
+
+    //管理员查看各种状态的账号
+    R<Page<Users>> getUsersWithStatus(int page, int pageSize , UserState status);
 }

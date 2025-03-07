@@ -815,3 +815,107 @@ Caused by: com.alibaba.nacos.api.exception.NacosException: Client not connected,
 15:49:43:778  INFO 29368 --- [SpringApplicationShutdownHook] c.a.n.c.remote.client.grpc.GrpcClient    : Shutdown grpc executor java.util.concurrent.ThreadPoolExecutor@10aec7d8[Running, pool size = 6, active threads = 0, queued tasks = 0, completed tasks = 154]
 15:49:43:781  INFO 29368 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
 15:49:43:832  INFO 29368 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+16:29:42:856  INFO 16788 --- [main] com.peacemall.user.UserApplication       : Starting UserApplication using Java 11.0.20 on chuxuebushi with PID 16788 (D:\A_STUDY_STUFF\frontbackendtest\PeaceMall\backend\peacemall\user-service\target\classes started by watergun in D:\A_STUDY_STUFF\frontbackendtest\PeaceMall\backend\peacemall)
+16:29:42:860 DEBUG 16788 --- [main] com.peacemall.user.UserApplication       : Running with Spring Boot v2.7.12, Spring v5.3.27
+16:29:42:860  INFO 16788 --- [main] com.peacemall.user.UserApplication       : The following 1 profile is active: "dev"
+16:29:43:575  INFO 16788 --- [main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=09f9c418-02cc-3019-a0a6-55167ebf2bec
+16:29:43:818  INFO 16788 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8084 (http)
+16:29:43:820  INFO 16788 --- [main] o.a.catalina.core.AprLifecycleListener   : Loaded Apache Tomcat Native library [1.2.38] using APR version [1.7.4].
+16:29:43:820  INFO 16788 --- [main] o.a.catalina.core.AprLifecycleListener   : APR capabilities: IPv6 [true], sendfile [true], accept filters [false], random [true], UDS [true].
+16:29:43:820  INFO 16788 --- [main] o.a.catalina.core.AprLifecycleListener   : APR/OpenSSL configuration: useAprConnector [false], useOpenSSL [true]
+16:29:43:831  INFO 16788 --- [main] o.a.catalina.core.AprLifecycleListener   : OpenSSL successfully initialized [OpenSSL 1.1.1v  1 Aug 2023]
+16:29:43:838  INFO 16788 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+16:29:43:839  INFO 16788 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.75]
+16:29:43:918  INFO 16788 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+16:29:43:920  INFO 16788 --- [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1030 ms
+16:29:45:656  INFO 16788 --- [main] pertySourcedRequestMappingHandlerMapping : Mapped URL path [/v2/api-docs] onto method [springfox.documentation.swagger2.web.Swagger2ControllerWebMvc#getDocumentation(String, HttpServletRequest)]
+16:29:46:372  INFO 16788 --- [main] com.alibaba.nacos.common.remote.client   : [RpcClientFactory] create a new rpc client of dff0c64b-5e6a-4a6b-a393-e7f8224d701f
+16:29:46:404  INFO 16788 --- [main] org.reflections.Reflections              : Reflections took 18 ms to scan 1 urls, producing 3 keys and 6 values 
+16:29:46:423  INFO 16788 --- [main] org.reflections.Reflections              : Reflections took 7 ms to scan 1 urls, producing 4 keys and 9 values 
+16:29:46:428  INFO 16788 --- [main] org.reflections.Reflections              : Reflections took 4 ms to scan 1 urls, producing 3 keys and 10 values 
+16:29:46:431  WARN 16788 --- [main] org.reflections.Reflections              : given scan urls are empty. set urls in the configuration
+16:29:46:438  INFO 16788 --- [main] org.reflections.Reflections              : Reflections took 7 ms to scan 1 urls, producing 1 keys and 5 values 
+16:29:46:446  INFO 16788 --- [main] org.reflections.Reflections              : Reflections took 5 ms to scan 1 urls, producing 1 keys and 7 values 
+16:29:46:451  INFO 16788 --- [main] org.reflections.Reflections              : Reflections took 3 ms to scan 1 urls, producing 2 keys and 8 values 
+16:29:46:453  WARN 16788 --- [main] org.reflections.Reflections              : given scan urls are empty. set urls in the configuration
+16:29:46:455  INFO 16788 --- [main] com.alibaba.nacos.common.remote.client   : [dff0c64b-5e6a-4a6b-a393-e7f8224d701f] RpcClient init label, labels = {module=naming, source=sdk}
+16:29:46:456  INFO 16788 --- [main] com.alibaba.nacos.common.remote.client   : [dff0c64b-5e6a-4a6b-a393-e7f8224d701f] RpcClient init, ServerListFactory = com.alibaba.nacos.client.naming.core.ServerListManager
+16:29:46:456  INFO 16788 --- [main] com.alibaba.nacos.common.remote.client   : [dff0c64b-5e6a-4a6b-a393-e7f8224d701f] Registry connection listener to current client:com.alibaba.nacos.client.naming.remote.gprc.redo.NamingGrpcRedoService
+16:29:46:456  INFO 16788 --- [main] com.alibaba.nacos.common.remote.client   : [dff0c64b-5e6a-4a6b-a393-e7f8224d701f] Register server push request handler:com.alibaba.nacos.client.naming.remote.gprc.NamingPushRequestHandler
+16:29:46:458  INFO 16788 --- [main] com.alibaba.nacos.common.remote.client   : [dff0c64b-5e6a-4a6b-a393-e7f8224d701f] Try to connect to server on start up, server: {serverIp = '192.168.145.134', server main port = 8848}
+16:29:48:539  INFO 16788 --- [main] com.alibaba.nacos.common.remote.client   : [dff0c64b-5e6a-4a6b-a393-e7f8224d701f] Success to connect to server [192.168.145.134:8848] on start up, connectionId = 1741336188743_192.168.145.1_53642
+16:29:48:540  INFO 16788 --- [com.alibaba.nacos.client.remote.worker] com.alibaba.nacos.common.remote.client   : [dff0c64b-5e6a-4a6b-a393-e7f8224d701f] Notify connected event to listeners.
+16:29:48:541  INFO 16788 --- [main] com.alibaba.nacos.common.remote.client   : [dff0c64b-5e6a-4a6b-a393-e7f8224d701f] Register server push request handler:com.alibaba.nacos.common.remote.client.RpcClient$ConnectResetRequestHandler
+16:29:48:541  INFO 16788 --- [main] com.alibaba.nacos.common.remote.client   : [dff0c64b-5e6a-4a6b-a393-e7f8224d701f] Register server push request handler:com.alibaba.nacos.common.remote.client.RpcClient$$Lambda$928/0x0000000800683840
+16:29:48:624  INFO 16788 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8084 (http) with context path ''
+16:29:48:644  INFO 16788 --- [main] c.a.c.n.registry.NacosServiceRegistry    : nacos registry, DEFAULT_GROUP user-service 172.27.106.201:8084 register finished
+16:29:49:114  INFO 16788 --- [nacos-grpc-client-executor-9] com.alibaba.nacos.common.remote.client   : [dff0c64b-5e6a-4a6b-a393-e7f8224d701f] Receive server push request, request = NotifySubscriberRequest, requestId = 14
+16:29:49:129  INFO 16788 --- [nacos-grpc-client-executor-9] com.alibaba.nacos.common.remote.client   : [dff0c64b-5e6a-4a6b-a393-e7f8224d701f] Ack server push request, request = NotifySubscriberRequest, requestId = 14
+16:29:49:341  INFO 16788 --- [main] d.s.w.p.DocumentationPluginsBootstrapper : Documentation plugins bootstrapped
+16:29:49:344  INFO 16788 --- [main] d.s.w.p.DocumentationPluginsBootstrapper : Found 1 custom documentation plugin(s)
+16:29:49:365  INFO 16788 --- [main] s.d.s.w.s.ApiListingReferenceScanner     : Scanning for api listing references
+16:29:49:489  INFO 16788 --- [main] com.peacemall.user.UserApplication       : Started UserApplication in 7.779 seconds (JVM running for 8.826)
+16:31:20:179  INFO 16788 --- [http-nio-8084-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+16:31:20:179  INFO 16788 --- [http-nio-8084-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+16:31:20:180  INFO 16788 --- [http-nio-8084-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+16:31:20:192  INFO 16788 --- [http-nio-8084-exec-1] c.p.c.interceptor.UserInfoInterceptor    : 获取用户信息1897915591104565249,ADMIN
+16:31:20:217  INFO 16788 --- [http-nio-8084-exec-1] c.p.user.service.impl.UserServiceImpl    : getUsersWithStatus: page=1, pageSize=20, status=ACTIVE
+16:31:20:217  INFO 16788 --- [http-nio-8084-exec-1] c.p.user.service.impl.UserServiceImpl    : getUsersWithStatus: userId=1897915591104565249, userRole=ADMIN
+16:31:20:321  INFO 16788 --- [http-nio-8084-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+16:31:20:763  INFO 16788 --- [http-nio-8084-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+16:31:20:770 DEBUG 16788 --- [http-nio-8084-exec-1] c.p.u.m.UsersMapper.selectList_mpCount   : ==>  Preparing: SELECT COUNT(*) AS total FROM users WHERE (status = ?)
+16:31:20:789 DEBUG 16788 --- [http-nio-8084-exec-1] c.p.u.m.UsersMapper.selectList_mpCount   : ==> Parameters: ACTIVE(String)
+16:31:20:821 DEBUG 16788 --- [http-nio-8084-exec-1] c.p.u.m.UsersMapper.selectList_mpCount   : <==      Total: 1
+16:31:20:827 DEBUG 16788 --- [http-nio-8084-exec-1] c.p.user.mapper.UsersMapper.selectList   : ==>  Preparing: SELECT user_id,username,nickname,email,password,phone_number,role,status,created_at,last_login,avatar_url,signature FROM users WHERE (status = ?) ORDER BY last_login DESC LIMIT ?
+16:31:20:827 DEBUG 16788 --- [http-nio-8084-exec-1] c.p.user.mapper.UsersMapper.selectList   : ==> Parameters: ACTIVE(String), 20(Long)
+16:31:20:838 DEBUG 16788 --- [http-nio-8084-exec-1] c.p.user.mapper.UsersMapper.selectList   : <==      Total: 7
+16:31:42:502  INFO 16788 --- [http-nio-8084-exec-4] c.p.c.interceptor.UserInfoInterceptor    : 获取用户信息1897915591104565249,ADMIN
+16:31:42:502  INFO 16788 --- [http-nio-8084-exec-4] c.p.user.service.impl.UserServiceImpl    : getUsersWithStatus: page=1, pageSize=20, status=ACTIVE
+16:31:42:503  INFO 16788 --- [http-nio-8084-exec-4] c.p.user.service.impl.UserServiceImpl    : getUsersWithStatus: userId=1897915591104565249, userRole=ADMIN
+16:31:42:509 DEBUG 16788 --- [http-nio-8084-exec-4] c.p.u.m.UsersMapper.selectList_mpCount   : ==>  Preparing: SELECT COUNT(*) AS total FROM users WHERE (status = ?)
+16:31:42:509 DEBUG 16788 --- [http-nio-8084-exec-4] c.p.u.m.UsersMapper.selectList_mpCount   : ==> Parameters: ACTIVE(String)
+16:31:42:512 DEBUG 16788 --- [http-nio-8084-exec-4] c.p.u.m.UsersMapper.selectList_mpCount   : <==      Total: 1
+16:31:42:512 DEBUG 16788 --- [http-nio-8084-exec-4] c.p.user.mapper.UsersMapper.selectList   : ==>  Preparing: SELECT user_id,username,nickname,email,password,phone_number,role,status,created_at,last_login,avatar_url,signature FROM users WHERE (status = ?) ORDER BY last_login DESC LIMIT ?
+16:31:42:512 DEBUG 16788 --- [http-nio-8084-exec-4] c.p.user.mapper.UsersMapper.selectList   : ==> Parameters: ACTIVE(String), 20(Long)
+16:31:42:520 DEBUG 16788 --- [http-nio-8084-exec-4] c.p.user.mapper.UsersMapper.selectList   : <==      Total: 7
+16:32:18:854  INFO 16788 --- [http-nio-8084-exec-6] c.p.c.interceptor.UserInfoInterceptor    : 获取用户信息1897915591104565249,ADMIN
+16:32:18:856  INFO 16788 --- [http-nio-8084-exec-6] c.p.user.service.impl.UserServiceImpl    : getUsersWithStatus: page=1, pageSize=20, status=ACTIVE
+16:32:18:856  INFO 16788 --- [http-nio-8084-exec-6] c.p.user.service.impl.UserServiceImpl    : getUsersWithStatus: userId=1897915591104565249, userRole=ADMIN
+16:32:18:866 DEBUG 16788 --- [http-nio-8084-exec-6] c.p.u.m.UsersMapper.selectList_mpCount   : ==>  Preparing: SELECT COUNT(*) AS total FROM users WHERE (status = ?)
+16:32:18:866 DEBUG 16788 --- [http-nio-8084-exec-6] c.p.u.m.UsersMapper.selectList_mpCount   : ==> Parameters: ACTIVE(String)
+16:32:18:869 DEBUG 16788 --- [http-nio-8084-exec-6] c.p.u.m.UsersMapper.selectList_mpCount   : <==      Total: 1
+16:32:18:871 DEBUG 16788 --- [http-nio-8084-exec-6] c.p.user.mapper.UsersMapper.selectList   : ==>  Preparing: SELECT user_id,username,nickname,email,password,phone_number,role,status,created_at,last_login,avatar_url,signature FROM users WHERE (status = ?) ORDER BY last_login DESC LIMIT ?
+16:32:18:871 DEBUG 16788 --- [http-nio-8084-exec-6] c.p.user.mapper.UsersMapper.selectList   : ==> Parameters: ACTIVE(String), 20(Long)
+16:32:18:877 DEBUG 16788 --- [http-nio-8084-exec-6] c.p.user.mapper.UsersMapper.selectList   : <==      Total: 7
+16:33:56:526  INFO 16788 --- [http-nio-8084-exec-5] c.p.c.interceptor.UserInfoInterceptor    : 获取用户信息1897915591104565249,ADMIN
+16:33:56:526  INFO 16788 --- [http-nio-8084-exec-5] c.p.user.service.impl.UserServiceImpl    : getUsersWithStatus: page=1, pageSize=20, status=ACTIVE
+16:33:56:528  INFO 16788 --- [http-nio-8084-exec-5] c.p.user.service.impl.UserServiceImpl    : getUsersWithStatus: userId=1897915591104565249, userRole=ADMIN
+16:33:56:535 DEBUG 16788 --- [http-nio-8084-exec-5] c.p.u.m.UsersMapper.selectList_mpCount   : ==>  Preparing: SELECT COUNT(*) AS total FROM users WHERE (status = ?)
+16:33:56:535 DEBUG 16788 --- [http-nio-8084-exec-5] c.p.u.m.UsersMapper.selectList_mpCount   : ==> Parameters: ACTIVE(String)
+16:33:56:539 DEBUG 16788 --- [http-nio-8084-exec-5] c.p.u.m.UsersMapper.selectList_mpCount   : <==      Total: 1
+16:33:56:539 DEBUG 16788 --- [http-nio-8084-exec-5] c.p.user.mapper.UsersMapper.selectList   : ==>  Preparing: SELECT user_id,username,nickname,email,password,phone_number,role,status,created_at,last_login,avatar_url,signature FROM users WHERE (status = ?) ORDER BY last_login DESC LIMIT ?
+16:33:56:540 DEBUG 16788 --- [http-nio-8084-exec-5] c.p.user.mapper.UsersMapper.selectList   : ==> Parameters: ACTIVE(String), 20(Long)
+16:33:56:547 DEBUG 16788 --- [http-nio-8084-exec-5] c.p.user.mapper.UsersMapper.selectList   : <==      Total: 7
+16:34:39:761  INFO 16788 --- [http-nio-8084-exec-3] c.p.c.interceptor.UserInfoInterceptor    : 获取用户信息1897915591104565249,ADMIN
+16:34:39:762  INFO 16788 --- [http-nio-8084-exec-3] c.p.user.service.impl.UserServiceImpl    : getUsersWithStatus: page=1, pageSize=20, status=LOCKED
+16:34:39:762  INFO 16788 --- [http-nio-8084-exec-3] c.p.user.service.impl.UserServiceImpl    : getUsersWithStatus: userId=1897915591104565249, userRole=ADMIN
+16:34:39:772 DEBUG 16788 --- [http-nio-8084-exec-3] c.p.u.m.UsersMapper.selectList_mpCount   : ==>  Preparing: SELECT COUNT(*) AS total FROM users WHERE (status = ?)
+16:34:39:774 DEBUG 16788 --- [http-nio-8084-exec-3] c.p.u.m.UsersMapper.selectList_mpCount   : ==> Parameters: LOCKED(String)
+16:34:39:780 DEBUG 16788 --- [http-nio-8084-exec-3] c.p.u.m.UsersMapper.selectList_mpCount   : <==      Total: 1
+16:35:37:779  INFO 16788 --- [http-nio-8084-exec-7] c.p.c.interceptor.UserInfoInterceptor    : 获取用户信息1897633411186991106,USER
+16:35:37:779  INFO 16788 --- [http-nio-8084-exec-7] c.p.user.service.impl.UserServiceImpl    : getUsersWithStatus: page=1, pageSize=20, status=LOCKED
+16:35:37:779  INFO 16788 --- [http-nio-8084-exec-7] c.p.user.service.impl.UserServiceImpl    : getUsersWithStatus: userId=1897633411186991106, userRole=USER
+16:35:37:779 ERROR 16788 --- [http-nio-8084-exec-7] c.p.user.service.impl.UserServiceImpl    : 用户无权限: userRole=USER
+16:35:45:632  WARN 16788 --- [Thread-7] c.a.n.common.http.HttpClientBeanHolder   : [HttpClientBeanHolder] Start destroying common HttpClient
+16:35:45:633  WARN 16788 --- [Thread-4] c.a.nacos.common.notify.NotifyCenter     : [NotifyCenter] Start destroying Publisher
+16:35:45:633  WARN 16788 --- [Thread-4] c.a.nacos.common.notify.NotifyCenter     : [NotifyCenter] Destruction of the end
+16:35:45:633  WARN 16788 --- [Thread-7] c.a.n.common.http.HttpClientBeanHolder   : [HttpClientBeanHolder] Destruction of the end
+16:35:46:157  INFO 16788 --- [SpringApplicationShutdownHook] c.a.c.n.registry.NacosServiceRegistry    : De-registering from Nacos Server now...
+16:35:46:186  INFO 16788 --- [SpringApplicationShutdownHook] c.a.c.n.registry.NacosServiceRegistry    : De-registration finished.
+16:35:46:527  INFO 16788 --- [SpringApplicationShutdownHook] com.alibaba.nacos.common.remote.client   : Shutdown rpc client, set status to shutdown
+16:35:46:527  INFO 16788 --- [SpringApplicationShutdownHook] com.alibaba.nacos.common.remote.client   : Shutdown client event executor java.util.concurrent.ScheduledThreadPoolExecutor@3b7cd946[Running, pool size = 2, active threads = 2, queued tasks = 0, completed tasks = 0]
+16:35:46:527  INFO 16788 --- [SpringApplicationShutdownHook] com.alibaba.nacos.common.remote.client   : Close current connection 1741336188743_192.168.145.1_53642
+16:35:46:532  INFO 16788 --- [nacos-grpc-client-executor-104] c.a.n.c.remote.client.grpc.GrpcClient    : [1741336188743_192.168.145.1_53642]Ignore complete event,isRunning:false,isAbandon=false
+16:35:46:538  INFO 16788 --- [SpringApplicationShutdownHook] c.a.n.c.remote.client.grpc.GrpcClient    : Shutdown grpc executor java.util.concurrent.ThreadPoolExecutor@6a5694ce[Running, pool size = 6, active threads = 0, queued tasks = 0, completed tasks = 105]
+16:35:46:546  INFO 16788 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+16:35:46:594  INFO 16788 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

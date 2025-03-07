@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.user.domain.po.UserAddress;
-import com.peacemall.user.enums.UserRole;
+import com.peacemall.common.enums.UserRole;
 import com.peacemall.user.mapper.UserAddressMapper;
 import com.peacemall.user.service.UserAddressService;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +47,7 @@ public class UserAddressServiceImpl extends ServiceImpl<UserAddressMapper, UserA
     }
 
 
+    //一个用户最多有8条地址信息
     @Override
     @Transactional
     public R<String> addUserAddress(UserAddress userAddress) {
@@ -63,6 +64,17 @@ public class UserAddressServiceImpl extends ServiceImpl<UserAddressMapper, UserA
         }
 
         log.info("addUserAddress is called, userId: {}", userId);
+
+        // 检查用户是否已经达到地址数量上限
+        LambdaQueryWrapper<UserAddress> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserAddress::getUserId, userId)
+                .eq(UserAddress::getStatus, 1);
+        long count = this.count(queryWrapper);
+
+        if (count > 8) {
+            log.info("addUserAddress failed: 用户地址数量已达到上限, userId: {}", userId);
+            return R.error("用户地址数量已达到上限");
+        }
 
         userAddress.setUserId(userId);
         userAddress.setStatus(1);
