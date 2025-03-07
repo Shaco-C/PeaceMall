@@ -16,8 +16,10 @@ import com.peacemall.user.enums.UserState;
 import com.peacemall.user.mapper.UsersMapper;
 import com.peacemall.user.service.UserService;
 
+import com.peacemall.user.utils.JwtUtils;
 import com.peacemall.user.utils.PasswordUtil;
 import com.peacemall.user.utils.PasswordValidator;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +29,11 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements UserService {
+
+    private final JwtUtils jwtUtils;
 
     // 注册用户
     //todo 添加钱包
@@ -67,10 +72,56 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         return R.ok("用户注册成功");
     }
 
-    // TODO 用户登录
+    //用户登陆
     @Override
     public R<UserLoginVO> login(LoginFormDTO loginFormDTO) {
-        return null;
+        log.info("login method is called : LoginInfo{}",loginFormDTO);
+
+        String username = loginFormDTO.getUsername();
+        String password = loginFormDTO.getPassword();
+
+        if (StrUtil.isEmpty(username) || StrUtil.isEmpty(password)){
+            log.error("用户名或密码为空{}",loginFormDTO);
+            return R.error("用户名或密码为空,请重试");
+        }
+
+        //查询用户是否存在
+        Users users = lambdaQuery().eq(Users::getUsername, username).one();
+        if (users == null){
+            log.error("用户不存在{}",loginFormDTO);
+            return R.error("用户不存在,请重试");
+        }
+
+        //检查用户是否被锁定
+        if (users.getStatus() == UserState.LOCKED){
+            log.error("用户已锁定{}",loginFormDTO);
+            return R.error("当前用户已锁定,请联系管理员");
+        }
+
+        //检查用户状态
+        if (users.getStatus() == UserState.CLOSED){
+            log.error("用户已关闭{}",loginFormDTO);
+            return R.error("当前用户已注销,请联系管理员");
+        }
+
+
+        //验证密码是否正确
+        if (!PasswordUtil.matches(password, users.getPassword())){
+            log.error("用户名或密码错误{}",loginFormDTO);
+            return R.error("用户名或密码错误，请重试");
+        }
+        //生成token
+        String token = jwtUtils.createToken(users.getUserId(),users.getRole().name());
+
+        UserLoginVO userLoginVO = new UserLoginVO();
+        userLoginVO.setToken(token);
+        userLoginVO.setUserId(users.getUserId());
+        userLoginVO.setUsername(users.getUsername());
+        userLoginVO.setUserRole(users.getRole());
+
+        log.info("userLoginVo:{}",userLoginVO);
+
+        return R.ok(userLoginVO);
     }
 
     // 关闭账户

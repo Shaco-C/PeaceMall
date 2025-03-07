@@ -43,3 +43,7 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - com.peacemall.user.controller
+pm:
+  jwt:
+    secret: "EBI0t1Rd1PchUR7RidJQo7QweK9ADXs0Kt/YG++d7II=" # 密钥
+    expire: 86400000

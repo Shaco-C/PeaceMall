@@ -1,12 +1,13 @@
 package com.peacemall.user.domain.vo;
 
+import com.peacemall.user.enums.UserRole;
 import lombok.Data;
 
-import java.math.BigDecimal;
 
 @Data
 public class UserLoginVO {
     private String token;
     private Long userId;
     private String username;
+    private UserRole userRole;
 }

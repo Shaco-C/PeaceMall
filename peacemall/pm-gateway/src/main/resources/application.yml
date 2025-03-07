@@ -1,0 +1,21 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user
+          uri: lb://user-service
+          predicates:
+            - Path=/user/**,/addresses/**
+
+pm:
+  jwt:
+    secret: "EBI0t1Rd1PchUR7RidJQo7QweK9ADXs0Kt/YG++d7II=" # 密钥
+    expire: 86400 # 过期时间（秒） 1 天
+  auth:
+    excludePaths:
+      - "/user/login"
+      - "/user/register"
+      - "/swagger-ui/**"

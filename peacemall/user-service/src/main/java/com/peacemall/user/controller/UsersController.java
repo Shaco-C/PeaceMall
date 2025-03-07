@@ -12,6 +12,7 @@ import com.peacemall.user.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "用户服务相关接口")
@@ -32,7 +33,7 @@ public class UsersController {
     // 用户登录
     @ApiOperation(value = "用户登录")
     @PostMapping("/login")
-    public R<UserLoginVO> login(@RequestBody LoginFormDTO loginFormDTO) {
+    public R<UserLoginVO> login(@RequestBody @Validated LoginFormDTO loginFormDTO) {
         return userService.login(loginFormDTO);
     }
 

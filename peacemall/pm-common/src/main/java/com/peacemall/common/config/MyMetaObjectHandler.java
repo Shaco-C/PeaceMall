@@ -1,13 +1,17 @@
 package com.peacemall.common.config;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 
 @Configuration
+@ConditionalOnClass({MybatisPlusInterceptor.class, BaseMapper.class})
 @Slf4j
 public class MyMetaObjectHandler implements MetaObjectHandler {
     // 在插入数据时，自动填充createdAt字段

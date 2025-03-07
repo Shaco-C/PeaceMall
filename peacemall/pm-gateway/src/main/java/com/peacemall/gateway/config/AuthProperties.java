@@ -9,8 +9,10 @@ import java.util.List;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "hm.auth")
+@ConfigurationProperties(prefix = "pm.auth")
 public class AuthProperties {
+
     private List<String> includePaths;
+
     private List<String> excludePaths;
 }

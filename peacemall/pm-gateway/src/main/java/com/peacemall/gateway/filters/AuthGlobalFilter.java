@@ -2,8 +2,9 @@ package com.peacemall.gateway.filters;
 
 import com.peacemall.common.exception.UnauthorizedException;
 import com.peacemall.gateway.config.AuthProperties;
-import com.peacemall.gateway.util.JwtTool;
+import com.peacemall.gateway.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -18,59 +19,95 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
     private final AuthProperties authProperties;
-
-    private final JwtTool jwtTool;
-
+    private final JwtUtils jwtUtils;
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        // 1.获取request
         ServerHttpRequest request = exchange.getRequest();
-        // 2.判断是否需要做登录拦截
-        if(isExclude(request.getPath().toString())){
-            // 放行
+        String path = request.getPath().toString();
+        log.info("Gateway request: {}", path);
+
+        // 1. 判断是否是白名单路径
+        if (isExclude(path)) {
+            log.info("路径 {} 免登录放行", path);
             return chain.filter(exchange);
         }
-        // 3.获取token
-        String token = null;
-        List<String> headers = request.getHeaders().get("authorization");
-        if (headers != null && !headers.isEmpty()) {
-            token = headers.get(0);
+
+        // 2. 获取 Token
+        String token = request.getHeaders().getFirst("authorization");
+        if (token == null || token.isEmpty()) {
+            log.warn("请求 {} 未携带 Token", path);
+            return unauthorizedResponse(exchange);
         }
-        // 4.校验并解析token
-        Long userId = null;
-        String userRole = null;
+
+        // 3. 校验 Token
+        Long userId;
+        String userRole;
         try {
-            userId = jwtTool.parseToken(token);
-            userRole = jwtTool.parseRole(token);
-        } catch (UnauthorizedException e)
-        {
-            // 拦截，设置响应状态码为401
-            ServerHttpResponse response = exchange.getResponse();
-            response.setStatusCode(HttpStatus.UNAUTHORIZED);
-            return response.setComplete();
+            userId = jwtUtils.getUserId(token);
+            userRole = jwtUtils.getUserRole(token);
+        } catch (UnauthorizedException e) {
+            log.warn("Token 校验失败: {}", e.getMessage());
+            return unauthorizedResponse(exchange);
         }
-        // 5.传递用户信息
-        String userInfo = userId.toString() + ":" +userRole;
+
+        // 4. 权限控制（**/admin/** 仅 ADMIN 可访问）
+        if (isAdminPath(path) && !"ADMIN".equalsIgnoreCase(userRole)) {
+            log.warn("用户 {} 角色 {} 访问 {} 被拒绝", userId, userRole, path);
+            return forbiddenResponse(exchange);
+        }
+
+        // 5. 权限控制（**/shop/** 仅 MERCHANT 或 ADMIN 可访问）
+        if (isMerchantPath(path) && !isMerchantOrAdmin(userRole)) {
+            log.warn("用户 {} 角色 {} 访问 {} 被拒绝", userId, userRole, path);
+            return forbiddenResponse(exchange);
+        }
+
+        // 6. 传递用户信息
         ServerWebExchange swe = exchange.mutate()
-                .request(builder -> builder.header("user-info", userInfo))
+                .request(builder -> builder.header("user-info", userId + "," + userRole))
                 .build();
-        // 6.放行
         return chain.filter(swe);
     }
 
+    // 白名单路径
     private boolean isExclude(String path) {
-        for (String pathPattern : authProperties.getExcludePaths()) {
-            if (antPathMatcher.match(pathPattern, path)) {
-                return true;
-            }
-        }
-        return false;
+        return authProperties.getExcludePaths()
+                .stream()
+                .anyMatch(pattern -> antPathMatcher.match(pattern, path));
+    }
+
+    // **/admin/** 访问控制
+    private boolean isAdminPath(String path) {
+        return antPathMatcher.match("*/admin/**", path);
+    }
+
+    // **/shop/** 访问控制
+    private boolean isMerchantPath(String path) {
+        return antPathMatcher.match("*/shop/**", path);
+    }
+
+    // 判断是否是商家或管理员
+    private boolean isMerchantOrAdmin(String role) {
+        return "MERCHANT".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role);
+    }
+
+    // 401 Unauthorized
+    private Mono<Void> unauthorizedResponse(ServerWebExchange exchange) {
+        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+        return exchange.getResponse().setComplete();
+    }
+
+    // 403 Forbidden
+    private Mono<Void> forbiddenResponse(ServerWebExchange exchange) {
+        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+        return exchange.getResponse().setComplete();
     }
 
     @Override
