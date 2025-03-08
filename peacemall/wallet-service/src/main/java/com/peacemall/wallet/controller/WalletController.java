@@ -1,9 +1,15 @@
 package com.peacemall.wallet.controller;
 
 
+import com.peacemall.common.domain.R;
+import com.peacemall.wallet.domain.vo.WalletVO;
+import com.peacemall.wallet.service.WalletService;
 import io.swagger.annotations.Api;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 
 /**
  * @author watergun
@@ -11,5 +17,70 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "钱包服务")
 @RequestMapping("/wallet")
+@RequiredArgsConstructor
 public class WalletController {
+
+    private final WalletService walletService;
+
+    //创建用户钱包（用户注册时一起执行）
+    @ApiOperation("创建用户钱包（用户注册时一起执行）")
+    @PostMapping("/createWalletWhenRegister")
+    public R<String> createWalletWhenRegister(@RequestParam("userId") Long userId){
+
+        return walletService.createWalletWhenRegister(userId);
+    }
+
+    //用户查询自己的钱包信息
+    @ApiOperation("用户查询自己的钱包信息")
+    @GetMapping("/userGetSelfWalletInfo")
+    public R<WalletVO> userGetSelfWalletInfo(){
+
+        return walletService.userGetSelfWalletInfo();
+    }
+
+    //管理员通过用户Id查询钱包
+    @ApiOperation("管理员通过用户Id查询钱包")
+    @GetMapping("/adminGetWalletInfoByUserId")
+    public R<WalletVO> adminGetWalletInfoByUserId(@RequestParam("userId")Long userId){
+
+        return walletService.adminGetWalletInfoByUserId(userId);
+    }
+
+    //用户充值钱包
+    @ApiOperation("用户充值钱包")
+    @PutMapping("/userRechargeWallet")
+    public R<String> userRechargeWallet(@RequestParam("amount")BigDecimal amount){
+
+        return walletService.userRechargeWallet(amount);
+    }
+
+    //用户支付
+    @ApiOperation("用户支付")
+    @PutMapping("/userPay")
+    public R<String> userPay(@RequestParam("amount")BigDecimal amount){
+
+        return walletService.userPay(amount);
+    }
+
+    //用户待确认金额变化
+    @ApiOperation("用户待确认金额变化")
+    @PutMapping("/userPendingBalanceChange")
+    public R<String> userPendingBalanceChange(@RequestParam("amount")BigDecimal amount){
+
+        return walletService.userPendingBalanceChange(amount);
+    }
+    //用户钱包余额变化
+    @ApiOperation("用户钱包余额变化")
+    @PutMapping("/userAvailableBalanceChange")
+    public R<String> userAvailableBalanceChange(@RequestParam("amount")BigDecimal amount){
+
+        return walletService.userAvailableBalanceChange(amount);
+    }
+    //管理员删除用户的钱包
+    @ApiOperation("管理员删除用户的钱包")
+    @DeleteMapping("/adminDeleteWallet")
+    public R<String> adminDeleteWallet(@RequestParam("amount")Long userId){
+
+        return walletService.adminDeleteWallet(userId);
+    }
 }

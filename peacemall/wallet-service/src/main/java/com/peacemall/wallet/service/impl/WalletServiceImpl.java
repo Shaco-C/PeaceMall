@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> implements WalletService {
 
 
+    //创建用户钱包（用户注册时一起执行）
     @Override
     public R<String> createWalletWhenRegister(Long userId) {
         log.info("createWalletWhenRegister method is called");
@@ -47,6 +48,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         return R.ok("创建钱包成功");
     }
 
+    //用户查询自己的钱包信息
     @Override
     public R<WalletVO> userGetSelfWalletInfo() {
         log.info("serGetSelfWalletInfo method is called");
@@ -74,6 +76,8 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         return R.ok(walletVO);
     }
 
+
+    //管理员通过用户Id查询钱包
     @Override
     public R<WalletVO> adminGetWalletInfoByUserId(Long userId) {
         log.info("adminGetWalletInfoByUserId method is called");
@@ -97,6 +101,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         return R.ok(walletVO);
     }
 
+    //用户充值钱包
     @Override
     public R<String> userRechargeWallet(BigDecimal amount) {
         log.info("userRechargeWallet method is called");
@@ -128,6 +133,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         return R.ok("用户充值成功");
     }
 
+    //用户支付
     @Override
     @Transactional
     public R<String> userPay(BigDecimal amount) {
@@ -164,6 +170,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         return R.ok("用户支付成功");
     }
 
+    //用户待确认金额变化
     @Override
     @Transactional
     public R<String> userPendingBalanceChange(BigDecimal amount) {
@@ -204,6 +211,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         return R.ok("用户待处理金额修改成功");
     }
 
+    //用户钱包余额变化
     @Override
     public R<String> userAvailableBalanceChange(BigDecimal amount) {
         log.info("userBalanceChange method is called");
@@ -238,6 +246,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         return R.ok("用户支付成功");
     }
 
+    //管理员删除用户的钱包
     @Override
     public R<String> adminDeleteWallet(Long userId) {
         log.info("adminDeleteWallet method is called");

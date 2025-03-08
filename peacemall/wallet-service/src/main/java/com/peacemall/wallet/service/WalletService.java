@@ -19,7 +19,6 @@ public interface WalletService extends IService<Wallet> {
     R<WalletVO> userGetSelfWalletInfo();
 
     //管理员通过用户Id查询钱包
-
     R<WalletVO> adminGetWalletInfoByUserId(Long userId);
 
     //用户充值钱包
@@ -28,8 +27,6 @@ public interface WalletService extends IService<Wallet> {
     //用户支付
     R<String> userPay(BigDecimal amount);
 
-    //钱包信息更新
-//    R<String> updateWalletInfo(WalletVO walletVO);
 
 
     //用户待确认金额变化

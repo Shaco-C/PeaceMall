@@ -1,8 +1,10 @@
 package com.peacemall.wallet.domain.po;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.peacemall.wallet.enums.WithDrawRequestStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
@@ -16,6 +18,7 @@ import java.sql.Timestamp;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("withdraw_request")
+@NoArgsConstructor
 public class WithdrawRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -33,7 +36,7 @@ public class WithdrawRequest implements Serializable {
     private BigDecimal amount;
 
     @TableField("status")
-    private String status; // PENDING, APPROVED, REJECTED, COMPLETED
+    private WithDrawRequestStatus status; // PENDING, APPROVED, REJECTED, COMPLETED
 
     @TableField("reason")
     private String reason;
@@ -49,4 +52,13 @@ public class WithdrawRequest implements Serializable {
 
     @TableField(value = "updated_at", fill = FieldFill.INSERT_UPDATE)
     private Timestamp updatedAt;
+
+    public WithdrawRequest(Long userId, Long walletId, BigDecimal amount, WithDrawRequestStatus status, String paymentMethod, String accountInfo) {
+        this.userId = userId;
+        this.walletId = walletId;
+        this.amount = amount;
+        this.status = status;
+        this.paymentMethod = paymentMethod;
+        this.accountInfo = accountInfo;
+    }
 }
