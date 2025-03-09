@@ -32,7 +32,7 @@ public class WithdrawRequestController {
 
     //管理员按照状态分页查询提现申请
     @ApiOperation(value = "管理员按照状态分页查询提现申请")
-    @GetMapping("/adminGetWithdrawRequestByStatus")
+    @GetMapping("/admin/adminGetWithdrawRequestByStatus")
     public R<Page<WithdrawRequest>> adminGetWithdrawRequestByStatus(@RequestParam(value = "page",defaultValue = "1") int page,
                                                                     @RequestParam(value = "pageSize",defaultValue = "1")int pageSize,
                                                                     @RequestParam(value = "withDrawRequestStatus",defaultValue = "PENDING")WithDrawRequestStatus withDrawRequestStatus){
@@ -42,7 +42,7 @@ public class WithdrawRequestController {
 
     //管理员审核提现申请
     @ApiOperation(value = "管理员审核提现申请")
-    @PutMapping("/adminCheckWithdrawRequest")
+    @PutMapping("/admin/adminCheckWithdrawRequest")
     public R<String> adminCheckWithdrawRequest(@RequestParam(value = "id") Long id,
                                                @RequestParam(value = "withDrawRequestStatus") WithDrawRequestStatus withDrawRequestStatus){
 

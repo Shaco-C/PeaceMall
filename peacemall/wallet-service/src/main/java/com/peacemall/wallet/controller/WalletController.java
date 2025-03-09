@@ -41,7 +41,7 @@ public class WalletController {
 
     //管理员通过用户Id查询钱包
     @ApiOperation("管理员通过用户Id查询钱包")
-    @GetMapping("/adminGetWalletInfoByUserId")
+    @GetMapping("/admin/adminGetWalletInfoByUserId")
     public R<WalletVO> adminGetWalletInfoByUserId(@RequestParam("userId")Long userId){
 
         return walletService.adminGetWalletInfoByUserId(userId);
@@ -82,7 +82,7 @@ public class WalletController {
     }
     //管理员删除用户的钱包
     @ApiOperation("管理员删除用户的钱包")
-    @DeleteMapping("/adminDeleteWallet")
+    @DeleteMapping("/admin/adminDeleteWallet")
     public void adminDeleteWallet(@RequestParam("ids") List<Long> userId){
 
         walletService.adminDeleteWallet(userId);

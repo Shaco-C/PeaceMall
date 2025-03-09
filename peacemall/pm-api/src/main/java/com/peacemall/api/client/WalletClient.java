@@ -19,7 +19,7 @@ public interface WalletClient {
     //创建用户钱包（用户注册时一起执行）
     @PostMapping("/wallet/createWalletWhenRegister")
     void createWalletWhenRegister(@RequestParam("userId") Long userId);
-    @DeleteMapping("/wallet/adminDeleteWallet")
+    @DeleteMapping("/wallet/admin/adminDeleteWallet")
     void adminDeleteWallet(@RequestParam("ids") List<Long> userId);
 
     @GetMapping("/wallet/userGetSelfWalletInfo")
