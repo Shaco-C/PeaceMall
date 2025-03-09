@@ -1,51 +1,15 @@
 server:
   port: 8081
+  tomcat:
+    threads:
+      max: 50 # 允许的最大线程数
+    accept-count: 50 # 最大排队等待数量
+    max-connections: 100 # 允许的最大连接
 feign:
   okhttp:
-    enabled: true # 开启OKHttp连接池支持
-#spring:
-#  application:
-#    name: user-service # 微服务名称
-#  profiles:
-#    active: dev
-#  datasource:
-#    url: jdbc:mysql://${pm.db.host}:${pm.db.port}/peacemall?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    username: ${pm.db.un}
-#    password: ${pm.db.pw}
-#  cloud:
-#    nacos:
-#      server-addr: 192.168.145.134:8848
-#  main:
-#    allow-bean-definition-overriding: true
-#mybatis-plus:
-#  configuration:
-#    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
-#  global-config:
-#    db-config:
-#      update-strategy: not_null
-#      id-type: assign_id
-#logging:
-#  level:
-#    com.peacemall: debug
-#  pattern:
-#    dateformat: HH:mm:ss:SSS
-#  file:
-#    path: "logs/${spring.application.name}"
-#knife4j:
-#  enable: true
-#  openapi:
-#    title: 和平商城用户服务接口文档
-#    description: "和平商城用户服务接口文档"
-#    email: chuxuebushi@gmail.com
-#    concat: 小陈
-#    version: v1.0.0
-#    group:
-#      default:
-#        group-name: default
-#        api-rule: package
-#        api-rule-resources:
-#          - com.peacemall.user.controller
+    enabled: true
+  sentinel:
+    enabled: true # 开启feign对sentinel的支持
 pm:
   jwt:
     secret: "EBI0t1Rd1PchUR7RidJQo7QweK9ADXs0Kt/YG++d7II=" # 密钥

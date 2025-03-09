@@ -22,6 +22,7 @@ import com.peacemall.user.service.UserService;
 import com.peacemall.user.utils.JwtUtils;
 import com.peacemall.user.utils.PasswordUtil;
 import com.peacemall.user.utils.PasswordValidator;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -194,7 +195,7 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
 
     // 管理员删除用户
     @Override
-    @Transactional
+    @GlobalTransactional
     public R<String> deleteUsersByIds(List<Long> userIds) {
         String userRole = UserContext.getUserRole();
         Long currentUserId = UserContext.getUserId();
@@ -234,7 +235,7 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
 
     //由管理员定期删除注销的用户
     @Override
-    @Transactional
+    @GlobalTransactional
     public R<String> deleteUserWithClosedState() {
         String userRole = UserContext.getUserRole();
         Long adminUserId = UserContext.getUserId();

@@ -1,8 +1,15 @@
 server:
   port: 8082
+  tomcat:
+    threads:
+      max: 50 # 允许的最大线程数
+    accept-count: 50 # 最大排队等待数量
+    max-connections: 100 # 允许的最大连接
 feign:
   okhttp:
-    enabled: true # 开启OKHttp连接池支持
+    enabled: true
+  sentinel:
+    enabled: true # 开启feign对sentinel的支持
 pm:
   swagger:
     title: 和平商城钱包服务接口文档

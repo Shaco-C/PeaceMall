@@ -24,7 +24,7 @@ public class WithdrawRequestController {
 
     //用户申请提现
     @ApiOperation(value = "用户申请提现")
-    @PostMapping("/userGetRequestWithdraw")
+    @PostMapping("/userRequestWithdraw")
     public R<String> userRequestWithdraw(@RequestBody WithdrawInfoVO withdrawInfoVO){
 
         return withdrawRequestService.userRequestWithdraw(withdrawInfoVO);

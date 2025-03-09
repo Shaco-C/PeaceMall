@@ -1,5 +1,6 @@
 package com.peacemall.api.config;
 
+import com.peacemall.api.client.fallback.WalletClientFallbackFacktory;
 import com.peacemall.common.utils.UserContext;
 import feign.Logger;
 import feign.RequestInterceptor;
@@ -28,5 +29,11 @@ public class DefaultFeignConfig {
                 }
             }
         };
+    }
+
+
+    @Bean
+    public WalletClientFallbackFacktory walletClientFallbackFacktory(){
+        return new WalletClientFallbackFacktory();
     }
 }
