@@ -4,6 +4,7 @@ package com.peacemall.user.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.IdsDTO;
+import com.peacemall.common.enums.UserRole;
 import com.peacemall.user.domain.dto.LoginFormDTO;
 import com.peacemall.user.domain.dto.VerifyInfosDTO;
 import com.peacemall.user.domain.po.Users;
@@ -60,14 +61,14 @@ public class UsersController {
         return userService.updatePassword(verifyPwdDTO.getCurrentInfo(), verifyPwdDTO.getNewInfo());
     }
 
-    //用户修改密码
+    //用户修改手机
     @ApiOperation(value = "用户修改手机")
     @PutMapping("/updatePhoneNumber")
     public R<String> updatePhoneNumber(@RequestBody VerifyInfosDTO verifyPwdDTO) {
         return userService.updatePhoneNumber(verifyPwdDTO.getCurrentInfo(), verifyPwdDTO.getNewInfo());
     }
 
-    //用户修改密码
+    //用户修改邮箱
     @ApiOperation(value = "用户修改邮箱")
     @PutMapping("/updateEmail")
     public R<String> updateEmail(@RequestBody VerifyInfosDTO verifyPwdDTO) {
@@ -103,6 +104,14 @@ public class UsersController {
                                             @RequestParam(value = "PageSize", defaultValue = "20") int pageSize,
                                             @RequestParam(value = "state", defaultValue = "ACTIVE") UserState status) {
         return userService.getUsersWithStatus(page,pageSize,status);
+    }
+
+    //管理员根据用户id来切换用户的角色
+    @ApiOperation("管理员根据用户id来切换用户的角色")
+    @PutMapping("/admin/changeUserRole")
+    public void adminChangeUserRole(@RequestParam(value = "userId") Long userId,
+                                    @RequestParam(value = "userRole") UserRole userRole){
+        userService.adminChangeUserRole(userId,userRole);
     }
 
 }

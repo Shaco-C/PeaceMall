@@ -9,7 +9,9 @@ public enum ApplicationStatus {
 
     APPROVED("APPROVED"),
 
-    REJECTED("REJECTED");
+    REJECTED("REJECTED"),
+
+    CANCELED("CANCELED");
 
     @EnumValue
     private final String value;

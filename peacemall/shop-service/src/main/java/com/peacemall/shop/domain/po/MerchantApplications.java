@@ -40,4 +40,7 @@ public class MerchantApplications implements Serializable {
 
     @TableField(value = "updated_at", fill = FieldFill.INSERT_UPDATE)
     private Timestamp updatedAt;
+
+    @TableField("reason")
+    private String reason;
 }

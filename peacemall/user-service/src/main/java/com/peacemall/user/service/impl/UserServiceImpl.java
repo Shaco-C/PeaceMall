@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.WalletClient;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.vo.WalletVO;
+import com.peacemall.common.exception.ForbiddenException;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.user.domain.dto.LoginFormDTO;
 import com.peacemall.user.domain.po.Users;
@@ -408,6 +409,32 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         this.page(usersPage, usersLambdaQueryWrapper);
 
         return R.ok(usersPage);
+    }
+
+    @Override
+    public void adminChangeUserRole(Long userId, UserRole userRole) {
+        log.info("changeUserRole: userId={}, userRole={}", userId, userRole);
+        Long currentUserId = UserContext.getUserId();
+        String currentUserRole = UserContext.getUserRole();
+
+        log.info("changeUserRole: currentUserId={}, currentUserRole={}", currentUserId, currentUserRole);
+        if (currentUserId == null || !UserRole.ADMIN.name().equals(currentUserRole)) {
+            log.error("用户未登录或用户不是管理员");
+            throw new ForbiddenException("用户未登录或用户不是管理员");
+        }
+        log.info("用户权限正确");
+        Users user = this.getById(userId);
+        if (user == null) {
+            log.error("用户不存在: userId={}", userId);
+            throw new RuntimeException("用户不存在");
+        }
+        user.setRole(userRole);
+        boolean updated = this.updateById(user);
+        if (!updated) {
+            log.error("更新用户角色失败: userId={}, userRole={}", userId, userRole);
+            throw new RuntimeException("更新用户角色失败");
+        }
+        log.info("更新用户角色成功: userId={}, userRole={}", userId, userRole);
     }
 
     /**
