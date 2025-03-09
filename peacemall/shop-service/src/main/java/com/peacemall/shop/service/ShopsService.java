@@ -6,7 +6,7 @@ import com.peacemall.shop.domain.po.Shops;
 public interface ShopsService extends IService<Shops> {
 
     //用户申请成为商家，审批同意之后创建商家
-
+    boolean createUserShop(Shops shops);
     //商家注销商店，商店状态变为CLOSED,用户角色变回USER
 
     //商家查看自己商店的信息

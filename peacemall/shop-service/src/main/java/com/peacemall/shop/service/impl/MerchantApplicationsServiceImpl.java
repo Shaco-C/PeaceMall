@@ -8,10 +8,13 @@ import com.peacemall.common.domain.R;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.shop.domain.po.MerchantApplications;
+import com.peacemall.shop.domain.po.Shops;
 import com.peacemall.shop.domain.vo.AdminCheckApplications;
 import com.peacemall.shop.enums.ApplicationStatus;
+import com.peacemall.shop.enums.ShopStatus;
 import com.peacemall.shop.mapper.MerchantApplicationsMapper;
 import com.peacemall.shop.service.MerchantApplicationService;
+import com.peacemall.shop.service.ShopsService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Service;
 public class MerchantApplicationsServiceImpl extends ServiceImpl<MerchantApplicationsMapper, MerchantApplications> implements MerchantApplicationService {
 
     private final UserClient userClient;
+    private final ShopsService shopsService;
 
     @Override
     public R<String> userCreateMerchantApplication(MerchantApplications merchantApplications) {
@@ -191,6 +195,21 @@ public class MerchantApplicationsServiceImpl extends ServiceImpl<MerchantApplica
                 log.error("用户身份修改失败");
                 throw new RuntimeException("用户身份修改失败");
             }
+        }
+
+        //为用户创建一个商店
+        Shops shops = new Shops();
+        shops.setUserId(merchantApplications.getUserId());
+        shops.setShopName(merchantApplications.getShopName());
+        shops.setShopStatus(ShopStatus.NORMAL);
+        shops.setShopDescription(merchantApplications.getShopDescription());
+        shops.setShopAvatarUrl(merchantApplications.getShopAvatarUrl());
+
+        //通过调用创建商店
+        boolean shopRes = shopsService.createUserShop(shops);
+        if (!shopRes){
+            log.error("商店创建失败");
+            throw new RuntimeException("商店创建失败");
         }
 
         //修改商家申请状态
