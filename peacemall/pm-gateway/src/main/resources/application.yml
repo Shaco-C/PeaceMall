@@ -15,6 +15,11 @@ spring:
           predicates:
             - Path=/wallet/**
 
+        - id: shop
+          uri: lb://shop-service
+          predicates:
+            - Path=/shops/**,/merchant-applications/**
+
 pm:
   jwt:
     secret: "EBI0t1Rd1PchUR7RidJQo7QweK9ADXs0Kt/YG++d7II=" # 密钥
