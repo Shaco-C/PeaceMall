@@ -1,4 +1,4 @@
-package com.peacemall.wallet.domain.vo;
+package com.peacemall.common.domain.vo;
 
 
 import com.baomidou.mybatisplus.annotation.TableField;

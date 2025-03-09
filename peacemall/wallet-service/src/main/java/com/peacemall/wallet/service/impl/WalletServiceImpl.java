@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.enums.UserRole;
+import com.peacemall.common.exception.BadRequestException;
+import com.peacemall.common.exception.UnauthorizedException;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.wallet.domain.po.Wallet;
-import com.peacemall.wallet.domain.vo.WalletVO;
+import com.peacemall.common.domain.vo.WalletVO;
 import com.peacemall.wallet.mapper.WalletMapper;
 import com.peacemall.wallet.service.WalletService;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author watergun
@@ -26,13 +32,14 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
 
     //创建用户钱包（用户注册时一起执行）
     @Override
-    public R<String> createWalletWhenRegister(Long userId) {
+    public void createWalletWhenRegister(Long userId) {
         log.info("createWalletWhenRegister method is called");
         log.info("userId:{}", userId);
         if (userId == null) {
             log.error("用户参数为空");
-            return R.error("用户参数为空");
+            throw new BadRequestException("用户参数为空");
         }
+        log.info("开始构建钱包信息");
 
         Wallet wallet = new Wallet();
         wallet.setUserId(userId);
@@ -43,9 +50,9 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         boolean save = this.save(wallet);
         if (!save) {
             log.error("创建钱包失败");
-            return R.error("创建钱包失败");
+            throw  new RuntimeException("创建钱包失败");
         }
-        return R.ok("创建钱包成功");
+        log.info("创建钱包成功");
     }
 
     //用户查询自己的钱包信息
@@ -248,31 +255,42 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
 
     //管理员删除用户的钱包
     @Override
-    public R<String> adminDeleteWallet(Long userId) {
+    @Transactional
+    public void adminDeleteWallet(List<Long> userId) {
         log.info("adminDeleteWallet method is called");
         if (userId == null) {
             log.error("用户id不合法");
-            return R.error("用户id不合法");
+            throw new BadRequestException("用户id不合法");
         }
         Long userIdFromToken = UserContext.getUserId();
         String userRole = UserContext.getUserRole();
         log.info("userIdFromToken:{},userRole:{}",userIdFromToken,userRole);
         if (userIdFromToken == null || !UserRole.ADMIN.name().equals(userRole)) {
             log.error("用户未登录或用户不是管理员");
-            return R.error("用户未登录或用户不是管理员");
+            throw new UnauthorizedException("用户未登录或用户不是管理员");
         }
+        log.info("权限正常");
 
         LambdaQueryWrapper<Wallet> walletLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        walletLambdaQueryWrapper.eq(Wallet::getUserId, userId);
-        Wallet wallet = this.getOne(walletLambdaQueryWrapper);
-        if (wallet == null) {
+        walletLambdaQueryWrapper.in(Wallet::getUserId, userId);
+        List<Long> walletList = Optional.ofNullable(this.list(walletLambdaQueryWrapper))
+                .orElse(Collections.emptyList()) // 避免 null
+                .stream()
+                .map(Wallet::getWalletId)
+                .collect(Collectors.toList());
+        log.info("walletList:{}",walletList);
+
+        if (walletList.isEmpty()) {
             log.error("用户钱包不存在");
-            return R.error("用户钱包不存在，系统错误");
+            throw new BadRequestException("用户钱包不存在");
         }
-        boolean remove = this.removeById(wallet.getWalletId());
+
+        log.info("用户钱包存在");
+        boolean remove = this.removeByIds(walletList);
         if (!remove) {
             log.error("用户钱包删除失败");
+            throw new RuntimeException("用户钱包删除失败");
         }
-        return R.ok("用户钱包删除成功");
+        log.info("用户钱包删除成功");
     }
 }

@@ -6,7 +6,9 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.peacemall.api.client.WalletClient;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.vo.WalletVO;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.user.domain.dto.LoginFormDTO;
 import com.peacemall.user.domain.po.Users;
@@ -23,11 +25,16 @@ import com.peacemall.user.utils.PasswordValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,9 +42,9 @@ import java.util.function.Function;
 public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements UserService {
 
     private final JwtUtils jwtUtils;
+    private final WalletClient walletClient;
 
     // 注册用户
-    //todo 添加钱包
     @Override
     public R<String> register(Users users) {
 
@@ -69,8 +76,12 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             log.error("用户注册失败{}",users);
             return R.error("用户注册失败,请重试");
         }
-
-        //todo 通过openfeign为用户创建钱包
+        //通过openfeign为用户创建钱包
+        try{
+            walletClient.createWalletWhenRegister(users.getUserId());
+        }catch (Exception e){
+            throw new RuntimeException("用户创建钱包失败，请重试");
+        }
 
         return R.ok("用户注册成功");
     }
@@ -129,8 +140,13 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
 
     // 关闭账户
     //用户只能注销账户，不能直接删除账户
+    //用户注销账户时，需要检查用户钱包是否清零，如果未清零，则不允许注销账户
     @Override
     public R<String> closeAccount(String password) {
+        if (StrUtil.isEmpty(password)){
+            log.error("密码为空{}",password);
+            return R.error("密码为空,请重试");
+        }
         Long userId = UserContext.getUserId();
 
         // 1. 检查是否登录
@@ -152,9 +168,14 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             return R.error("密码错误");
         }
 
-        //todo 检查用户钱包是否清零
+        //检查用户钱包是否清零
+        R<WalletVO> walletVoR = walletClient.userGetSelfWalletInfo();
+        WalletVO walletVO = walletVoR.getData();
+        if (walletVO.getTotalBalance().compareTo(BigDecimal.ZERO)!=0){
+            log.error("用户钱包未清零: userId={}", userId);
+            return R.error("用户钱包未清零，请先清零钱包");
+        }
 
-        //todo 删除用户的钱包
 
         // 4. 更新用户状态
         users.setStatus(UserState.CLOSED);
@@ -173,6 +194,7 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
 
     // 管理员删除用户
     @Override
+    @Transactional
     public R<String> deleteUsersByIds(List<Long> userIds) {
         String userRole = UserContext.getUserRole();
         Long currentUserId = UserContext.getUserId();
@@ -190,6 +212,13 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             return R.error("请选择要删除的用户");
         }
 
+        //管理员删除用户的钱包
+        try{
+            walletClient.adminDeleteWallet(userIds);
+        }catch (Exception e){
+            throw new RuntimeException("删除钱包失败，请重试");
+        }
+
         // 3. 执行删除
         boolean res = this.removeByIds(userIds);
         if (!res) {
@@ -197,13 +226,15 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             return R.error("删除用户失败，请稍后重试");
         }
 
+
         log.info("管理员成功删除用户: adminUserId={}, userIds={}", currentUserId, userIds);
         return R.ok("删除用户成功");
     }
 
 
-    //由管理员定时删除注销的用户
+    //由管理员定期删除注销的用户
     @Override
+    @Transactional
     public R<String> deleteUserWithClosedState() {
         String userRole = UserContext.getUserRole();
         Long adminUserId = UserContext.getUserId();
@@ -215,20 +246,39 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             log.error("当前用户没有管理员权限: userId={}, userRole={}", adminUserId, userRole);
             return R.error("当前用户没有管理员权限");
         }
+        log.info("权限正常");
 
         // 2. 删除所有状态为 CLOSED 的用户
         LambdaQueryWrapper<Users> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Users::getStatus, UserState.CLOSED.name());
-
-        int deletedCount = this.baseMapper.delete(queryWrapper);
-        log.info("deleteUserWithClosedState: deletedCount={}", deletedCount);
-        if (deletedCount == 0) {
-            log.info("没有需要删除的用户: adminUserId={}", adminUserId);
+        List<Long> userIds = Optional.ofNullable(this.list(queryWrapper))
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(Users::getUserId)
+                .collect(Collectors.toList());
+        log.info("userIds:{}",userIds);
+        // 3. 判断是否有需要删除的用户
+        if (CollectionUtil.isEmpty(userIds)) {
+            log.warn("没有需要删除的用户: adminUserId={}", adminUserId);
             return R.ok("没有需要删除的用户");
         }
+        log.info("有需要删除的用户");
+        //管理员删除用户的钱包
+        try{
+            walletClient.adminDeleteWallet(userIds);
+        }catch (Exception e){
+            throw new RuntimeException("删除钱包失败，请重试");
+        }
 
-        log.info("管理员删除了 {} 个已注销的用户: adminUserId={}", deletedCount, adminUserId);
-        return R.ok("成功删除 " + deletedCount + " 个用户");
+        // 4. 执行删除
+        try{
+            this.removeByIds(userIds);
+        }catch (Exception e){
+            throw new RuntimeException("删除用户失败，请重试");
+        }
+
+        log.info("管理员删除了 {} 个已注销的用户: adminUserId={}", userIds.size(), adminUserId);
+        return R.ok("成功删除 " + userIds.size() + " 个用户");
     }
 
 

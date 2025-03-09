@@ -2,7 +2,7 @@ package com.peacemall.wallet.controller;
 
 
 import com.peacemall.common.domain.R;
-import com.peacemall.wallet.domain.vo.WalletVO;
+import com.peacemall.common.domain.vo.WalletVO;
 import com.peacemall.wallet.service.WalletService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author watergun
@@ -25,9 +26,9 @@ public class WalletController {
     //创建用户钱包（用户注册时一起执行）
     @ApiOperation("创建用户钱包（用户注册时一起执行）")
     @PostMapping("/createWalletWhenRegister")
-    public R<String> createWalletWhenRegister(@RequestParam("userId") Long userId){
+    public void createWalletWhenRegister(@RequestParam("userId") Long userId){
 
-        return walletService.createWalletWhenRegister(userId);
+        walletService.createWalletWhenRegister(userId);
     }
 
     //用户查询自己的钱包信息
@@ -55,6 +56,7 @@ public class WalletController {
     }
 
     //用户支付
+    //todo 后续要修改
     @ApiOperation("用户支付")
     @PutMapping("/userPay")
     public R<String> userPay(@RequestParam("amount")BigDecimal amount){
@@ -63,6 +65,7 @@ public class WalletController {
     }
 
     //用户待确认金额变化
+    //todo 后续要修改
     @ApiOperation("用户待确认金额变化")
     @PutMapping("/userPendingBalanceChange")
     public R<String> userPendingBalanceChange(@RequestParam("amount")BigDecimal amount){
@@ -70,6 +73,7 @@ public class WalletController {
         return walletService.userPendingBalanceChange(amount);
     }
     //用户钱包余额变化
+    //todo 后续要修改
     @ApiOperation("用户钱包余额变化")
     @PutMapping("/userAvailableBalanceChange")
     public R<String> userAvailableBalanceChange(@RequestParam("amount")BigDecimal amount){
@@ -79,8 +83,8 @@ public class WalletController {
     //管理员删除用户的钱包
     @ApiOperation("管理员删除用户的钱包")
     @DeleteMapping("/adminDeleteWallet")
-    public R<String> adminDeleteWallet(@RequestParam("amount")Long userId){
+    public void adminDeleteWallet(@RequestParam("ids") List<Long> userId){
 
-        return walletService.adminDeleteWallet(userId);
+        walletService.adminDeleteWallet(userId);
     }
 }

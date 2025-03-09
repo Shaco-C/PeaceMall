@@ -1,11 +1,15 @@
 server:
-  port: 8081
+  port: 8082
 feign:
   okhttp:
     enabled: true # 开启OKHttp连接池支持
+pm:
+  swagger:
+    title: 和平商城钱包服务接口文档
+    package: com.peacemall.wallet.controller
 #spring:
 #  application:
-#    name: user-service # 微服务名称
+#    name: wallet-service # 微服务名称
 #  profiles:
 #    active: dev
 #  datasource:
@@ -35,8 +39,8 @@ feign:
 #knife4j:
 #  enable: true
 #  openapi:
-#    title: 和平商城用户服务接口文档
-#    description: "和平商城用户服务接口文档"
+#    title: 和平商城钱包服务接口文档
+#    description: "和平商城钱包服务接口文档"
 #    email: chuxuebushi@gmail.com
 #    concat: 小陈
 #    version: v1.0.0
@@ -45,11 +49,4 @@ feign:
 #        group-name: default
 #        api-rule: package
 #        api-rule-resources:
-#          - com.peacemall.user.controller
-pm:
-  jwt:
-    secret: "EBI0t1Rd1PchUR7RidJQo7QweK9ADXs0Kt/YG++d7II=" # 密钥
-    expire: 86400000
-  swagger:
-    title: 和平商城钱包服务接口文档
-    package: com.peacemall.wallet.controller
+#          - com.peacemall.wallet.controller

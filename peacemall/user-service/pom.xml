@@ -23,6 +23,11 @@
             <artifactId>pm-common</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.watergun</groupId>
+            <artifactId>pm-api</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
         <!--web-->
         <dependency>

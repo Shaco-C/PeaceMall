@@ -6,6 +6,9 @@ import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import org.springframework.context.annotation.Bean;
 
+/**
+ * @author watergun
+ */
 public class DefaultFeignConfig {
     @Bean
     public Logger.Level fullFeignLoggerLevel(){
@@ -19,16 +22,11 @@ public class DefaultFeignConfig {
             public void apply(RequestTemplate template) {
                 Long userId = UserContext.getUserId();
                 String userRole = UserContext.getUserRole();
-                String userInfo = userId.toString() + "," + userRole;
+                String userInfo = userId + "," + userRole;
                 if (userId != null) {
-                    template.header("user-info",userInfo );
+                    template.header("user-info", userInfo);
                 }
             }
         };
     }
-
-//    @Bean
-//    public ItemClientFallbackFactory itemClientFallbackFactory(){
-//        return new ItemClientFallbackFactory();
-//    }
 }

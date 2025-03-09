@@ -10,6 +10,11 @@ spring:
           predicates:
             - Path=/user/**,/addresses/**
 
+        - id: wallet
+          uri: lb://wallet-service
+          predicates:
+            - Path=/wallet/**
+
 pm:
   jwt:
     secret: "EBI0t1Rd1PchUR7RidJQo7QweK9ADXs0Kt/YG++d7II=" # 密钥

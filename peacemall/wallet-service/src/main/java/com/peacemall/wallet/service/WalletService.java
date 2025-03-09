@@ -3,9 +3,10 @@ package com.peacemall.wallet.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
 import com.peacemall.wallet.domain.po.Wallet;
-import com.peacemall.wallet.domain.vo.WalletVO;
+import com.peacemall.common.domain.vo.WalletVO;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author watergun
@@ -13,7 +14,7 @@ import java.math.BigDecimal;
 public interface WalletService extends IService<Wallet> {
 
     //创建用户钱包（用户注册时一起执行）
-    R<String> createWalletWhenRegister(Long userId);
+    void createWalletWhenRegister(Long userId);
 
     //用户查询自己的钱包信息
     R<WalletVO> userGetSelfWalletInfo();
@@ -34,6 +35,6 @@ public interface WalletService extends IService<Wallet> {
     //用户钱包余额变化
     R<String> userAvailableBalanceChange(BigDecimal amount);
     //管理员删除用户的钱包
-    R<String> adminDeleteWallet(Long userId);
+    void adminDeleteWallet(List<Long> userId);
 
 }
