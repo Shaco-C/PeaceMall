@@ -22,6 +22,12 @@
             <groupId>com.watergun</groupId>
             <artifactId>pm-common</artifactId>
             <version>1.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.alibaba.cloud</groupId>
+                    <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--网关-->
         <dependency>

@@ -12,6 +12,8 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Api("用户申请成为商家相关接口")
 @RequestMapping("/merchant-applications")
 @RequiredArgsConstructor
@@ -38,7 +40,7 @@ public class MerchantApplicationsController {
     //在这个页面中，可以选择取消申请
     @ApiOperation(value = "用户查看自己的申请记录")
     @GetMapping("/userGetMerchantApplication")
-    public R<MerchantApplications> userGetMerchantApplication(){
+    public R<List<MerchantApplications>> userGetMerchantApplication(){
         return merchantApplicationService.userGetMerchantApplication();
     }
 

@@ -64,7 +64,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             return forbiddenResponse(exchange);
         }
 
-        // 5. 权限控制（**/shop/** 仅 MERCHANT 或 ADMIN 可访问）
+        // 5. 权限控制（**/merchant/** 仅 MERCHANT 或 ADMIN 可访问）
         if (isMerchantPath(path) && !isMerchantOrAdmin(userRole)) {
             log.warn("用户 {} 角色 {} 访问 {} 被拒绝", userId, userRole, path);
             return forbiddenResponse(exchange);
@@ -91,7 +91,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
     // **/shop/** 访问控制
     private boolean isMerchantPath(String path) {
-        return antPathMatcher.match("*/shop/**", path);
+        return antPathMatcher.match("*/merchant/**", path);
     }
 
     // 判断是否是商家或管理员

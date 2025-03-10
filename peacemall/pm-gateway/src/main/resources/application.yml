@@ -13,7 +13,7 @@ spring:
         - id: wallet
           uri: lb://wallet-service
           predicates:
-            - Path=/wallet/**
+            - Path=/wallet/**,/withdraw/**
 
         - id: shop
           uri: lb://shop-service

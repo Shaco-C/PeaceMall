@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(value = "user-service" , fallbackFactory = UserClientFallbackFactory.class)
 public interface UserClient {
-    @PutMapping("/admin/changeUserRole")
+    @PutMapping("/user/admin/changeUserRole")
     void adminChangeUserRole(@RequestParam(value = "userId") Long userId,
                                     @RequestParam(value = "userRole") UserRole userRole);
 

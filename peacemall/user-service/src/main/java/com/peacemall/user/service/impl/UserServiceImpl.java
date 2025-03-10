@@ -418,10 +418,21 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         String currentUserRole = UserContext.getUserRole();
 
         log.info("changeUserRole: currentUserId={}, currentUserRole={}", currentUserId, currentUserRole);
-        if (currentUserId == null || !UserRole.ADMIN.name().equals(currentUserRole)) {
-            log.error("用户未登录或用户不是管理员");
-            throw new ForbiddenException("用户未登录或用户不是管理员");
+
+        if (currentUserId == null){
+            log.error("用户未登录");
+            throw new ForbiddenException("用户未登录");
         }
+
+        //判断当前用户是否是商家，想要修改自己为USER
+        //是否为自己的请求
+        if (!currentUserId.equals(userId) || !UserRole.MERCHANT.name().equals(currentUserRole) || !UserRole.USER.equals(userRole)){
+            if (!UserRole.ADMIN.name().equals(currentUserRole)) {
+                log.error("用户未登录或用户不是管理员");
+                throw new ForbiddenException("用户未登录或用户不是管理员");
+            }
+        }
+
         log.info("用户权限正确");
         Users user = this.getById(userId);
         if (user == null) {

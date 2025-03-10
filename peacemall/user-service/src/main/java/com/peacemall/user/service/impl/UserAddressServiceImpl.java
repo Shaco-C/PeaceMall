@@ -71,7 +71,7 @@ public class UserAddressServiceImpl extends ServiceImpl<UserAddressMapper, UserA
                 .eq(UserAddress::getStatus, 1);
         long count = this.count(queryWrapper);
 
-        if (count > 8) {
+        if (count >= 8) {
             log.info("addUserAddress failed: 用户地址数量已达到上限, userId: {}", userId);
             return R.error("用户地址数量已达到上限");
         }

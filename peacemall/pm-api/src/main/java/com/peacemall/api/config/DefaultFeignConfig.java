@@ -1,5 +1,6 @@
 package com.peacemall.api.config;
 
+import com.peacemall.api.client.fallback.UserClientFallbackFactory;
 import com.peacemall.api.client.fallback.WalletClientFallbackFacktory;
 import com.peacemall.common.utils.UserContext;
 import feign.Logger;
@@ -35,5 +36,10 @@ public class DefaultFeignConfig {
     @Bean
     public WalletClientFallbackFacktory walletClientFallbackFacktory(){
         return new WalletClientFallbackFacktory();
+    }
+
+    @Bean
+    public UserClientFallbackFactory userClientFallbackFactory(){
+        return new UserClientFallbackFactory();
     }
 }

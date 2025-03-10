@@ -15,5 +15,5 @@ pm:
     secret: "EBI0t1Rd1PchUR7RidJQo7QweK9ADXs0Kt/YG++d7II=" # 密钥
     expire: 86400000
   swagger:
-    title: 和平商城钱包服务接口文档
-    package: com.peacemall.wallet.controller
+    title: 和平商城用户服务接口文档
+    package: com.peacemall.user.controller

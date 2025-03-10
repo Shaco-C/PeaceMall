@@ -44,6 +44,7 @@ public class WithdrawRequestServiceImpl extends ServiceImpl<WithdrawRequestMappe
         }
 
         Long userId = UserContext.getUserId();
+        log.info("当前用户id为：{}",userId);
 
         if (userId==null){
             log.info("用户未登录");

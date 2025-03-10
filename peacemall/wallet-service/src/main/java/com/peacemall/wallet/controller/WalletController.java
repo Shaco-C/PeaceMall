@@ -2,6 +2,7 @@ package com.peacemall.wallet.controller;
 
 
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.IdsDTO;
 import com.peacemall.common.domain.vo.WalletVO;
 import com.peacemall.wallet.service.WalletService;
 import io.swagger.annotations.Api;
@@ -83,8 +84,8 @@ public class WalletController {
     //管理员删除用户的钱包
     @ApiOperation("管理员删除用户的钱包")
     @DeleteMapping("/admin/adminDeleteWallet")
-    public void adminDeleteWallet(@RequestParam("ids") List<Long> userId){
+    public void adminDeleteWallet(@RequestBody IdsDTO idsDTO){
 
-        walletService.adminDeleteWallet(userId);
+        walletService.adminDeleteWallet(idsDTO.getIdsList());
     }
 }

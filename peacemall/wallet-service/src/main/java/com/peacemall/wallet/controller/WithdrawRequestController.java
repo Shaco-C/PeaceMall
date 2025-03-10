@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "提现请求服务")
 @RestController
-@RequestMapping("/withdraw-request")
+@RequestMapping("/withdraw")
 @RequiredArgsConstructor
 public class WithdrawRequestController {
     private final WithdrawRequestService withdrawRequestService;
@@ -34,7 +34,7 @@ public class WithdrawRequestController {
     @ApiOperation(value = "管理员按照状态分页查询提现申请")
     @GetMapping("/admin/adminGetWithdrawRequestByStatus")
     public R<Page<WithdrawRequest>> adminGetWithdrawRequestByStatus(@RequestParam(value = "page",defaultValue = "1") int page,
-                                                                    @RequestParam(value = "pageSize",defaultValue = "1")int pageSize,
+                                                                    @RequestParam(value = "pageSize",defaultValue = "20")int pageSize,
                                                                     @RequestParam(value = "withDrawRequestStatus",defaultValue = "PENDING")WithDrawRequestStatus withDrawRequestStatus){
 
         return withdrawRequestService.adminGetWithdrawRequestByStatus(page,pageSize,withDrawRequestStatus);
@@ -53,7 +53,7 @@ public class WithdrawRequestController {
     @ApiOperation(value = "用户查询自己的提现申请")
     @GetMapping("/userGetWithdrawRequest")
     public R<Page<WithdrawRequest>> userGetWithdrawRequest(@RequestParam(value = "page",defaultValue = "1") int page,
-                                                           @RequestParam(value = "pageSize",defaultValue = "1")int pageSize){
+                                                           @RequestParam(value = "pageSize",defaultValue = "20")int pageSize){
 
         return withdrawRequestService.userGetWithdrawRequest(page,pageSize);
     }

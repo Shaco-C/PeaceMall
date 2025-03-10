@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -32,6 +34,7 @@ public class MerchantApplicationsServiceImpl extends ServiceImpl<MerchantApplica
     public R<String> userCreateMerchantApplication(MerchantApplications merchantApplications) {
         log.info("userCreateMerchantApplication method is called");
         Long userId = UserContext.getUserId();
+        String userRole = UserContext.getUserRole();
 
         //查询用户是否登陆
         if (userId == null) {
@@ -40,9 +43,16 @@ public class MerchantApplicationsServiceImpl extends ServiceImpl<MerchantApplica
         }
         log.info("用户已登陆，userId:{}",userId);
 
+        //检查当前用户是否已经为商家
+        if (UserRole.MERCHANT.name().equals(userRole)){
+            log.error("用户已经是商家");
+            return R.error("用户已经是商家");
+        }
+
         //查询用户是否已经申请过商家，如果申请过，则返回错误信息
         LambdaQueryWrapper<MerchantApplications> merchantApplicationsLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        merchantApplicationsLambdaQueryWrapper.eq(MerchantApplications::getUserId, userId);
+        merchantApplicationsLambdaQueryWrapper.eq(MerchantApplications::getUserId, userId)
+                .eq(MerchantApplications::getStatus, ApplicationStatus.PENDING);
         MerchantApplications dbMerchantApplications = this.getOne(merchantApplicationsLambdaQueryWrapper);
 
         if (dbMerchantApplications != null) {
@@ -107,7 +117,7 @@ public class MerchantApplicationsServiceImpl extends ServiceImpl<MerchantApplica
     }
 
     @Override
-    public R<MerchantApplications> userGetMerchantApplication() {
+    public R<List<MerchantApplications>> userGetMerchantApplication() {
         log.info("userGetMerchantApplication method is called");
         Long userId = UserContext.getUserId();
         //查询用户是否登陆
@@ -120,12 +130,12 @@ public class MerchantApplicationsServiceImpl extends ServiceImpl<MerchantApplica
         //根据当前登陆的userId来返回Application
         LambdaQueryWrapper<MerchantApplications> merchantApplicationsLambdaQueryWrapper = new LambdaQueryWrapper<>();
         merchantApplicationsLambdaQueryWrapper.eq(MerchantApplications::getUserId, userId);
-        MerchantApplications merchantApplications = this.getOne(merchantApplicationsLambdaQueryWrapper);
-        if (merchantApplications == null) {
+        List<MerchantApplications> merchantApplications = this.list(merchantApplicationsLambdaQueryWrapper);
+        if (merchantApplications.isEmpty()) {
             log.error("用户未申请过商家");
             return R.error("用户未申请过商家");
         }
-        log.info("用户已申请过商家");
+        log.info("用户查询商家申请记录成功");
         return R.ok(merchantApplications);
     }
 
