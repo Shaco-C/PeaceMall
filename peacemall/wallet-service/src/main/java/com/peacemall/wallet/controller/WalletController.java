@@ -65,22 +65,6 @@ public class WalletController {
         return walletService.userPay(amount);
     }
 
-    //用户待确认金额变化
-    //todo 后续要修改
-    @ApiOperation("用户待确认金额变化")
-    @PutMapping("/userPendingBalanceChange")
-    public R<String> userPendingBalanceChange(@RequestParam("amount")BigDecimal amount){
-
-        return walletService.userPendingBalanceChange(amount);
-    }
-    //用户钱包余额变化
-    //todo 后续要修改
-    @ApiOperation("用户钱包余额变化")
-    @PutMapping("/userAvailableBalanceChange")
-    public R<String> userAvailableBalanceChange(@RequestParam("amount")BigDecimal amount){
-
-        return walletService.userAvailableBalanceChange(amount);
-    }
     //管理员删除用户的钱包
     @ApiOperation("管理员删除用户的钱包")
     @DeleteMapping("/admin/adminDeleteWallet")

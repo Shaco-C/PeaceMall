@@ -29,11 +29,6 @@ public interface WalletService extends IService<Wallet> {
     R<String> userPay(BigDecimal amount);
 
 
-
-    //用户待确认金额变化
-    R<String> userPendingBalanceChange(BigDecimal amount);
-    //用户钱包余额变化
-    R<String> userAvailableBalanceChange(BigDecimal amount);
     //管理员删除用户的钱包
     void adminDeleteWallet(List<Long> userId);
 

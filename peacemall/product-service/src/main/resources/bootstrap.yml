@@ -1,6 +1,6 @@
 spring:
   application:
-    name: product-service # 服务名称
+    name: user-service # 服务名称
   profiles:
     active: dev
   cloud:

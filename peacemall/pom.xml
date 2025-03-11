@@ -21,6 +21,7 @@
         <module>review-service</module>
         <module>order-service</module>
         <module>coupon-service</module>
+        <module>product-service</module>
     </modules>
 
     <parent>

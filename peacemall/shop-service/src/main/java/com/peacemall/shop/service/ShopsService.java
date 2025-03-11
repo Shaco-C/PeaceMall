@@ -17,6 +17,8 @@ public interface ShopsService extends IService<Shops> {
     //todo 商家查看自己商店的信息
     // R<ShopsDTO> merchantGetShopInfo();
 
+    //todo 商家一键下架所有商品
+
     //商家更新商店的基础信息
     R<String> merchantUpdateShopInfo(Shops shops);
 

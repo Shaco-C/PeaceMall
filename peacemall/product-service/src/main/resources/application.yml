@@ -1,0 +1,16 @@
+server:
+  port: 8084
+  tomcat:
+    threads:
+      max: 50 # 允许的最大线程数
+    accept-count: 50 # 最大排队等待数量
+    max-connections: 100 # 允许的最大连接
+feign:
+  okhttp:
+    enabled: true
+  sentinel:
+    enabled: true # 开启feign对sentinel的支持
+pm:
+  swagger:
+    title: 和平商城商品服务接口文档
+    package: com.peacemall.product.controller
