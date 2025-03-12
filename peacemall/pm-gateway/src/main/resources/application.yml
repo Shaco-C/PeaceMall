@@ -20,6 +20,11 @@ spring:
           predicates:
             - Path=/shops/**,/merchant-applications/**
 
+        - id: product
+          uri: lb://product-service
+          predicates:
+            - Path=/products/**,/product-images/**,/productsConfigurations/**,/categories/**
+
 pm:
   jwt:
     secret: "EBI0t1Rd1PchUR7RidJQo7QweK9ADXs0Kt/YG++d7II=" # 密钥
