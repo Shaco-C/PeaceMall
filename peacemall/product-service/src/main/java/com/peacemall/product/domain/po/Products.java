@@ -26,6 +26,9 @@ public class Products implements Serializable {
     @TableField("shop_id")
     private Long shopId;
 
+    @TableField("user_Id")
+    private Long userId;
+
     @TableField("brand")
     private String brand;
 

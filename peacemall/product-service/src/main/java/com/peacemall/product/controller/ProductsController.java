@@ -1,10 +1,17 @@
 package com.peacemall.product.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.peacemall.common.domain.R;
+import com.peacemall.product.domain.dto.AddProductDTO;
+import com.peacemall.product.domain.po.Products;
+import com.peacemall.product.domain.vo.ProductDetailsVO;
+import com.peacemall.product.enums.ProductStatus;
 import com.peacemall.product.service.ProductsService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author watergun
@@ -15,4 +22,64 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/products")
 public class ProductsController {
     private final ProductsService productsService;
+
+    //创建商品
+    @ApiOperation(value = "创建商品")
+    @PostMapping("/merchant/create")
+    public R<Long> merchantCreateProduct(@RequestBody @Validated AddProductDTO addProductDTO){
+        return productsService.merchantCreateProduct(addProductDTO);
+    }
+
+    //商家修改商品上下架状态
+    //传递目前的status,后台直接保存!activeStatus
+    @ApiOperation(value = "修改商品上下架状态")
+    @PutMapping("/merchant/updateActiveStatus")
+    public R<String> merchantUpdateProductActiveStatus(@RequestParam("productId") Long productId,
+                                                       @RequestParam("activeStatus") Boolean activeStatus){
+        return productsService.merchantUpdateProductActiveStatus(productId,activeStatus);
+    }
+
+    //商家删除商品
+    @ApiOperation(value = "商家删除商品")
+    @DeleteMapping("/merchant/delete/{productId}")
+    public R<String> merchantDeleteProduct(@PathVariable Long productId){
+        return productsService.merchantDeleteProduct(productId);
+    }
+
+    //todo 查询商品
+
+    //todo 首页商品显示
+
+
+    //分页查询查看某个分类下的产品
+    @ApiOperation(value = "分页查询查看某个分类下的产品")
+    @GetMapping("/getProductsByCategoryId")
+    R<Page<Products>> getProductsByCategoryId(@RequestParam(value = "page",defaultValue = "1") int page,
+                                              @RequestParam(value = "pageSize",defaultValue = "20")int pageSize,
+                                              @RequestParam("categoryId") Long categoryId){
+        return productsService.getProductsByCategoryId(page,pageSize,categoryId);
+    }
+
+    //修改商品基本信息
+    @ApiOperation(value = "修改商品基本信息")
+    @PutMapping("/merchant/update")
+    public R<String> merchantUpdateProduct(@RequestBody Products products){
+        return productsService.merchantUpdateProduct(products);
+    }
+
+    //商家查看自己商品的基本信息
+    @ApiOperation(value = "商家查看自己商品的基本信息")
+    @GetMapping("/merchant/getProductInfo")
+    public R<Page<Products>> merchantGetProductInfo(@RequestParam(value = "page",defaultValue = "1") int page,
+                                                    @RequestParam(value = "pageSize",defaultValue = "20")int pageSize,
+                                                    @RequestParam("productStatus") ProductStatus productStatus){
+        return productsService.merchantGetProductInfo(page,pageSize,productStatus);
+    }
+
+    //根据id查看基本详细信息，以及其配置
+    @ApiOperation(value = "根据id查看基本详细信息，以及其配置")
+    @GetMapping("/getProductDetailsById/{productId}")
+    public R<ProductDetailsVO> getProductDetailsById(@PathVariable Long productId){
+        return productsService.getProductDetailsById(productId);
+    }
 }
