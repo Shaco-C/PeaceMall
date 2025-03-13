@@ -29,5 +29,5 @@ public interface ProductConfigurationsService extends IService<ProductConfigurat
     List<ProductConfigurations> queryProductConfigurationsByProductId(Long productId);
 
     //todo 商品配置数量的增减（购买，退货，补货）
-
+    //todo void updateProductConfigurationsQuantity(PurchaseDTO purchaseDTO);
 }

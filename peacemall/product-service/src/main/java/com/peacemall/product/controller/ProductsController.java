@@ -84,4 +84,22 @@ public class ProductsController {
     public R<ProductDetailsVO> getProductDetailsById(@PathVariable Long productId){
         return productsService.getProductDetailsById(productId);
     }
+
+    //TODO 管理员审核商品
+    @ApiOperation(value = "管理员审核商品")
+    @PutMapping("/admin/auditProduct")
+    R<String> adminAuditProduct(@RequestParam("productId") Long productId,
+                                @RequestParam("productStatus") ProductStatus productStatus){
+        return productsService.adminAuditProduct(productId,productStatus);
+    }
+
+    //TODO 管理员查看待审核商品信息
+    @ApiOperation(value = "管理员查看待审核商品信息")
+    @GetMapping("/admin/getProductsToAudit")
+
+    R<Page<Products>> adminGetProductsToAudit(@RequestParam(value = "page",defaultValue = "1") int page,
+                                              @RequestParam(value = "pageSize",defaultValue = "20") int pageSize,
+                                              @RequestParam("productStatus") ProductStatus productStatus){
+        return productsService.adminGetProductsToAudit(page,pageSize,productStatus);
+    }
 }

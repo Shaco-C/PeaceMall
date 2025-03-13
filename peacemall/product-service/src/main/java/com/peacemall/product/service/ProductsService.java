@@ -40,8 +40,9 @@ public interface ProductsService extends IService<Products> {
     R<ProductDetailsVO> getProductDetailsById(Long productId);
 
     //TODO 管理员审核商品
+    R<String> adminAuditProduct(Long productId, ProductStatus productStatus);
 
     //TODO 管理员查看待审核商品信息
-
+    R<Page<Products>> adminGetProductsToAudit(int page, int pageSize, ProductStatus productStatus);
 
 }

@@ -302,6 +302,54 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         return R.ok(productDetailsVO);
     }
 
+    @Override
+    public R<String> adminAuditProduct(Long productId, ProductStatus productStatus) {
+        log.info("adminAuditProduct,productId:{},productStatus:{}", productId, productStatus);
+        if (productId == null || productStatus == null) {
+            log.error("参数错误");
+            return R.error("参数错误");
+        }
+        Long userId = UserContext.getUserId();
+        String userRole = UserContext.getUserRole();
+        if (userId == null || !UserRole.ADMIN.name().equals(userRole)) {
+            log.error("用户未登录或权限不对");
+            return R.error("用户未登录或权限不对");
+        }
+        log.info("用户信息正常");
+        Products products = this.getById(productId);
+        if (products == null) {
+            log.error("商品不存在");
+            return R.error("商品不存在");
+        }
+        if (products.getStatus() != ProductStatus.PENDING) {
+            log.error("商品状态不对");
+            return R.error("商品已被处理");
+        }
+        products.setStatus(productStatus);
+        this.updateById(products);
+        return R.ok("审核成功");
+    }
+
+    @Override
+    public R<Page<Products>> adminGetProductsToAudit(int page, int pageSize, ProductStatus productStatus) {
+        log.info("adminGetProductsToAudit,page:{},pageSize:{},productStatus:{}", page, pageSize, productStatus);
+        if (page < 1 || pageSize < 1 || productStatus == null) {
+            log.error("参数错误");
+            return R.error("参数错误");
+        }
+        Long userId = UserContext.getUserId();
+        String userRole = UserContext.getUserRole();
+        if (userId == null || !UserRole.ADMIN.name().equals(userRole)) {
+            log.error("用户未登录或权限不对");
+            return R.error("用户未登录或权限不对");
+        }
+        log.info("用户信息正常");
+        LambdaQueryWrapper<Products> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Products::getStatus, productStatus);
+        Page<Products> productsPage = this.page(new Page<>(page, pageSize), queryWrapper);
+        return R.ok(productsPage);
+    }
+
     private List<Long> findAllChildCategoriesOptimized(Long parentId, List<Categories> allCategories) {
         List<Long> result = new ArrayList<>();
 
