@@ -23,22 +23,24 @@ public class ProductConfigurationsController {
 
     //创建商品配置
     @ApiOperation("创建商品配置")
-    @PostMapping("/create")
+    @PostMapping("/merchant/create")
     R<String> merchantCreateProductConfigurations(@RequestBody ProductConfigDTO productConfigDTO){
         return productConfigurationsService.merchantCreateProductConfigurations(productConfigDTO);
     }
 
     //删除商品配置
     @ApiOperation("删除商品配置")
-    @DeleteMapping("/delete")
+    @DeleteMapping("/merchant/delete")
     R<String> merchantDeleteProductConfigurations(@RequestBody IdsDTO idsDTO){
         return productConfigurationsService.merchantDeleteProductConfigurations(idsDTO.getIdsList());
     }
 
     //修改商品配置
     @ApiOperation("修改商品配置")
-    @PutMapping("/update")
+    @PutMapping("/merchant/update")
     R<String> merchantUpdateProductConfigurations(@RequestBody ProductConfigurations productConfigurations){
         return productConfigurationsService.merchantUpdateProductConfigurations(productConfigurations);
     }
+
+
 }
