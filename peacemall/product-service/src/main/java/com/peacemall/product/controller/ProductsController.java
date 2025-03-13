@@ -54,6 +54,7 @@ public class ProductsController {
     //分页查询查看某个分类下的产品
     @ApiOperation(value = "分页查询查看某个分类下的产品")
     @GetMapping("/getProductsByCategoryId")
+
     R<Page<Products>> getProductsByCategoryId(@RequestParam(value = "page",defaultValue = "1") int page,
                                               @RequestParam(value = "pageSize",defaultValue = "20")int pageSize,
                                               @RequestParam("categoryId") Long categoryId){
@@ -72,11 +73,12 @@ public class ProductsController {
     @GetMapping("/merchant/getProductInfo")
     public R<Page<Products>> merchantGetProductInfo(@RequestParam(value = "page",defaultValue = "1") int page,
                                                     @RequestParam(value = "pageSize",defaultValue = "20")int pageSize,
-                                                    @RequestParam("productStatus") ProductStatus productStatus){
+                                                    @RequestParam(value = "productStatus",defaultValue = "APPROVED") ProductStatus productStatus){
         return productsService.merchantGetProductInfo(page,pageSize,productStatus);
     }
 
     //根据id查看基本详细信息，以及其配置
+
     @ApiOperation(value = "根据id查看基本详细信息，以及其配置")
     @GetMapping("/getProductDetailsById/{productId}")
     public R<ProductDetailsVO> getProductDetailsById(@PathVariable Long productId){

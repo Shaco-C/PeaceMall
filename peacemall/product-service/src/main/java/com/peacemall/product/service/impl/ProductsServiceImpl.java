@@ -9,10 +9,12 @@ import com.peacemall.common.enums.UserRole;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.product.domain.dto.AddProductDTO;
 
+import com.peacemall.product.domain.po.Categories;
 import com.peacemall.product.domain.po.Products;
 import com.peacemall.product.domain.vo.ProductDetailsVO;
 import com.peacemall.product.enums.ProductStatus;
 import com.peacemall.product.mapper.ProductsMapper;
+import com.peacemall.product.service.CategoriesService;
 import com.peacemall.product.service.ProductConfigurationsService;
 import com.peacemall.product.service.ProductImagesService;
 import com.peacemall.product.service.ProductsService;
@@ -20,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
 
 
 /**
@@ -32,6 +36,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
 
     private final ProductImagesService productImagesService;
     private final ProductConfigurationsService productConfigurationsService;
+    private final CategoriesService categoriesService;
 
     //创建商品
     @Override
@@ -150,6 +155,12 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
             return R.error("该商品不属于该用户");
         }
 
+        //删除该商品的所有配置信息
+        productConfigurationsService.merchantDeleteProductConfigurationsByProductId(productId);
+
+        //根据商品Id删除所有图片
+        productImagesService.deleteProductImagesByProductId(productId);
+
         boolean remove = this.removeById(productId);
         if (!remove) {
             log.error("商品删除失败");
@@ -157,11 +168,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         }
         log.info("商品删除成功");
 
-        //删除该商品的所有配置信息
-        productConfigurationsService.merchantDeleteProductConfigurationsByProductId(productId);
 
-        //根据商品Id删除所有图片
-        productImagesService.deleteProductImagesByProductId(productId);
 
         return R.ok("商品删除成功");
     }
@@ -173,15 +180,28 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
             log.error("参数错误");
             return R.error("参数错误");
         }
+
         Long userId = UserContext.getUserId();
         if (userId == null) {
             log.error("用户未登录");
             return R.error("用户未登录");
         }
         log.info("用户信息正常");
-        //查询该分类下的所有商品
+
+        // 查询所有分类信息
+        List<Categories> allCategories = categoriesService.list();
+
+        // 获取当前分类及其所有子分类、孙分类的ID列表
+        List<Long> categoryIds = new ArrayList<>();
+        categoryIds.add(categoryId); // 添加当前分类ID
+        categoryIds.addAll(findAllChildCategoriesOptimized(categoryId, allCategories));
+
+        log.info("查询分类及其子分类IDs: {}", categoryIds);
+
+        // 查询这些分类下的所有商品
         LambdaQueryWrapper<Products> productsLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        productsLambdaQueryWrapper.eq(Products::getCategoryId, categoryId);
+        productsLambdaQueryWrapper.in(Products::getCategoryId, categoryIds);
+
         Page<Products> productsPage = this.page(new Page<>(page, pageSize), productsLambdaQueryWrapper);
         return R.ok(productsPage);
     }
@@ -280,5 +300,36 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
 
         //返回一整个VO
         return R.ok(productDetailsVO);
+    }
+
+    private List<Long> findAllChildCategoriesOptimized(Long parentId, List<Categories> allCategories) {
+        List<Long> result = new ArrayList<>();
+
+        // 预处理: 构建父ID到子分类列表的映射
+        Map<Long, List<Categories>> parentToChildren = new HashMap<>();
+        for (Categories category : allCategories) {
+            if (category.getParentId() != null) {
+                parentToChildren.computeIfAbsent(category.getParentId(), k -> new ArrayList<>())
+                        .add(category);
+            }
+        }
+
+        // 使用广度优先搜索
+        Queue<Long> queue = new LinkedList<>();
+        queue.add(parentId);
+
+        while (!queue.isEmpty()) {
+            Long currentId = queue.poll();
+            List<Categories> children = parentToChildren.get(currentId);
+
+            if (children != null) {
+                for (Categories child : children) {
+                    result.add(child.getCategoryId());
+                    queue.add(child.getCategoryId());
+                }
+            }
+        }
+
+        return result;
     }
 }

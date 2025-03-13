@@ -211,4 +211,6 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
         Page<Categories> categoriesPage = this.page(new Page<>(page, pageSize));
         return R.ok(categoriesPage);
     }
+
+
 }

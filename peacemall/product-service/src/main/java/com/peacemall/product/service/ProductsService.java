@@ -19,8 +19,9 @@ public interface ProductsService extends IService<Products> {
     //商家修改商品上下架状态
     R<String> merchantUpdateProductActiveStatus(Long productId,Boolean activeStatus);
 
-    //商家/管理员删除商品
+    //商家删除商品
     R<String> merchantDeleteProduct(Long productId);
+
 
     //todo 查询商品
 
@@ -37,6 +38,10 @@ public interface ProductsService extends IService<Products> {
 
     //根据id查看基本详细信息，以及其配置
     R<ProductDetailsVO> getProductDetailsById(Long productId);
+
+    //TODO 管理员审核商品
+
+    //TODO 管理员查看待审核商品信息
 
 
 }

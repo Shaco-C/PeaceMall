@@ -34,21 +34,21 @@ public class CategoriesController {
     //管理员创建分类
     @ApiOperation(value = "管理员创建分类")
     @PostMapping("/admin/createCategories")
-    R<String> createCategories(Categories categories){
+    R<String> createCategories(@RequestBody Categories categories){
         return categoriesService.createCategories(categories);
 
     }
     //管理员删除分类
     @ApiOperation("管理员删除分类")
-    @DeleteMapping("/admin/deleteCategories")
-    R<String> deleteCategories(Long id){
-        return categoriesService.deleteCategories(id);
+    @DeleteMapping("/admin/deleteCategories/{categoryId}")
+    R<String> deleteCategories(@PathVariable("categoryId") Long categoryId){
+        return categoriesService.deleteCategories(categoryId);
 
     }
     //管理员修改分类
     @ApiOperation("value = 管理员修改分类")
     @PutMapping("/admin/updateCategories")
-    R<String> updateCategories(Categories categories){
+    R<String> updateCategories(@RequestBody Categories categories){
         return categoriesService.updateCategories(categories);
 
     }
@@ -56,7 +56,8 @@ public class CategoriesController {
     //管理员分页查看所有分类
     @ApiOperation("管理员分页查看所有分类")
     @GetMapping("/admin/getCategoriesByPage")
-    R<Page<Categories>> getCategoriesByPage(int page, int pageSize){
+    R<Page<Categories>> getCategoriesByPage(@RequestParam(value = "page",defaultValue = "1") int page,
+                                            @RequestParam(value = "pageSize",defaultValue = "20") int pageSize){
         return categoriesService.getCategoriesByPage(page,pageSize);
 
     }
