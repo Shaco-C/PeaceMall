@@ -2,6 +2,7 @@ package com.peacemall.product.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import com.peacemall.product.domain.dto.AddProductDTO;
 import com.peacemall.product.domain.po.Products;
 import com.peacemall.product.domain.vo.ProductDetailsVO;
@@ -12,6 +13,9 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author watergun
@@ -46,7 +50,7 @@ public class ProductsController {
         return productsService.merchantDeleteProduct(productId);
     }
 
-    //todo 查询商品
+    //todo 搜索商品 es
 
     //todo 首页商品显示
 
@@ -77,6 +81,13 @@ public class ProductsController {
         return productsService.merchantGetProductInfo(page,pageSize,productStatus);
     }
 
+    //根据商品id查询基本信息
+    @ApiOperation(value = "根据商品id查询基本信息")
+    @GetMapping("/getProductBasicInfosAndShopInfosById")
+    Map<Long, ProductBasicInfosAndShopInfos> getProductBasicInfosAndShopInfosById(@RequestParam List<Long> productIds){
+        return productsService.getProductBasicInfosAndShopInfosById(productIds);
+    }
+
     //根据id查看基本详细信息，以及其配置
 
     @ApiOperation(value = "根据id查看基本详细信息，以及其配置")
@@ -85,7 +96,7 @@ public class ProductsController {
         return productsService.getProductDetailsById(productId);
     }
 
-    //TODO 管理员审核商品
+    //管理员审核商品
     @ApiOperation(value = "管理员审核商品")
     @PutMapping("/admin/auditProduct")
     R<String> adminAuditProduct(@RequestParam("productId") Long productId,
@@ -93,7 +104,7 @@ public class ProductsController {
         return productsService.adminAuditProduct(productId,productStatus);
     }
 
-    //TODO 管理员查看待审核商品信息
+    //管理员查看待审核商品信息
     @ApiOperation(value = "管理员查看待审核商品信息")
     @GetMapping("/admin/getProductsToAudit")
 

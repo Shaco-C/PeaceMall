@@ -4,7 +4,11 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.peacemall.api.client.ShopClient;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.IdsDTO;
+import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
+import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.product.domain.dto.AddProductDTO;
@@ -24,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -37,6 +42,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
     private final ProductImagesService productImagesService;
     private final ProductConfigurationsService productConfigurationsService;
     private final CategoriesService categoriesService;
+    private final ShopClient shopClient;
 
     //创建商品
     @Override
@@ -260,6 +266,62 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         return R.ok(productsPage);
     }
 
+    //通过productId查询商品的基本信息
+    //在favorites中被调用
+    //通过feign接口调用
+    @Override
+    public Map<Long, ProductBasicInfosAndShopInfos> getProductBasicInfosAndShopInfosById(List<Long> productIds) {
+        log.info("getProductBasicInfosAndShopInfosById called, productIds: {}", productIds);
+
+        if (productIds == null || productIds.isEmpty()) {
+            log.error("productIds 为空");
+            throw new IllegalArgumentException("参数错误: productIds 不能为空");
+        }
+
+        // 批量查询商品信息
+        List<Products> productsList = this.listByIds(productIds);
+        if (productsList == null || productsList.isEmpty()) {
+            log.error("查询不到商品信息");
+            throw new RuntimeException("商品不存在");
+        }
+
+        // 获取所有商家 ID（去重，防止重复查询）
+        List<Long> shopIdList = productsList.stream()
+                .map(Products::getShopId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // 通过 Feign 调用商家信息
+        Map<Long, ShopsInfoVO> shopInfoMap = shopClient.getShopInfoByIds(shopIdList);
+
+        // 组装商品和商家信息，并转换为 Map<productId, ProductBasicInfosAndShopInfos>
+        Map<Long, ProductBasicInfosAndShopInfos> productInfoMap = productsList.stream()
+                .collect(Collectors.toMap(
+                        Products::getProductId,
+                        product -> {
+                            ProductBasicInfosAndShopInfos vo = new ProductBasicInfosAndShopInfos();
+                            BeanUtil.copyProperties(product, vo);
+
+                            // 获取商家信息并填充
+                            ShopsInfoVO shopInfo = shopInfoMap.get(product.getShopId());
+                            if (shopInfo != null) {
+                                vo.setShopName(shopInfo.getShopName());
+                                vo.setShopDescription(shopInfo.getShopDescription());
+                                vo.setShopAvatarUrl(shopInfo.getShopAvatarUrl());
+                            } else {
+                                log.warn("商家 ID {} 对应的商家信息不存在", product.getShopId());
+                            }
+
+                            return vo;
+                        }
+                ));
+
+        log.info("getProductBasicInfosAndShopInfosById success, result size: {}", productInfoMap.size());
+        return productInfoMap;
+    }
+
+
+
     //根据id查看基本详细信息，以及其配置
     //所有用户通过点击商品的基本信息
     //下一个页面就是商品的详细信息
@@ -297,6 +359,25 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         productDetailsVO.setProductImagesList(
                 productImagesService.getProductImagesByProductId(productId)
         );
+
+        log.info("shopId:{}",products.getShopId());
+
+        //通过openfeign来查询商品的商家信息
+        //TODO 1
+        try {
+            ShopsInfoVO shopsInfoVO = shopClient.getShopInfoById(products.getShopId());
+            if (shopsInfoVO != null) {
+                productDetailsVO.setShopName(shopsInfoVO.getShopName());
+                productDetailsVO.setShopDescription(shopsInfoVO.getShopDescription());
+                productDetailsVO.setShopAvatarUrl(shopsInfoVO.getShopAvatarUrl());
+            } else {
+                log.warn("无法获取店铺信息，shopId: {}", products.getShopId());
+            }
+        } catch (Exception e) {
+            log.error("获取店铺信息时出错，shopId: {}", products.getShopId(), e);
+            // 这里可以设置默认值或者继续返回，取决于你的业务需求
+            productDetailsVO.setShopName("未知店铺");
+        }
 
         //返回一整个VO
         return R.ok(productDetailsVO);

@@ -3,10 +3,14 @@ package com.peacemall.product.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import com.peacemall.product.domain.dto.AddProductDTO;
 import com.peacemall.product.domain.po.Products;
 import com.peacemall.product.domain.vo.ProductDetailsVO;
 import com.peacemall.product.enums.ProductStatus;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author watergun
@@ -36,7 +40,10 @@ public interface ProductsService extends IService<Products> {
     //商家查看自己商品的基本信息
     R<Page<Products>> merchantGetProductInfo(int page, int pageSize, ProductStatus productStatus);
 
-    //根据id查看基本详细信息，以及其配置
+    //根据商品id查询基本信息
+    Map<Long, ProductBasicInfosAndShopInfos> getProductBasicInfosAndShopInfosById(List<Long> productIds);
+
+    //根据id查看详细信息，以及其配置
     R<ProductDetailsVO> getProductDetailsById(Long productId);
 
     //TODO 管理员审核商品

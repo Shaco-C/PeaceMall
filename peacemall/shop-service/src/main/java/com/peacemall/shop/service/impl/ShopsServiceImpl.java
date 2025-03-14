@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.UserClient;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.shop.domain.po.Shops;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -96,6 +98,54 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
         log.info("商店状态修改成功");
         return R.ok("商店注销成功");
     }
+
+    @Override
+    public ShopsInfoVO getShopInfoById(Long shopId) {
+        log.info("getShopInfoById method is called,shopId:{}", shopId);
+        if (shopId == null) {
+            log.error("getShopInfoById method failed,shopId is null");
+            return null;
+        }
+        log.info("shopId正常");
+        Shops shops = this.getById(shopId);
+        if (shops == null) {
+            log.error("getShopInfoById method failed,shopId is not exist");
+            return null;
+        }
+        log.info("shopId存在");
+        ShopsInfoVO shopsInfoVO = new ShopsInfoVO();
+        BeanUtil.copyProperties(shops,shopsInfoVO);
+        log.info("shopsInfoVO:{}", shopsInfoVO);
+        return shopsInfoVO;
+    }
+
+    @Override
+    public Map<Long, ShopsInfoVO> getShopInfoByIds(List<Long> shopIds) {
+        log.info("getShopInfoByIds method is called, shopIds: {}", shopIds);
+
+        if (BeanUtil.isEmpty(shopIds)) {
+            log.error("getShopInfoByIds method failed: shopIds is null or empty");
+            throw new IllegalArgumentException("shopIds cannot be null or empty");
+        }
+
+        List<Shops> shops = this.lambdaQuery().in(Shops::getShopId, shopIds).list();
+        if (BeanUtil.isEmpty(shops)) {
+            log.error("getShopInfoByIds method failed: shopIds do not exist");
+            throw new IllegalArgumentException("shopIds do not exist");
+        }
+
+        //通过商家id与商家信息进行绑定
+        ShopsInfoVO shopsInfoVO = new ShopsInfoVO();
+        Map<Long, ShopsInfoVO> shopsInfoVOMap = shops.stream()
+                .collect(Collectors.toMap(Shops::getShopId, shop -> {
+                    BeanUtil.copyProperties(shop, shopsInfoVO);
+                    return shopsInfoVO;
+                }));
+
+        log.info("Successfully retrieved shop information: {}", shopsInfoVOMap);
+        return shopsInfoVOMap;
+    }
+
 
     @Override
     public R<String> merchantUpdateShopInfo(Shops shops) {

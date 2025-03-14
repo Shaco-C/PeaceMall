@@ -14,6 +14,10 @@ public class ProductDetailsVO {
     private Long productId;
 
     private Long shopId;
+    //商家的信息
+    private String shopName;
+    private String shopDescription;
+    private String shopAvatarUrl;
 
     private Long userId;
 

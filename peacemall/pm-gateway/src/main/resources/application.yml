@@ -25,6 +25,11 @@ spring:
           predicates:
             - Path=/products/**,/product-images/**,/productsConfigurations/**,/categories/**
 
+        - id: favorite
+          uri: lb://favorite-service
+          predicates:
+            - Path=/favorites/**
+
 pm:
   jwt:
     secret: "EBI0t1Rd1PchUR7RidJQo7QweK9ADXs0Kt/YG++d7II=" # 密钥

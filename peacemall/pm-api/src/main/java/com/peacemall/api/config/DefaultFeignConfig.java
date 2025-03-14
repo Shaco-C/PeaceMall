@@ -1,5 +1,7 @@
 package com.peacemall.api.config;
 
+import com.peacemall.api.client.fallback.ProductClientFallbackFactory;
+import com.peacemall.api.client.fallback.ShopClientFallbackFactory;
 import com.peacemall.api.client.fallback.UserClientFallbackFactory;
 import com.peacemall.api.client.fallback.WalletClientFallbackFacktory;
 import com.peacemall.common.utils.UserContext;
@@ -41,5 +43,15 @@ public class DefaultFeignConfig {
     @Bean
     public UserClientFallbackFactory userClientFallbackFactory(){
         return new UserClientFallbackFactory();
+    }
+
+    @Bean
+    public ShopClientFallbackFactory shopClientFallbackFactory(){
+        return new ShopClientFallbackFactory();
+    }
+
+    @Bean
+    public ProductClientFallbackFactory productClientFallbackFactory(){
+        return new ProductClientFallbackFactory();
     }
 }

@@ -2,6 +2,8 @@ package com.peacemall.shop.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.IdsDTO;
+import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.shop.domain.po.Shops;
 import com.peacemall.shop.enums.ShopStatus;
 import com.peacemall.shop.service.ShopsService;
@@ -9,6 +11,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @Api("商家商店服务相关接口")
 @RestController
@@ -54,6 +59,23 @@ public class ShopsController {
     @DeleteMapping("/admin/cleanClosedShops")
     public R<String> adminCleanClosedShops(){
         return shopsService.adminCleanClosedShops();
+    }
+
+    //根据商店id查询商店的基本信息
+    //通过feign调用
+    @ApiOperation("根据商店id查询商店的基本信息")
+    @GetMapping("/getShopInfoById")
+    public ShopsInfoVO getShopInfoById(@RequestParam("shopId") Long shopId){
+        return shopsService.getShopInfoById(shopId);
+    }
+
+    //根据idList查询商店的基本信息
+    //用于收藏服务中需要大量加载商品信息以及商店基本信息的场合
+    //通过<Long,ShopsInfoVO>的map来返回
+    @ApiOperation("根据idList查询商店的基本信息")
+    @GetMapping("/getShopInfoByIdsList")
+    Map<Long, ShopsInfoVO> getShopInfoByIds(@RequestParam List<Long> shopIds){
+        return shopsService.getShopInfoByIds(shopIds);
     }
 
 }

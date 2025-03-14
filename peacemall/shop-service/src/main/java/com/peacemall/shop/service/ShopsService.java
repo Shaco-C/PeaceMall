@@ -3,8 +3,12 @@ package com.peacemall.shop.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.shop.domain.po.Shops;
 import com.peacemall.shop.enums.ShopStatus;
+
+import java.util.List;
+import java.util.Map;
 
 public interface ShopsService extends IService<Shops> {
 
@@ -13,6 +17,15 @@ public interface ShopsService extends IService<Shops> {
 
     //商家注销商店，商店状态变为CLOSED,用户角色变回USER,在注销前要下架自己的所有商品
     R<String> merchantCloseShop();
+
+    //根据商店id查询商店的基本信息
+    //通过feign调用
+    ShopsInfoVO getShopInfoById(Long shopId);
+
+    //根据idList查询商店的基本信息
+    //用于收藏服务中需要大量加载商品信息以及商店基本信息的场合
+    //通过<Long,ShopsInfoVO>的map来返回
+    Map<Long, ShopsInfoVO> getShopInfoByIds(List<Long> shopIds);
 
     //todo 商家查看自己商店的信息
     // R<ShopsDTO> merchantGetShopInfo();
