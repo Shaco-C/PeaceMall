@@ -1,6 +1,7 @@
 package com.peacemall.logs.domain.po;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.peacemall.common.enums.WalletFlowType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -23,11 +24,14 @@ public class FlowLog implements Serializable {
     @TableField("wallet_id")
     private Long walletId;
 
+    @TableField("user_id")
+    private Long userId;
+
     @TableField("related_order")
     private Long relatedOrder;
 
     @TableField("flow_type")
-    private String flowType;
+    private WalletFlowType flowType;
 
     @TableField("balance_change")
     private BigDecimal balanceChange;

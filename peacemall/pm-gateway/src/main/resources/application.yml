@@ -30,6 +30,11 @@ spring:
           predicates:
             - Path=/favorites/**
 
+        - id: logs
+          uri: lb://log-service
+          predicates:
+            - Path=/flowLog/**,/stockChangeLog/**
+
 pm:
   jwt:
     secret: "EBI0t1Rd1PchUR7RidJQo7QweK9ADXs0Kt/YG++d7II=" # 密钥

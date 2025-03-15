@@ -3,15 +3,20 @@ package com.peacemall.wallet.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.peacemall.common.constant.FlowLogsMQConstants;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.FlowLogsDTO;
 import com.peacemall.common.enums.UserRole;
+import com.peacemall.common.enums.WalletFlowType;
 import com.peacemall.common.exception.BadRequestException;
 import com.peacemall.common.exception.UnauthorizedException;
+import com.peacemall.common.utils.RabbitMqHelper;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.wallet.domain.po.Wallet;
 import com.peacemall.common.domain.vo.WalletVO;
 import com.peacemall.wallet.mapper.WalletMapper;
 import com.peacemall.wallet.service.WalletService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +32,10 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> implements WalletService {
 
+    private final RabbitMqHelper rabbitMqHelper;
 
     //创建用户钱包（用户注册时一起执行）
     @Override
@@ -136,7 +143,21 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
             log.error("用户充值失败");
             return R.error("用户充值失败");
         }
-        //todo 添加流水日志
+
+        //添加流水日志
+        FlowLogsDTO flowLogsDTO = new FlowLogsDTO();
+        flowLogsDTO.setWalletId(wallet.getWalletId());
+        flowLogsDTO.setFlowType(WalletFlowType.RECHARGE);
+        flowLogsDTO.setBalanceChange(amount);
+        flowLogsDTO.setUserId(userId);
+        flowLogsDTO.setBalanceAfter(wallet.getTotalBalance());
+        try{
+            rabbitMqHelper.sendMessage(FlowLogsMQConstants.FLOW_LOGS_EXCHANGE_NAME,
+                    FlowLogsMQConstants.FLOW_LOGS_ROUTING_KEY,flowLogsDTO);
+        }catch (Exception e){
+            log.error("发送消息失败,失败的流水日志信息为:{}",flowLogsDTO);
+        }
+
         return R.ok("用户充值成功");
     }
 
@@ -173,7 +194,22 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
             log.error("用户支付失败");
             return R.error("用户支付失败");
         }
-        //todo 添加流水日志
+
+        //添加流水日志
+        //todo 需要修改
+        FlowLogsDTO flowLogsDTO = new FlowLogsDTO();
+        flowLogsDTO.setWalletId(wallet.getWalletId());
+        flowLogsDTO.setFlowType(WalletFlowType.EXPENSE);
+        flowLogsDTO.setBalanceChange(amount.negate());
+        flowLogsDTO.setUserId(userId);
+        flowLogsDTO.setBalanceAfter(wallet.getTotalBalance());
+        try{
+            rabbitMqHelper.sendMessage(FlowLogsMQConstants.FLOW_LOGS_EXCHANGE_NAME,
+                    FlowLogsMQConstants.FLOW_LOGS_ROUTING_KEY,flowLogsDTO);
+        }catch (Exception e){
+            log.error("发送消息失败,失败的流水日志信息为:{}",flowLogsDTO);
+        }
+
         return R.ok("用户支付成功");
     }
 

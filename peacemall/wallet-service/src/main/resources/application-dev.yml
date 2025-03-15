@@ -4,3 +4,9 @@ pm:
     port: 3306
     un: root
     pw: 123456
+  mq:
+    host: 192.168.145.134
+    port: 5672
+    vhost: /peacemall
+    un: peacemall
+    pw: 123456

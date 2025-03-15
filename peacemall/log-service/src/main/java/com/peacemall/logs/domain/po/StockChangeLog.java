@@ -1,6 +1,7 @@
 package com.peacemall.logs.domain.po;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.peacemall.common.enums.StockSourceType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -26,7 +27,7 @@ public class StockChangeLog implements Serializable {
     private Integer delta;
 
     @TableField("source_type")
-    private String sourceType;
+    private StockSourceType sourceType;
 
     @TableField(value = "created_at", fill = FieldFill.INSERT)
     private Timestamp createdAt;

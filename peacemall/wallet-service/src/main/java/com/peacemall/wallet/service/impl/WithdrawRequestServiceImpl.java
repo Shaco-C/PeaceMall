@@ -162,6 +162,9 @@ public class WithdrawRequestServiceImpl extends ServiceImpl<WithdrawRequestMappe
             throw new RuntimeException("钱包更新失败");
         }
         log.info("申请状态修改成功");
+
+        //todo 添加流水日志
+
         return R.ok("申请状态修改成功");
     }
 

@@ -30,4 +30,5 @@ public interface ProductConfigurationsService extends IService<ProductConfigurat
 
     //todo 商品配置数量的增减（购买，退货，补货）
     //todo void updateProductConfigurationsQuantity(PurchaseDTO purchaseDTO);
+    //todo 添加库存变化日志
 }
