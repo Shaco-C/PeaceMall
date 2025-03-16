@@ -1,8 +1,9 @@
 package com.peacemall.logs.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
+
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.enums.WalletFlowType;
 import com.peacemall.logs.domain.po.FlowLog;
 import com.peacemall.logs.service.FlowLogService;
