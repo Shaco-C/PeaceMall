@@ -1,6 +1,7 @@
 package com.peacemall.favorite.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.favorite.domain.vo.FavoriteProductVO;
 import com.peacemall.favorite.service.FavoriteService;
 import io.swagger.annotations.Api;
@@ -26,8 +27,8 @@ public class FavoriteController {
     //需要使用到VO,将商品收藏和商品整合在一起
     @ApiOperation("查看自己的所有收藏")
     @GetMapping("/list")
-    public R<Page<FavoriteProductVO>> getUserFavoritesInfo(@RequestParam(value = "page",defaultValue = "1") int page,
-                                                    @RequestParam(value = "pageSize",defaultValue = "20")int pageSize){
+    public R<PageDTO<FavoriteProductVO>> getUserFavoritesInfo(@RequestParam(value = "page",defaultValue = "1") int page,
+                                                              @RequestParam(value = "pageSize",defaultValue = "20")int pageSize){
         return favoriteService.getUserFavoritesInfo(page,pageSize);
     }
 

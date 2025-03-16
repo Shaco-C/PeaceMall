@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.user.domain.po.UserAddress;
 import com.peacemall.common.enums.UserRole;
@@ -240,7 +241,7 @@ public class UserAddressServiceImpl extends ServiceImpl<UserAddressMapper, UserA
 
 
     @Override
-    public R<Page<UserAddress>> listDeletedAddresses(int page, int pageSize) {
+    public R<PageDTO<UserAddress>> listDeletedAddresses(int page, int pageSize) {
         log.info("listDeletedAddresses is called, page: {}, pageSize: {}", page, pageSize);
         if (page < 1 || pageSize < 1) {
             log.info("listDeletedAddresses failed: 请求参数错误, page: {}, pageSize: {}", page, pageSize);
@@ -267,7 +268,7 @@ public class UserAddressServiceImpl extends ServiceImpl<UserAddressMapper, UserA
             log.info("listDeletedAddresses result: 无已删除地址, page: {}, pageSize: {}", page, pageSize);
         }
 
-        return R.ok(addressPage);
+        return R.ok(PageDTO.of(addressPage));
     }
 
 

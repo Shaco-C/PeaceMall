@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.ProductClient;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.favorite.domain.po.Favorite;
@@ -61,7 +62,7 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
     }
 
     @Override
-    public R<Page<FavoriteProductVO>> getUserFavoritesInfo(int page, int pageSize) {
+    public R<PageDTO<FavoriteProductVO>> getUserFavoritesInfo(int page, int pageSize) {
         log.info("getUserFavoritesInfo method is called");
 
         if (page < 1 || pageSize < 1) {
@@ -84,7 +85,7 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
         log.info("分页成功");
         List<Favorite> favorites = favoritePage.getRecords();
         if (favorites.isEmpty()) {
-            return R.ok(new Page<>(page, pageSize, 0)); // 直接返回空分页
+            return R.ok(PageDTO.of(new Page<>(page, pageSize, 0)) ); // 直接返回空分页
         }
         log.info("获取收藏商品信息成功");
 
@@ -103,7 +104,7 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
         Page<FavoriteProductVO> favoriteProductVOPage = new Page<>(page, pageSize, favoritePage.getTotal());
         favoriteProductVOPage.setRecords(favoriteProductVOS);
 
-        return R.ok(favoriteProductVOPage);
+        return R.ok(PageDTO.of(favoriteProductVOPage));
     }
 
 

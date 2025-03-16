@@ -1,6 +1,7 @@
 package com.peacemall.logs.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.enums.WalletFlowType;
 import com.peacemall.logs.domain.po.FlowLog;
@@ -23,9 +24,9 @@ public class FlowLogController {
     //获取用户流水日志
     @ApiOperation(value = "获取用户流水日志")
     @GetMapping("/getUserFlowLog")
-    R<Page<FlowLog>> getUserFlowLog(@RequestParam(value = "page",defaultValue = "1") int page,
-                                    @RequestParam(value = "pageSize",defaultValue = "20") int pageSize,
-                                    @RequestParam(value = "walletFlowType",required = false) WalletFlowType walletFlowType) {
+    R<PageDTO<FlowLog>> getUserFlowLog(@RequestParam(value = "page",defaultValue = "1") int page,
+                                       @RequestParam(value = "pageSize",defaultValue = "20") int pageSize,
+                                       @RequestParam(value = "walletFlowType",required = false) WalletFlowType walletFlowType) {
         return flowLogService.getUserFlowLog(page, pageSize, walletFlowType);
     }
 

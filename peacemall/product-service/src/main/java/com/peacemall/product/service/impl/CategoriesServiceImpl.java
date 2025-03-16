@@ -3,6 +3,7 @@ package com.peacemall.product.service.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.product.domain.po.Categories;
@@ -194,7 +195,7 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
 
     //管理员分页查看所有分类
     @Override
-    public R<Page<Categories>> getCategoriesByPage(int page, int pageSize) {
+    public R<PageDTO<Categories>> getCategoriesByPage(int page, int pageSize) {
         log.info("getCategoriesByPage,page:{},pageSize:{}", page, pageSize);
         if (page <= 0 || pageSize <= 0) {
             log.error("参数错误");
@@ -209,7 +210,7 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
         }
         log.info("用户信息正常");
         Page<Categories> categoriesPage = this.page(new Page<>(page, pageSize));
-        return R.ok(categoriesPage);
+        return R.ok(PageDTO.of(categoriesPage));
     }
 
 

@@ -3,6 +3,7 @@ package com.peacemall.user.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.user.domain.po.UserAddress;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public interface UserAddressService extends IService<UserAddress> {
     R<UserAddress> getDefaultAddressByUserId();
 
     // 管理员查询所有已删除的地址（status=0）
-    R<Page<UserAddress>> listDeletedAddresses(int page,int pageSize);
+    R<PageDTO<UserAddress>> listDeletedAddresses(int page, int pageSize);
 
     //管理员删除用户删除的地址信息
     R<String> adminPhysicallyDeleteAddressWith0Status();

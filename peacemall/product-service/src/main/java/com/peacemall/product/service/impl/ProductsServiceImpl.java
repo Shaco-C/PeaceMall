@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.ShopClient;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.IdsDTO;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.common.enums.UserRole;
@@ -180,7 +181,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
     }
 
     @Override
-    public R<Page<Products>> getProductsByCategoryId(int page, int pageSize, Long categoryId) {
+    public R<PageDTO<Products>> getProductsByCategoryId(int page, int pageSize, Long categoryId) {
         log.info("getProductsByCategoryId,page:{},pageSize:{},categoryId:{}", page, pageSize, categoryId);
         if (page <= 0 || pageSize <= 0 || categoryId == null) {
             log.error("参数错误");
@@ -209,7 +210,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         productsLambdaQueryWrapper.in(Products::getCategoryId, categoryIds);
 
         Page<Products> productsPage = this.page(new Page<>(page, pageSize), productsLambdaQueryWrapper);
-        return R.ok(productsPage);
+        return R.ok(PageDTO.of(productsPage));
     }
 
     //修改商品基本信息
@@ -245,7 +246,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
 
     //商家查看自己商品的基本信息
     @Override
-    public R<Page<Products>> merchantGetProductInfo(int page, int pageSize, ProductStatus productStatus) {
+    public R<PageDTO<Products>> merchantGetProductInfo(int page, int pageSize, ProductStatus productStatus) {
         log.info("merchantGetProductInfo,page:{},pageSize:{},productStatus:{}", page, pageSize, productStatus);
         if (page <= 0 || pageSize <= 0 || productStatus== null) {
             log.error("参数错误");
@@ -263,7 +264,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
                 .eq(Products::getStatus, productStatus);
         Page<Products> productsPage = new Page<>(page, pageSize);
         this.page(productsPage, queryWrapper);
-        return R.ok(productsPage);
+        return R.ok(PageDTO.of(productsPage));
     }
 
     //通过productId查询商品的基本信息
@@ -412,7 +413,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
     }
 
     @Override
-    public R<Page<Products>> adminGetProductsToAudit(int page, int pageSize, ProductStatus productStatus) {
+    public R<PageDTO<Products>> adminGetProductsToAudit(int page, int pageSize, ProductStatus productStatus) {
         log.info("adminGetProductsToAudit,page:{},pageSize:{},productStatus:{}", page, pageSize, productStatus);
         if (page < 1 || pageSize < 1 || productStatus == null) {
             log.error("参数错误");
@@ -428,7 +429,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         LambdaQueryWrapper<Products> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Products::getStatus, productStatus);
         Page<Products> productsPage = this.page(new Page<>(page, pageSize), queryWrapper);
-        return R.ok(productsPage);
+        return R.ok(PageDTO.of(productsPage));
     }
 
     private List<Long> findAllChildCategoriesOptimized(Long parentId, List<Categories> allCategories) {

@@ -2,6 +2,7 @@ package com.peacemall.product.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import com.peacemall.product.domain.dto.AddProductDTO;
 import com.peacemall.product.domain.po.Products;
@@ -59,9 +60,9 @@ public class ProductsController {
     @ApiOperation(value = "分页查询查看某个分类下的产品")
     @GetMapping("/getProductsByCategoryId")
 
-    R<Page<Products>> getProductsByCategoryId(@RequestParam(value = "page",defaultValue = "1") int page,
-                                              @RequestParam(value = "pageSize",defaultValue = "20")int pageSize,
-                                              @RequestParam("categoryId") Long categoryId){
+    R<PageDTO<Products>> getProductsByCategoryId(@RequestParam(value = "page",defaultValue = "1") int page,
+                                                 @RequestParam(value = "pageSize",defaultValue = "20")int pageSize,
+                                                 @RequestParam("categoryId") Long categoryId){
         return productsService.getProductsByCategoryId(page,pageSize,categoryId);
     }
 
@@ -75,7 +76,7 @@ public class ProductsController {
     //商家查看自己商品的基本信息
     @ApiOperation(value = "商家查看自己商品的基本信息")
     @GetMapping("/merchant/getProductInfo")
-    public R<Page<Products>> merchantGetProductInfo(@RequestParam(value = "page",defaultValue = "1") int page,
+    public R<PageDTO<Products>> merchantGetProductInfo(@RequestParam(value = "page",defaultValue = "1") int page,
                                                     @RequestParam(value = "pageSize",defaultValue = "20")int pageSize,
                                                     @RequestParam(value = "productStatus",defaultValue = "APPROVED") ProductStatus productStatus){
         return productsService.merchantGetProductInfo(page,pageSize,productStatus);
@@ -108,7 +109,7 @@ public class ProductsController {
     @ApiOperation(value = "管理员查看待审核商品信息")
     @GetMapping("/admin/getProductsToAudit")
 
-    R<Page<Products>> adminGetProductsToAudit(@RequestParam(value = "page",defaultValue = "1") int page,
+    R<PageDTO<Products>> adminGetProductsToAudit(@RequestParam(value = "page",defaultValue = "1") int page,
                                               @RequestParam(value = "pageSize",defaultValue = "20") int pageSize,
                                               @RequestParam("productStatus") ProductStatus productStatus){
         return productsService.adminGetProductsToAudit(page,pageSize,productStatus);

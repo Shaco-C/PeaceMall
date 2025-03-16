@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.WalletClient;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.vo.WalletVO;
 import com.peacemall.common.exception.ForbiddenException;
 import com.peacemall.common.utils.UserContext;
@@ -382,7 +383,7 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
     }
 
     @Override
-    public R<Page<Users>> getUsersWithStatus(int page, int pageSize, UserState status) {
+    public R<PageDTO<Users>> getUsersWithStatus(int page, int pageSize, UserState status) {
         log.info("getUsersWithStatus: page={}, pageSize={}, status={}", page, pageSize, status);
 
         Long userId = UserContext.getUserId();
@@ -408,7 +409,7 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         Page<Users> usersPage = new Page<>(page, pageSize);
         this.page(usersPage, usersLambdaQueryWrapper);
 
-        return R.ok(usersPage);
+        return R.ok(PageDTO.of(usersPage));
     }
 
     @Override

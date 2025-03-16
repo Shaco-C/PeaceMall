@@ -3,6 +3,7 @@ package com.peacemall.user.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.user.domain.dto.LoginFormDTO;
 import com.peacemall.user.domain.po.Users;
@@ -43,7 +44,7 @@ public interface UserService extends IService<Users> {
     R<UserInfoVO> getUserInfo();
 
     //管理员查看各种状态的账号
-    R<Page<Users>> getUsersWithStatus(int page, int pageSize , UserState status);
+    R<PageDTO<Users>> getUsersWithStatus(int page, int pageSize , UserState status);
 
     //管理员根据用户id来切换用户的角色
     void adminChangeUserRole(Long userId, UserRole userRole);

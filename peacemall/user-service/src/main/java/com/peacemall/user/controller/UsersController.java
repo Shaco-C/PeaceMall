@@ -4,6 +4,7 @@ package com.peacemall.user.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.IdsDTO;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.user.domain.dto.LoginFormDTO;
 import com.peacemall.user.domain.dto.VerifyInfosDTO;
@@ -100,9 +101,9 @@ public class UsersController {
     //管理员根据用户状态查询用户
     @ApiOperation(value = "管理员根据用户状态查询用户")
     @GetMapping("/admin/getUsersByState")
-    public R<Page<Users>> getUsersWithState(@RequestParam(value = "page", defaultValue = "1") int page,
-                                            @RequestParam(value = "PageSize", defaultValue = "20") int pageSize,
-                                            @RequestParam(value = "state", defaultValue = "ACTIVE") UserState status) {
+    public R<PageDTO<Users>> getUsersWithState(@RequestParam(value = "page", defaultValue = "1") int page,
+                                               @RequestParam(value = "PageSize", defaultValue = "20") int pageSize,
+                                               @RequestParam(value = "state", defaultValue = "ACTIVE") UserState status) {
         return userService.getUsersWithStatus(page,pageSize,status);
     }
 

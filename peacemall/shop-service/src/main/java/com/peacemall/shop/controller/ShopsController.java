@@ -3,6 +3,7 @@ package com.peacemall.shop.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.IdsDTO;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.shop.domain.po.Shops;
 import com.peacemall.shop.enums.ShopStatus;
@@ -48,9 +49,9 @@ public class ShopsController {
     //管理员查看特定状态的商家信息
     @ApiOperation("管理员查看特定状态的商家信息")
     @GetMapping("/admin/getShopsWithStatus")
-    public R<Page<Shops>> adminGetShopsWithStatus(@RequestParam(value = "page",defaultValue = "1") int page,
-                                                  @RequestParam(value = "pageSize",defaultValue = "20") int pageSize,
-                                                  @RequestParam(value = "shopStatus",defaultValue = "CLOSED") ShopStatus shopStatus){
+    public R<PageDTO<Shops>> adminGetShopsWithStatus(@RequestParam(value = "page",defaultValue = "1") int page,
+                                                     @RequestParam(value = "pageSize",defaultValue = "20") int pageSize,
+                                                     @RequestParam(value = "shopStatus",defaultValue = "CLOSED") ShopStatus shopStatus){
         return shopsService.adminGetShopsWithStatus(page,pageSize,shopStatus);
     }
 

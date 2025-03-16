@@ -3,6 +3,7 @@ package com.peacemall.product.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.product.domain.po.Categories;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public interface CategoriesService extends IService<Categories> {
     R<String> updateCategories(Categories categories);
 
     //管理员分页查看所有分类
-    R<Page<Categories>> getCategoriesByPage(int page,int pageSize);
+    R<PageDTO<Categories>> getCategoriesByPage(int page, int pageSize);
 
 
 

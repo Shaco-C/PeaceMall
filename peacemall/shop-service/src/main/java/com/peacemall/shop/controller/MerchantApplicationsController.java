@@ -3,6 +3,7 @@ package com.peacemall.shop.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.shop.domain.po.MerchantApplications;
 import com.peacemall.shop.domain.vo.AdminCheckApplications;
 import com.peacemall.shop.enums.ApplicationStatus;
@@ -47,9 +48,9 @@ public class MerchantApplicationsController {
     //管理员查看特定状态的申请记录
     @ApiOperation(value = "管理员查看特定状态的申请记录")
     @GetMapping("/admin/adminGetMerchantApplicationByStatus")
-    public R<Page<MerchantApplications>> adminGetMerchantApplicationByStatus(@RequestParam(value = "page",defaultValue = "1")int page,
-                                                                             @RequestParam(value = "pageSize",defaultValue = "10")int pageSize,
-                                                                             @RequestParam(value = "merchantApplicationStatus",defaultValue = "PENDING")ApplicationStatus merchantApplicationStatus){
+    public R<PageDTO<MerchantApplications>> adminGetMerchantApplicationByStatus(@RequestParam(value = "page",defaultValue = "1")int page,
+                                                                                @RequestParam(value = "pageSize",defaultValue = "10")int pageSize,
+                                                                                @RequestParam(value = "merchantApplicationStatus",defaultValue = "PENDING")ApplicationStatus merchantApplicationStatus){
         return merchantApplicationService.adminGetMerchantApplicationByStatus(page,pageSize,merchantApplicationStatus);
     }
     //管理员审批用户请求

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.wallet.domain.po.Wallet;
@@ -87,7 +88,7 @@ public class WithdrawRequestServiceImpl extends ServiceImpl<WithdrawRequestMappe
 
     //管理员按照状态分页查询提现申请
     @Override
-    public R<Page<WithdrawRequest>> adminGetWithdrawRequestByStatus(int page, int pageSize, WithDrawRequestStatus withDrawRequestStatus) {
+    public R<PageDTO<WithdrawRequest>> adminGetWithdrawRequestByStatus(int page, int pageSize, WithDrawRequestStatus withDrawRequestStatus) {
         log.info("adminGetWithdrawRequestByStatus method is called");
         if (page < 1 || pageSize < 1) {
             return R.error("分页参数无效");
@@ -110,7 +111,7 @@ public class WithdrawRequestServiceImpl extends ServiceImpl<WithdrawRequestMappe
         Page<WithdrawRequest> withdrawRequestPage = new Page<>(page, pageSize);
         this.page(withdrawRequestPage, queryWrapper);
 
-        return R.ok(withdrawRequestPage);
+        return R.ok(PageDTO.of(withdrawRequestPage));
     }
 
     //管理员审核提现申请
@@ -170,7 +171,7 @@ public class WithdrawRequestServiceImpl extends ServiceImpl<WithdrawRequestMappe
 
     //用户查询自己的提现申请
     @Override
-    public R<Page<WithdrawRequest>> userGetWithdrawRequest(int page, int pageSize) {
+    public R<PageDTO<WithdrawRequest>> userGetWithdrawRequest(int page, int pageSize) {
         log.info("userGetWithdrawRequest method is called");
         if (page < 1 || pageSize < 1) {
             return R.error("分页参数无效");
@@ -189,7 +190,7 @@ public class WithdrawRequestServiceImpl extends ServiceImpl<WithdrawRequestMappe
         //分页查询
         Page<WithdrawRequest> withdrawRequestPage = new Page<>(page, pageSize);
         this.page(withdrawRequestPage, queryWrapper);
-        return R.ok(withdrawRequestPage);
+        return R.ok(PageDTO.of(withdrawRequestPage));
     }
 
     //用户取消提现申请

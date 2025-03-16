@@ -23,6 +23,7 @@
         <module>coupon-service</module>
         <module>product-service</module>
         <module>favorite-service</module>
+        <module>search-service</module>
     </modules>
 
     <parent>

@@ -3,6 +3,7 @@ package com.peacemall.user.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.IdsDTO;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.user.domain.po.UserAddress;
 import com.peacemall.user.service.UserAddressService;
 import io.swagger.annotations.Api;
@@ -69,8 +70,8 @@ public class UserAddressController {
     // 管理员查询所有已删除的地址（status=0）
     @ApiOperation(value = "管理员查询所有已删除的地址")
     @GetMapping("/admin/listDeletedAddresses")
-    public R<Page<UserAddress>> listDeletedAddresses(@RequestParam(value = "page",defaultValue = "1")int page,
-                                                     @RequestParam(value = "pageSize",defaultValue = "1")int pageSize){
+    public R<PageDTO<UserAddress>> listDeletedAddresses(@RequestParam(value = "page",defaultValue = "1")int page,
+                                                        @RequestParam(value = "pageSize",defaultValue = "1")int pageSize){
         return userAddressService.listDeletedAddresses(page, pageSize);
     }
 

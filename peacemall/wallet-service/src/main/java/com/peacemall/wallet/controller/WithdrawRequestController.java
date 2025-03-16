@@ -2,6 +2,7 @@ package com.peacemall.wallet.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.wallet.domain.po.WithdrawRequest;
 import com.peacemall.wallet.domain.vo.WithdrawInfoVO;
 import com.peacemall.wallet.enums.WithDrawRequestStatus;
@@ -33,9 +34,9 @@ public class WithdrawRequestController {
     //管理员按照状态分页查询提现申请
     @ApiOperation(value = "管理员按照状态分页查询提现申请")
     @GetMapping("/admin/adminGetWithdrawRequestByStatus")
-    public R<Page<WithdrawRequest>> adminGetWithdrawRequestByStatus(@RequestParam(value = "page",defaultValue = "1") int page,
-                                                                    @RequestParam(value = "pageSize",defaultValue = "20")int pageSize,
-                                                                    @RequestParam(value = "withDrawRequestStatus",defaultValue = "PENDING")WithDrawRequestStatus withDrawRequestStatus){
+    public R<PageDTO<WithdrawRequest>> adminGetWithdrawRequestByStatus(@RequestParam(value = "page",defaultValue = "1") int page,
+                                                                       @RequestParam(value = "pageSize",defaultValue = "20")int pageSize,
+                                                                       @RequestParam(value = "withDrawRequestStatus",defaultValue = "PENDING")WithDrawRequestStatus withDrawRequestStatus){
 
         return withdrawRequestService.adminGetWithdrawRequestByStatus(page,pageSize,withDrawRequestStatus);
     }
@@ -52,7 +53,7 @@ public class WithdrawRequestController {
     //用户查询自己的提现申请
     @ApiOperation(value = "用户查询自己的提现申请")
     @GetMapping("/userGetWithdrawRequest")
-    public R<Page<WithdrawRequest>> userGetWithdrawRequest(@RequestParam(value = "page",defaultValue = "1") int page,
+    public R<PageDTO<WithdrawRequest>> userGetWithdrawRequest(@RequestParam(value = "page",defaultValue = "1") int page,
                                                            @RequestParam(value = "pageSize",defaultValue = "20")int pageSize){
 
         return withdrawRequestService.userGetWithdrawRequest(page,pageSize);

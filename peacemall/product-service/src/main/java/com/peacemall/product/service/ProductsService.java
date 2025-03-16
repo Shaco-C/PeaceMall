@@ -3,6 +3,7 @@ package com.peacemall.product.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import com.peacemall.product.domain.dto.AddProductDTO;
 import com.peacemall.product.domain.po.Products;
@@ -32,13 +33,13 @@ public interface ProductsService extends IService<Products> {
     //todo 首页商品显示
 
     //分页查询查看某个分类下的产品
-    R<Page<Products>> getProductsByCategoryId(int page, int pageSize, Long categoryId);
+    R<PageDTO<Products>> getProductsByCategoryId(int page, int pageSize, Long categoryId);
 
     //修改商品基本信息
     R<String> merchantUpdateProduct(Products products);
 
     //商家查看自己商品的基本信息
-    R<Page<Products>> merchantGetProductInfo(int page, int pageSize, ProductStatus productStatus);
+    R<PageDTO<Products>> merchantGetProductInfo(int page, int pageSize, ProductStatus productStatus);
 
     //根据商品id查询基本信息
     Map<Long, ProductBasicInfosAndShopInfos> getProductBasicInfosAndShopInfosById(List<Long> productIds);
@@ -50,6 +51,6 @@ public interface ProductsService extends IService<Products> {
     R<String> adminAuditProduct(Long productId, ProductStatus productStatus);
 
     //TODO 管理员查看待审核商品信息
-    R<Page<Products>> adminGetProductsToAudit(int page, int pageSize, ProductStatus productStatus);
+    R<PageDTO<Products>> adminGetProductsToAudit(int page, int pageSize, ProductStatus productStatus);
 
 }

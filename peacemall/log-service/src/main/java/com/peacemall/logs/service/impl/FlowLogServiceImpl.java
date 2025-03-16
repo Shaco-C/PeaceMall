@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.FlowLogsDTO;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.enums.WalletFlowType;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.logs.domain.po.FlowLog;
@@ -31,7 +32,7 @@ public class FlowLogServiceImpl extends ServiceImpl<FlowLogMapper, FlowLog> impl
     }
 
     @Override
-    public R<Page<FlowLog>> getUserFlowLog(int page, int pageSize, WalletFlowType walletFlowType) {
+    public R<PageDTO<FlowLog>> getUserFlowLog(int page, int pageSize, WalletFlowType walletFlowType) {
         log.info("getUserFlowLog method is called,page:{},pageSize:{},walletFlowType:{}", page, pageSize, walletFlowType);
         Long userId = UserContext.getUserId();
         if (userId == null) {
@@ -46,6 +47,6 @@ public class FlowLogServiceImpl extends ServiceImpl<FlowLogMapper, FlowLog> impl
         queryWrapper.orderByDesc(FlowLog::getCreatedAt);
         Page<FlowLog> flowLogPage = new Page<>(page, pageSize);
         this.page(flowLogPage, queryWrapper);
-        return R.ok(flowLogPage);
+        return R.ok(PageDTO.of(flowLogPage));
     }
 }

@@ -2,6 +2,7 @@ package com.peacemall.product.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.product.domain.po.Categories;
 import com.peacemall.product.service.CategoriesService;
 import io.swagger.annotations.Api;
@@ -56,8 +57,8 @@ public class CategoriesController {
     //管理员分页查看所有分类
     @ApiOperation("管理员分页查看所有分类")
     @GetMapping("/admin/getCategoriesByPage")
-    R<Page<Categories>> getCategoriesByPage(@RequestParam(value = "page",defaultValue = "1") int page,
-                                            @RequestParam(value = "pageSize",defaultValue = "20") int pageSize){
+    R<PageDTO<Categories>> getCategoriesByPage(@RequestParam(value = "page",defaultValue = "1") int page,
+                                               @RequestParam(value = "pageSize",defaultValue = "20") int pageSize){
         return categoriesService.getCategoriesByPage(page,pageSize);
 
     }

@@ -3,6 +3,7 @@ package com.peacemall.shop.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.shop.domain.po.MerchantApplications;
 import com.peacemall.shop.domain.vo.AdminCheckApplications;
 import com.peacemall.shop.enums.ApplicationStatus;
@@ -22,7 +23,7 @@ public interface MerchantApplicationService extends IService<MerchantApplication
     R<List<MerchantApplications>> userGetMerchantApplication();
 
     //管理员查看特定状态的申请记录
-    R<Page<MerchantApplications>> adminGetMerchantApplicationByStatus(int page, int pageSize, ApplicationStatus merchantApplicationStatus);
+    R<PageDTO<MerchantApplications>> adminGetMerchantApplicationByStatus(int page, int pageSize, ApplicationStatus merchantApplicationStatus);
 
     //管理员审批用户请求
     R<String> adminCheckMerchantApplication(AdminCheckApplications adminCheckApplications);

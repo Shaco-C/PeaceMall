@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.UserClient;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.common.utils.UserContext;
@@ -184,7 +185,7 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
     }
 
     @Override
-    public R<Page<Shops>> adminGetShopsWithStatus(int page, int pageSize, ShopStatus shopStatus) {
+    public R<PageDTO<Shops>> adminGetShopsWithStatus(int page, int pageSize, ShopStatus shopStatus) {
         log.info("adminGetShopsWithStatus method is called");
         Long userId = UserContext.getUserId();
         String userRole = UserContext.getUserRole();
@@ -197,7 +198,7 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
         //查看商家商店信息
         Page<Shops> shopsPage = new Page<>(page, pageSize);
         this.page(shopsPage, new LambdaQueryWrapper<Shops>().eq(Shops::getShopStatus, shopStatus));
-        return R.ok(shopsPage);
+        return R.ok(PageDTO.of(shopsPage));
     }
 
     @Override

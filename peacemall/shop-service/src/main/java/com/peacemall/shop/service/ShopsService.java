@@ -3,6 +3,7 @@ package com.peacemall.shop.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.shop.domain.po.Shops;
 import com.peacemall.shop.enums.ShopStatus;
@@ -41,7 +42,7 @@ public interface ShopsService extends IService<Shops> {
     //todo 需要考虑的是，如果这个商家没有商品，那么就不需要返回商品信息
 
     //管理员查看特定状态的商家信息
-    R<Page<Shops>> adminGetShopsWithStatus(int page, int pageSize, ShopStatus shopStatus);
+    R<PageDTO<Shops>> adminGetShopsWithStatus(int page, int pageSize, ShopStatus shopStatus);
 
     //管理员定期清理状态为CLOSED的商家
     R<String> adminCleanClosedShops();

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.UserClient;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.shop.domain.po.MerchantApplications;
@@ -140,7 +141,7 @@ public class MerchantApplicationsServiceImpl extends ServiceImpl<MerchantApplica
     }
 
     @Override
-    public R<Page<MerchantApplications>> adminGetMerchantApplicationByStatus(int page, int pageSize, ApplicationStatus merchantApplicationStatus) {
+    public R<PageDTO<MerchantApplications>> adminGetMerchantApplicationByStatus(int page, int pageSize, ApplicationStatus merchantApplicationStatus) {
         log.info("adminGetMerchantApplicationByStatus method is called");
         log.info("page:{},pageSize:{},merchantApplicationStatus:{}",page,pageSize,merchantApplicationStatus);
         Long userId =UserContext.getUserId();
@@ -160,7 +161,7 @@ public class MerchantApplicationsServiceImpl extends ServiceImpl<MerchantApplica
         Page<MerchantApplications> merchantApplicationsPage = new Page<>(page, pageSize);
         this.page(merchantApplicationsPage, merchantApplicationsLambdaQueryWrapper);
         log.info("查询商家申请成功");
-        return R.ok(merchantApplicationsPage);
+        return R.ok(PageDTO.of(merchantApplicationsPage));
     }
 
     @Override
