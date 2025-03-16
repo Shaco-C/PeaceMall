@@ -3,6 +3,7 @@ package com.peacemall.product.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.ProductDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import com.peacemall.product.domain.dto.AddProductDTO;
 import com.peacemall.product.domain.po.Products;
@@ -113,5 +114,14 @@ public class ProductsController {
                                               @RequestParam(value = "pageSize",defaultValue = "20") int pageSize,
                                               @RequestParam("productStatus") ProductStatus productStatus){
         return productsService.adminGetProductsToAudit(page,pageSize,productStatus);
+    }
+
+    //分页查询所有的商品信息
+    //用于es数据的批量插入
+    @ApiOperation(value = "分页查询所有的商品信息")
+    @GetMapping("/admin/findAllProductsWithPage")
+    public PageDTO<ProductDTO> findAllProductsWithPage(@RequestParam(value = "page",defaultValue = "1")int page,
+                                                    @RequestParam(value = "pageSize",defaultValue = "1000")int size){
+        return productsService.findAllProductsWithPage(page,size);
     }
 }

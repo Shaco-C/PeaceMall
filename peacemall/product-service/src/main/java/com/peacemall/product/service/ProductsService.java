@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.ProductDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import com.peacemall.product.domain.dto.AddProductDTO;
 import com.peacemall.product.domain.po.Products;
@@ -52,5 +53,7 @@ public interface ProductsService extends IService<Products> {
 
     //TODO 管理员查看待审核商品信息
     R<PageDTO<Products>> adminGetProductsToAudit(int page, int pageSize, ProductStatus productStatus);
+
+    PageDTO<ProductDTO> findAllProductsWithPage(int page, int size);
 
 }

@@ -1,6 +1,8 @@
 package com.peacemall.api.client.fallback;
 
 import com.peacemall.api.client.ProductClient;
+import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.ProductDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
@@ -17,6 +19,13 @@ public class ProductClientFallbackFactory implements FallbackFactory<ProductClie
             public Map<Long, ProductBasicInfosAndShopInfos> getProductBasicInfosAndShopInfosById(List<Long> productIds) {
                 log.error("调用商品服务失败");
                 throw new RuntimeException("调用商品服务失败");
+            }
+
+            @Override
+            public PageDTO<ProductDTO> findAllProductsWithPage(int page, int size) {
+                log.error("批量获取商品失败");
+                log.error("获取的页数为page:{},size:{}",page,size);
+                throw new RuntimeException("批量获取商品失败");
             }
         };
     }

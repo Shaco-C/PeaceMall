@@ -6,8 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.ShopClient;
 import com.peacemall.common.domain.R;
-import com.peacemall.common.domain.dto.IdsDTO;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.ProductDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.common.enums.UserRole;
@@ -430,6 +430,27 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         queryWrapper.eq(Products::getStatus, productStatus);
         Page<Products> productsPage = this.page(new Page<>(page, pageSize), queryWrapper);
         return R.ok(PageDTO.of(productsPage));
+    }
+
+    @Override
+    public PageDTO<ProductDTO> findAllProductsWithPage(int page, int size) {
+        // 创建分页对象
+        Page<ProductDTO> pageResult = new Page<>(page, size);
+
+        // 计算偏移量
+        int offset = (page - 1) * size;
+
+        // 查询总记录数
+        int total = baseMapper.countProducts();
+
+        // 查询当前页数据
+        List<ProductDTO> pageRecords = baseMapper.findProductsWithPage(offset, size);
+
+        // 设置分页结果
+        pageResult.setRecords(pageRecords);
+        pageResult.setTotal(total);
+
+        return PageDTO.of(pageResult);
     }
 
     private List<Long> findAllChildCategoriesOptimized(Long parentId, List<Categories> allCategories) {
