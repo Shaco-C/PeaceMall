@@ -30,6 +30,9 @@ public class ProductDoc {
     @Field(type = FieldType.Text, analyzer = "ik_smart")
     private String name;
 
+    @Field(type = FieldType.Keyword, index = false)
+    private String imageUrl;
+
     @Field(type = FieldType.Text, analyzer = "ik_smart")
     private String description;
 

@@ -15,7 +15,14 @@ import java.util.List;
 @Mapper
 public interface ProductsMapper extends BaseMapper<Products> {
 
-    @Select("SELECT p.product_id,p.brand,p.name,p.description,p.sales,c.category_id ,c.category_name FROM products p LEFT JOIN categories c ON p.category_id = c.category_id LIMIT #{offset}, #{limit}")
+    @Select("SELECT p.product_id, p.brand, p.name, p.description, p.sales, " +
+            "c.category_id, c.category_name, " +
+            "(SELECT img.url FROM product_images img " +
+            "WHERE img.product_id = p.product_id " +
+            "ORDER BY img.is_main DESC, img.sort_order ASC LIMIT 1) AS image_url " +
+            "FROM products p " +
+            "LEFT JOIN categories c ON p.category_id = c.category_id " +
+            "LIMIT #{offset}, #{limit}")
     List<ProductDTO> findProductsWithPage(@Param("offset") int offset, @Param("limit") int limit);
 
     @Select("SELECT COUNT(*) FROM products")
