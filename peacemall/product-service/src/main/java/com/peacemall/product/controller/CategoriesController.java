@@ -62,4 +62,11 @@ public class CategoriesController {
         return categoriesService.getCategoriesByPage(page,pageSize);
 
     }
+
+    //返回一个分类的所有子分类，包括自己
+    @ApiOperation("返回一个分类的所有子分类，包括自己")
+    @GetMapping("/getSubCategoryIds")
+    List<Long> getSubCategoryIds(@RequestParam("categoryId") Long categoryId){
+        return categoriesService.getSubCategoryIds(categoryId);
+    }
 }

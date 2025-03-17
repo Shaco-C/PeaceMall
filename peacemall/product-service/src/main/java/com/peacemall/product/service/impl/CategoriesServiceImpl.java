@@ -130,24 +130,7 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
         return R.ok("分类删除成功");
     }
 
-    /**
-     * 查找所有子分类（非递归）
-     */
-    private List<Long> findAllChildCategories(Long parentId, List<Categories> allCategories) {
-        List<Long> result = new ArrayList<>();
-        Queue<Long> queue = new LinkedList<>();
-        queue.add(parentId);
-        while (!queue.isEmpty()) {
-            Long currentId = queue.poll();
-            for (Categories category : allCategories) {
-                if (currentId.equals(category.getParentId())) {
-                    result.add(category.getCategoryId());
-                    queue.add(category.getCategoryId()); // 继续查找子分类
-                }
-            }
-        }
-        return result;
-    }
+
 
 
 
@@ -213,5 +196,41 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
         return R.ok(PageDTO.of(categoriesPage));
     }
 
+    @Override
+    public List<Long> getSubCategoryIds(Long categoryId) {
+        log.info("getSubCategoryIds: {}", categoryId);
+        if (categoryId == null) {
+            log.error("参数错误");
+            throw new RuntimeException("分类Id为空");
+        }
 
+        // 一次性查询所有分类，避免递归查询数据库
+        List<Categories> allCategories = this.list();
+        List<Long> categoryIds = findAllChildCategories(categoryId, allCategories);
+
+        categoryIds.add(categoryId); // 包含自身
+
+        log.info("被查询的id为(从深到浅): {}", categoryIds);
+        return categoryIds;
+
+    }
+
+    /**
+     * 查找所有子分类（非递归）
+     */
+    private List<Long> findAllChildCategories(Long parentId, List<Categories> allCategories) {
+        List<Long> result = new ArrayList<>();
+        Queue<Long> queue = new LinkedList<>();
+        queue.add(parentId);
+        while (!queue.isEmpty()) {
+            Long currentId = queue.poll();
+            for (Categories category : allCategories) {
+                if (currentId.equals(category.getParentId())) {
+                    result.add(category.getCategoryId());
+                    queue.add(category.getCategoryId()); // 继续查找子分类
+                }
+            }
+        }
+        return result;
+    }
 }

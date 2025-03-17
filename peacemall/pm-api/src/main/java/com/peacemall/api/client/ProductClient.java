@@ -21,4 +21,6 @@ public interface ProductClient {
     PageDTO<ProductDTO> findAllProductsWithPage(@RequestParam(value = "page",defaultValue = "1")int page,
                                                        @RequestParam(value = "pageSize",defaultValue = "1000")int size);
 
+    @GetMapping("/categories/getSubCategoryIds")
+    List<Long> getSubCategoryIds(@RequestParam("categoryId") Long categoryId);
 }

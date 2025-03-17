@@ -28,6 +28,9 @@ public interface CategoriesService extends IService<Categories> {
     //管理员分页查看所有分类
     R<PageDTO<Categories>> getCategoriesByPage(int page, int pageSize);
 
+    //返回一个分类的所有子分类，包括自己
+    List<Long> getSubCategoryIds(Long categoryId);
+
 
 
 }

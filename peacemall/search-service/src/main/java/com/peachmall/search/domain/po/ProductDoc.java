@@ -15,11 +15,15 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 public class ProductDoc {
 
     @Id
+    @Field(type = FieldType.Keyword)
     private Long productId;
 
     @Field(type = FieldType.Keyword)
-    private String categoryName;
+    private Long categoryId;
 
+    @Field(type = FieldType.Keyword)
+    private String categoryName;
+    
     @Field(type = FieldType.Keyword)
     private String brand;
 

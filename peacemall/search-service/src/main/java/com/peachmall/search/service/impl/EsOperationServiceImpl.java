@@ -18,6 +18,8 @@ import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.rest.RestStatus;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,7 +34,8 @@ public class EsOperationServiceImpl implements EsOperationService {
 
     private final ProductRepository productRepository;
 
-    private final RestHighLevelClient restHighLevelClient;
+    private final ElasticsearchRestTemplate elasticsearchRestTemplate;
+    //private final RestHighLevelClient restHighLevelClient;
 
     private static final String PRODUCT_INDEX_NAME = "product";
 
@@ -75,46 +78,70 @@ public class EsOperationServiceImpl implements EsOperationService {
         return R.ok("商品数据加载到es成功");
     }
 
-    @Override
     public R<String> createProductIndex() {
         try {
-            GetIndexRequest getRequest = new GetIndexRequest(PRODUCT_INDEX_NAME);
-            try {
-                // 尝试获取索引（更准确判断存在性）
-                restHighLevelClient.indices().get(getRequest, RequestOptions.DEFAULT);
+            IndexOperations indexOps = elasticsearchRestTemplate.indexOps(ProductDoc.class);
+
+            // 判断索引是否存在
+            if (indexOps.exists()) {
                 log.warn("索引 {} 已存在，无需重复创建！", PRODUCT_INDEX_NAME);
                 return R.error("索引已存在！");
-            } catch (ElasticsearchStatusException e) {
-                if (e.status() == RestStatus.NOT_FOUND) {
-                    log.info("索引 {} 不存在，开始创建...", PRODUCT_INDEX_NAME);
-
-                    // 创建索引请求
-                    CreateIndexRequest createRequest = new CreateIndexRequest(PRODUCT_INDEX_NAME);
-                    String mappingJson = "{" +
-                            "\"properties\": {" +
-                            "    \"productId\": { \"type\": \"long\" }," +
-                            "    \"categoryName\": { \"type\": \"keyword\" }," +
-                            "    \"brand\": { \"type\": \"keyword\" }," +
-                            "    \"name\": { \"type\": \"text\", \"analyzer\": \"ik_smart\" }," +
-                            "    \"description\": { \"type\": \"text\", \"analyzer\": \"ik_smart\" }," +
-                            "    \"sales\": { \"type\": \"integer\" }" +
-                            "}" +
-                            "}";
-                    createRequest.mapping(mappingJson, XContentType.JSON);
-
-                    // 执行创建
-                    restHighLevelClient.indices().create(createRequest, RequestOptions.DEFAULT);
-                    log.info("索引 {} 创建成功！", PRODUCT_INDEX_NAME);
-                    return R.ok("索引创建成功！");
-                } else {
-                    log.error("检查索引存在性失败：", e);
-                    return R.error("服务异常：" + e.getMessage());
-                }
             }
+
+            // 创建索引
+            indexOps.create();
+            indexOps.putMapping(indexOps.createMapping());
+
+            log.info("索引 {} 创建成功！", PRODUCT_INDEX_NAME);
+            return R.ok("索引创建成功！");
         } catch (Exception e) {
             log.error("创建索引异常：", e);
             return R.error("索引创建失败：" + e.getMessage());
         }
     }
+
+//    @Override
+//    public R<String> createProductIndex() {
+//        try {
+//            GetIndexRequest getRequest = new GetIndexRequest(PRODUCT_INDEX_NAME);
+//            try {
+//                // 尝试获取索引（更准确判断存在性）
+//                restHighLevelClient.indices().get(getRequest, RequestOptions.DEFAULT);
+//                log.warn("索引 {} 已存在，无需重复创建！", PRODUCT_INDEX_NAME);
+//                return R.error("索引已存在！");
+//            } catch (ElasticsearchStatusException e) {
+//                if (e.status() == RestStatus.NOT_FOUND) {
+//                    log.info("索引 {} 不存在，开始创建...", PRODUCT_INDEX_NAME);
+//
+//                    // 创建索引请求
+//                    CreateIndexRequest createRequest = new CreateIndexRequest(PRODUCT_INDEX_NAME);
+//                    String mappingJson = "{" +
+//                            "\"properties\": {" +
+//                            "    \"productId\": { \"type\": \"long\" }," +
+//                            "    \"categoryId\": { \"type\": \"keyword\" }," +
+//                            "    \"categoryName\": { \"type\": \"keyword\" }," +
+//                            "    \"brand\": { \"type\": \"keyword\" }," +
+//                            "    \"name\": { \"type\": \"text\", \"analyzer\": \"ik_smart\" }," +
+//                            "    \"description\": { \"type\": \"text\", \"analyzer\": \"ik_smart\" }," +
+//                            "    \"sales\": { \"type\": \"integer\" }" +
+//                            "}" +
+//                            "}";
+//
+//                    createRequest.mapping(mappingJson, XContentType.JSON);
+//
+//                    // 执行创建
+//                    restHighLevelClient.indices().create(createRequest, RequestOptions.DEFAULT);
+//                    log.info("索引 {} 创建成功！", PRODUCT_INDEX_NAME);
+//                    return R.ok("索引创建成功！");
+//                } else {
+//                    log.error("检查索引存在性失败：", e);
+//                    return R.error("服务异常：" + e.getMessage());
+//                }
+//            }
+//        } catch (Exception e) {
+//            log.error("创建索引异常：", e);
+//            return R.error("索引创建失败：" + e.getMessage());
+//        }
+//    }
 
 }

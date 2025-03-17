@@ -27,6 +27,13 @@ public class ProductClientFallbackFactory implements FallbackFactory<ProductClie
                 log.error("获取的页数为page:{},size:{}",page,size);
                 throw new RuntimeException("批量获取商品失败");
             }
+
+            @Override
+            public List<Long> getSubCategoryIds(Long categoryId) {
+                log.error("获取子分类失败");
+                log.error("获取的id为:{}",categoryId);
+                throw new RuntimeException("获取子分类失败");
+            }
         };
     }
 }
