@@ -1,9 +1,10 @@
 package com.peacemall.user.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.UserDTO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.user.domain.dto.LoginFormDTO;
 import com.peacemall.user.domain.po.Users;
@@ -48,4 +49,6 @@ public interface UserService extends IService<Users> {
 
     //管理员根据用户id来切换用户的角色
     void adminChangeUserRole(Long userId, UserRole userRole);
+
+    PageDTO<UserDTO> findAllUsersWithPage(int page, int size);
 }

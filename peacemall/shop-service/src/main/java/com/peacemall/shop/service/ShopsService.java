@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.ShopDTO;
+import com.peacemall.common.domain.dto.UserDTO;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.shop.domain.po.Shops;
 import com.peacemall.shop.enums.ShopStatus;
@@ -46,5 +48,7 @@ public interface ShopsService extends IService<Shops> {
 
     //管理员定期清理状态为CLOSED的商家
     R<String> adminCleanClosedShops();
+
+    PageDTO<ShopDTO> findAllShopsWithPage(int page, int size);
 
 }

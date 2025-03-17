@@ -19,7 +19,7 @@ public interface ProductClient {
 
     @GetMapping("/products/admin/findAllProductsWithPage")
     PageDTO<ProductDTO> findAllProductsWithPage(@RequestParam(value = "page",defaultValue = "1")int page,
-                                                       @RequestParam(value = "pageSize",defaultValue = "1000")int size);
+                                                       @RequestParam(value = "pageSize",defaultValue = "1000")int pageSize);
 
     @GetMapping("/categories/getSubCategoryIds")
     List<Long> getSubCategoryIds(@RequestParam("categoryId") Long categoryId);

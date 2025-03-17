@@ -15,7 +15,7 @@ import java.util.List;
 @Mapper
 public interface ProductsMapper extends BaseMapper<Products> {
 
-    @Select("SELECT p.product_id, p.brand, p.name, p.description, p.sales, " +
+    @Select("SELECT p.product_id, p.brand, p.name, p.description, p.sales, p.updated_at," +
             "c.category_id, c.category_name, " +
             "(SELECT img.url FROM product_images img " +
             "WHERE img.product_id = p.product_id " +

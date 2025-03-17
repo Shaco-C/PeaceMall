@@ -121,7 +121,7 @@ public class ProductsController {
     @ApiOperation(value = "分页查询所有的商品信息")
     @GetMapping("/admin/findAllProductsWithPage")
     public PageDTO<ProductDTO> findAllProductsWithPage(@RequestParam(value = "page",defaultValue = "1")int page,
-                                                    @RequestParam(value = "pageSize",defaultValue = "1000")int size){
-        return productsService.findAllProductsWithPage(page,size);
+                                                    @RequestParam(value = "pageSize",defaultValue = "1000")int pageSize){
+        return productsService.findAllProductsWithPage(page,pageSize);
     }
 }

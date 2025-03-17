@@ -7,7 +7,6 @@ import com.peacemall.common.domain.query.PageQuery;
 import com.peachmall.search.domain.po.ProductDoc;
 import com.peachmall.search.domain.query.ProductPageQuery;
 import com.peachmall.search.domain.vo.ProductVO;
-import com.peachmall.search.mapper.ProductRepository;
 import com.peachmall.search.service.EsSearchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,9 +36,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EsSearchServiceImpl implements EsSearchService {
 
-    private final ProductRepository productRepository;
     private final ElasticsearchRestTemplate elasticsearchTemplate;
     private final ProductClient productClient;
+
 
     @Override
     public R<PageDTO<ProductVO>> searchProduct(ProductPageQuery query) {

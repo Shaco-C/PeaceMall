@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.UserClient;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.ShopDTO;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.common.utils.UserContext;
@@ -230,5 +231,26 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
         }
         log.info("商店删除成功");
         return R.ok("商店删除成功,删除了"+shopsIdList.size()+"个CLOSED商店");
+    }
+
+    @Override
+    public PageDTO<ShopDTO> findAllShopsWithPage(int page, int size) {
+        // 创建分页对象
+        Page<ShopDTO> pageResult = new Page<>(page, size);
+
+        // 计算偏移量
+        int offset = (page - 1) * size;
+
+        // 查询总记录数
+        int total = baseMapper.countShops();
+
+        // 查询当前页数据
+        List<ShopDTO> pageRecords = baseMapper.findShopsWithPage(offset, size);
+
+        // 设置分页结果
+        pageResult.setRecords(pageRecords);
+        pageResult.setTotal(total);
+
+        return PageDTO.of(pageResult);
     }
 }

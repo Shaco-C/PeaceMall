@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.WalletClient;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.UserDTO;
 import com.peacemall.common.domain.vo.WalletVO;
 import com.peacemall.common.exception.ForbiddenException;
 import com.peacemall.common.utils.UserContext;
@@ -28,7 +29,6 @@ import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -447,6 +447,27 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             throw new RuntimeException("更新用户角色失败");
         }
         log.info("更新用户角色成功: userId={}, userRole={}", userId, userRole);
+    }
+
+    @Override
+    public PageDTO<UserDTO> findAllUsersWithPage(int page, int size) {
+        // 创建分页对象
+        Page<UserDTO> pageResult = new Page<>(page, size);
+
+        // 计算偏移量
+        int offset = (page - 1) * size;
+
+        // 查询总记录数
+        int total = baseMapper.countUsers();
+
+        // 查询当前页数据
+        List<UserDTO> pageRecords = baseMapper.findUsersWithPage(offset, size);
+
+        // 设置分页结果
+        pageResult.setRecords(pageRecords);
+        pageResult.setTotal(total);
+
+        return PageDTO.of(pageResult);
     }
 
     /**

@@ -2,6 +2,8 @@ package com.peacemall.api.client;
 
 import com.peacemall.api.client.fallback.ShopClientFallbackFactory;
 import com.peacemall.common.domain.dto.IdsDTO;
+import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.ShopDTO;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,4 +20,8 @@ public interface ShopClient {
 
     @GetMapping("/shops/getShopInfoByIdsList")
     Map<Long, ShopsInfoVO> getShopInfoByIds(@RequestParam List<Long> shopIds);
+
+    @GetMapping("/shops/admin/findAllShopsWithPage")
+    PageDTO<ShopDTO> findAllShopsWithPage(@RequestParam(value = "page",defaultValue = "1")int page,
+                                                 @RequestParam(value = "pageSize",defaultValue = "1000")int pageSize);
 }

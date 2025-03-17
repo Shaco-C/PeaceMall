@@ -25,9 +25,37 @@ public class EsOperationController{
         return esOperationService.loadProductDocs();
     }
 
+    //将mysql中的用户数据,批量导入到es中
+    @ApiOperation("将mysql中的用户数据,批量导入到es中")
+    @PutMapping("/admin/LoadUserDocs")
+    public R<String> loadUserDocs(){
+        return esOperationService.loadUserDocs();
+    }
+
+    //将mysql中的商店数据,批量导入到es中
+    @ApiOperation("将mysql中的商店数据,批量导入到es中")
+    @PutMapping("/admin/LoadShopDocs")
+    public R<String> loadShopDocs(){
+        return esOperationService.loadShopDocs();
+    }
     @ApiOperation("将mysql数据库中的数据全部插入到es中")
     @PostMapping("/admin/createProductIndex")
     public R<String> createProductIndex(){
         return esOperationService.createProductIndex();
+    }
+
+
+    //创建user索引
+    @ApiOperation("创建user索引")
+    @PostMapping("/admin/createUserIndex")
+    public R<String> createUserIndex(){
+        return esOperationService.createUserIndex();
+    }
+
+    //创建shop索引
+    @ApiOperation("创建shop索引")
+    @PostMapping("/admin/createShopIndex")
+    public R<String> createShopIndex(){
+        return esOperationService.createShopIndex();
     }
 }

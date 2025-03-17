@@ -1,10 +1,11 @@
 package com.peacemall.user.controller;
 
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.IdsDTO;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.UserDTO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.user.domain.dto.LoginFormDTO;
 import com.peacemall.user.domain.dto.VerifyInfosDTO;
@@ -113,6 +114,15 @@ public class UsersController {
     public void adminChangeUserRole(@RequestParam(value = "userId") Long userId,
                                     @RequestParam(value = "userRole") UserRole userRole){
         userService.adminChangeUserRole(userId,userRole);
+    }
+
+    //分页查询所有的用户信息
+    //用于es数据的批量插入
+    @ApiOperation(value = "分页查询所有的商品信息")
+    @GetMapping("/admin/findAllUsersWithPage")
+    public PageDTO<UserDTO> findAllUsersWithPage(@RequestParam(value = "page",defaultValue = "1")int page,
+                                                    @RequestParam(value = "pageSize",defaultValue = "1000")int pageSize){
+        return userService.findAllUsersWithPage(page,pageSize);
     }
 
 }

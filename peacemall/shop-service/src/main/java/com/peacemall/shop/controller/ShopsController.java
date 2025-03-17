@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.IdsDTO;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.ShopDTO;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.shop.domain.po.Shops;
 import com.peacemall.shop.enums.ShopStatus;
@@ -75,8 +76,17 @@ public class ShopsController {
     //通过<Long,ShopsInfoVO>的map来返回
     @ApiOperation("根据idList查询商店的基本信息")
     @GetMapping("/getShopInfoByIdsList")
-    Map<Long, ShopsInfoVO> getShopInfoByIds(@RequestParam List<Long> shopIds){
+    public Map<Long, ShopsInfoVO> getShopInfoByIds(@RequestParam List<Long> shopIds){
         return shopsService.getShopInfoByIds(shopIds);
+    }
+
+    //分页查询所有的商家信息
+    //用于es数据的批量插入
+    @ApiOperation(value = "分页查询所有的商品信息")
+    @GetMapping("/admin/findAllShopsWithPage")
+    public PageDTO<ShopDTO> findAllShopsWithPage(@RequestParam(value = "page",defaultValue = "1")int page,
+                                                 @RequestParam(value = "pageSize",defaultValue = "1000")int pageSize) {
+        return shopsService.findAllShopsWithPage(page,pageSize);
     }
 
 }

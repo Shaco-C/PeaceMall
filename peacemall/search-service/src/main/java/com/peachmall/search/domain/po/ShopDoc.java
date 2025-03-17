@@ -8,39 +8,30 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import java.sql.Timestamp;
+import java.util.Date;
 
 @Data
-@Document(indexName = "product")
+@Document(indexName = "shop")
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductDoc {
+public class ShopDoc {
 
     @Id
     @Field(type = FieldType.Keyword)
-    private Long productId;
+    private Long shopId;  // 店铺ID，改为String以防止long精度丢失
 
     @Field(type = FieldType.Keyword)
-    private Long categoryId;
-
-    @Field(type = FieldType.Keyword)
-    private String categoryName;
-    
-    @Field(type = FieldType.Keyword)
-    private String brand;
+    private Long userId;  // 商家用户ID（MERCHANT）
 
     @Field(type = FieldType.Text, analyzer = "ik_smart")
-    private String name;
-
-    @Field(type = FieldType.Keyword, index = false)
-    private String imageUrl;
+    private String shopName;  // 店铺名称，支持模糊搜索
 
     @Field(type = FieldType.Text, analyzer = "ik_smart")
-    private String description;
-
-    @Field(type = FieldType.Integer)
-    private Integer sales;
+    private String shopDescription;  // 店铺简介，支持全文搜索
 
     @Field(type = FieldType.Date)
-    private Timestamp updatedAt;
+    private Date updatedAt;  // 店铺信息更新时间
+
+    @Field(type = FieldType.Keyword, index = false)
+    private String shopAvatarUrl;  // 店铺头像URL，不索引
 }

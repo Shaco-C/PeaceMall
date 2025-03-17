@@ -22,9 +22,9 @@ public class ProductClientFallbackFactory implements FallbackFactory<ProductClie
             }
 
             @Override
-            public PageDTO<ProductDTO> findAllProductsWithPage(int page, int size) {
+            public PageDTO<ProductDTO> findAllProductsWithPage(int page, int pageSize) {
                 log.error("批量获取商品失败");
-                log.error("获取的页数为page:{},size:{}",page,size);
+                log.error("获取的页数为page:{},size:{}",page,pageSize);
                 throw new RuntimeException("批量获取商品失败");
             }
 
