@@ -12,6 +12,7 @@ public interface FlowLogService extends IService<FlowLog> {
 
     //根据不同的流水，添加流水日志
     void addFlowLog(FlowLogsDTO flowLogsDTO);
+
     //查询用户自己的流水日志
 
     R<PageDTO<FlowLog>> getUserFlowLog(int page, int pageSize, WalletFlowType walletFlowType);

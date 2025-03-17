@@ -16,8 +16,16 @@ public interface EsSearchService {
      */
     R<PageDTO<ProductVO>> searchProduct(ProductPageQuery query);
 
+    //根据分类查询商品
     R<PageDTO<ProductVO>> searchProductsByCategory(Long categoryId, PageQuery query);
 
+    //用户在搜索结果的页面中，点击品牌选项
+    //返回该关键字所有的品牌信息
+    //当用户点击具体品牌之后，调用searchProduct，然后添加一个brand属性再去搜索
     R<List<String>> getBrandsBySearchKey(String key);
+
+    //根据用户名，搜索用户
+
+    //根据商店名称搜索商店
 
 }

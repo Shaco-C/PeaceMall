@@ -15,6 +15,7 @@ import com.peacemall.logs.service.FlowLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+
 @Service
 @Slf4j
 public class FlowLogServiceImpl extends ServiceImpl<FlowLogMapper, FlowLog> implements FlowLogService {
@@ -30,6 +31,9 @@ public class FlowLogServiceImpl extends ServiceImpl<FlowLogMapper, FlowLog> impl
             throw new RuntimeException("添加流水日志失败");
         }
     }
+
+
+
 
     @Override
     public R<PageDTO<FlowLog>> getUserFlowLog(int page, int pageSize, WalletFlowType walletFlowType) {

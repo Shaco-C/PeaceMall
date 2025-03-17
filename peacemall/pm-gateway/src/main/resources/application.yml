@@ -33,7 +33,7 @@ spring:
         - id: logs
           uri: lb://log-service
           predicates:
-            - Path=/flowLog/**,/stockChangeLog/**
+            - Path=/flowLog/**,/stockChangeLog/**,/dead-letter-log/**
 
         - id: search
           uri: lb://search-service
