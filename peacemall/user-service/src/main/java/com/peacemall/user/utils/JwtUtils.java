@@ -39,8 +39,11 @@ public class JwtUtils {
         Map<String, Object> payload = new HashMap<>();
         payload.put("userId", userId);
         payload.put("userRole", userRole);
-        payload.put(RegisteredPayload.ISSUED_AT, System.currentTimeMillis());
-        payload.put(RegisteredPayload.EXPIRES_AT, System.currentTimeMillis() + expire);
+
+        // 使用秒级时间戳
+        long currentTimeSeconds = System.currentTimeMillis() / 1000;
+        payload.put(RegisteredPayload.ISSUED_AT, currentTimeSeconds);
+        payload.put(RegisteredPayload.EXPIRES_AT, currentTimeSeconds + expire); // expire 是秒，无需转换
 
         return JWTUtil.createToken(payload, signer);
     }
