@@ -5,11 +5,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.UserClient;
+import com.peacemall.common.constant.EsOperataionMQConstant;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.ShopDTO;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.common.enums.UserRole;
+import com.peacemall.common.utils.RabbitMqHelper;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.shop.domain.po.Shops;
 import com.peacemall.shop.enums.ShopStatus;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements ShopsService {
 
     private final UserClient userClient;
+    private final RabbitMqHelper rabbitMqHelper;
     @Override
     public boolean createUserShop(Shops shops) {
         log.info("createUserShop method is called,shops:{}", shops);
@@ -47,6 +50,13 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
             return false;
         }
         log.info("createUserShop method success,shops:{}", shops);
+        ShopDTO shopDTO = BeanUtil.copyProperties(shops, ShopDTO.class);
+        try{
+            rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_SHOP_EXCHANGE_NAME,
+                    EsOperataionMQConstant.ES_ADD_SHOP_ROUTING_KEY,shopDTO);
+        }catch (Exception e){
+            log.error("createUserShop method failed,shops save failed");
+        }
         return true;
     }
 
@@ -182,6 +192,15 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
             return R.error("商店信息修改失败");
         }
         log.info("商店信息修改成功");
+
+        ShopDTO shopDTO = BeanUtil.copyProperties(shops, ShopDTO.class);
+        try{
+            log.info("更新商店信息到ES");
+            rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_SHOP_EXCHANGE_NAME,
+                    EsOperataionMQConstant.ES_UPDATE_SHOP_ROUTING_KEY,shopDTO);
+        }catch (Exception e){
+            log.error("更新商店信息到ES失败");
+        }
         return R.ok("商店信息修改成功");
     }
 
@@ -230,6 +249,13 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
             throw new RuntimeException("商店删除失败");
         }
         log.info("商店删除成功");
+        try{
+            log.info("删除商店信息到ES");
+            rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_SHOP_EXCHANGE_NAME,
+                EsOperataionMQConstant.ES_DELETE_SHOP_ROUTING_KEY, shopsIdList);
+        }catch (Exception e){
+        log.error("删除商店信息到ES失败");
+        }
         return R.ok("商店删除成功,删除了"+shopsIdList.size()+"个CLOSED商店");
     }
 

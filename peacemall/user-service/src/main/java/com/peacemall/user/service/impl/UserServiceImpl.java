@@ -7,11 +7,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.WalletClient;
+import com.peacemall.common.constant.EsOperataionMQConstant;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.UserDTO;
 import com.peacemall.common.domain.vo.WalletVO;
 import com.peacemall.common.exception.ForbiddenException;
+import com.peacemall.common.utils.RabbitMqHelper;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.user.domain.dto.LoginFormDTO;
 import com.peacemall.user.domain.po.Users;
@@ -46,9 +48,11 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
 
     private final JwtUtils jwtUtils;
     private final WalletClient walletClient;
+    private final RabbitMqHelper rabbitMqHelper;
 
     // 注册用户
     @Override
+    @GlobalTransactional
     public R<String> register(Users users) {
 
         if (users == null){
@@ -84,6 +88,15 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             walletClient.createWalletWhenRegister(users.getUserId());
         }catch (Exception e){
             throw new RuntimeException("用户创建钱包失败，请重试");
+        }
+        UserDTO userDTO = BeanUtil.copyProperties(users, UserDTO.class);
+
+        try {
+            rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_USER_EXCHANGE_NAME,
+                    EsOperataionMQConstant.ES_ADD_USER_ROUTING_KEY,userDTO);
+        }catch (Exception e){
+            log.error("发送消息失败,失败的用户日志信息为:{}",userDTO);
+            //todo 添加日志
         }
 
         return R.ok("用户注册成功");
@@ -229,6 +242,14 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             return R.error("删除用户失败，请稍后重试");
         }
 
+        //异步删除es中的用户数据
+        try{
+            rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_USER_EXCHANGE_NAME,
+                    EsOperataionMQConstant.ES_DELETE_USER_ROUTING_KEY,userIds);
+        }catch (Exception e){
+            log.error("删除用户失败: adminUserId={}, userIds={}", currentUserId, userIds);
+        }
+
 
         log.info("管理员成功删除用户: adminUserId={}, userIds={}", currentUserId, userIds);
         return R.ok("删除用户成功");
@@ -280,7 +301,16 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             throw new RuntimeException("删除用户失败，请重试");
         }
 
+
         log.info("管理员删除了 {} 个已注销的用户: adminUserId={}", userIds.size(), adminUserId);
+
+        //异步删除es中的用户数据
+        try{
+            rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_USER_EXCHANGE_NAME,
+                    EsOperataionMQConstant.ES_DELETE_USER_ROUTING_KEY,userIds);
+        }catch (Exception e){
+            log.error("删除用户失败: adminUserId={}, userIds={}", adminUserId, userIds);
+        }
         return R.ok("成功删除 " + userIds.size() + " 个用户");
     }
 
@@ -327,6 +357,15 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         }
 
         log.info("用户成功更新信息: userId={}, 更新字段={}", userId, updateUser);
+
+        UserDTO userDTO = BeanUtil.copyProperties(updateUser, UserDTO.class);
+        //异步删除es中的用户数据
+        try{
+            rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_USER_EXCHANGE_NAME,
+                    EsOperataionMQConstant.ES_UPDATE_USER_ROUTING_KEY,userDTO);
+        }catch (Exception e){
+            log.error(" 更新用户信息失败: userId={}, users={}", userId, users);
+        }
         return R.ok("更新用户信息成功");
     }
 

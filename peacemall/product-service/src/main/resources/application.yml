@@ -5,6 +5,9 @@ server:
       max: 50 # 允许的最大线程数
     accept-count: 50 # 最大排队等待数量
     max-connections: 100 # 允许的最大连接
+spring:
+  rabbitmq:
+    host: ${pm.mq.host:192.168.145.134}
 feign:
   okhttp:
     enabled: true

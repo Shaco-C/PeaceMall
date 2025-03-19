@@ -68,8 +68,8 @@ public class WalletController {
     //管理员删除用户的钱包
     @ApiOperation("管理员删除用户的钱包")
     @DeleteMapping("/admin/adminDeleteWallet")
-    public void adminDeleteWallet(@RequestBody IdsDTO idsDTO){
+    public void adminDeleteWallet(@RequestBody List<Long> userId){
 
-        walletService.adminDeleteWallet(idsDTO.getIdsList());
+        walletService.adminDeleteWallet(userId);
     }
 }

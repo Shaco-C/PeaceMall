@@ -5,10 +5,7 @@ import com.peacemall.api.client.fallback.WalletClientFallbackFacktory;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.vo.WalletVO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,7 +17,7 @@ public interface WalletClient {
     @PostMapping("/wallet/createWalletWhenRegister")
     void createWalletWhenRegister(@RequestParam("userId") Long userId);
     @DeleteMapping("/wallet/admin/adminDeleteWallet")
-    void adminDeleteWallet(@RequestParam("ids") List<Long> userId);
+    void adminDeleteWallet(@RequestBody List<Long> userId);
 
     @GetMapping("/wallet/userGetSelfWalletInfo")
     R<WalletVO> userGetSelfWalletInfo();

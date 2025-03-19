@@ -5,12 +5,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.ShopClient;
+import com.peacemall.common.constant.EsOperataionMQConstant;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.ProductDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.common.enums.UserRole;
+import com.peacemall.common.utils.RabbitMqHelper;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.product.domain.dto.AddProductDTO;
 
@@ -44,6 +46,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
     private final ProductConfigurationsService productConfigurationsService;
     private final CategoriesService categoriesService;
     private final ShopClient shopClient;
+    private final RabbitMqHelper rabbitMqHelper;
 
     //创建商品
     @Override
@@ -94,6 +97,14 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
             throw new RuntimeException("商品图片保存失败");
         }
         log.info("商品图片保存成功");
+        ProductDTO productDTO = baseMapper.findProductDTOById(productId);
+        try{
+            log.info("保存商品信息到ES中");
+            rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_PRODUCT_EXCHANGE_NAME,
+                    EsOperataionMQConstant.ES_ADD_PRODUCT_ROUTING_KEY,productDTO);
+        }catch (Exception e){
+            log.error("保存商品信息到ES中失败");
+        }
         return R.ok(productId);
     }
 
@@ -174,7 +185,15 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
             return R.error("商品删除失败");
         }
         log.info("商品删除成功");
+        List<Long> list = List.of(productId);
 
+        try{
+            log.info("删除商品信息到ES中");
+            rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_PRODUCT_EXCHANGE_NAME,
+                    EsOperataionMQConstant.ES_DELETE_PRODUCT_ROUTING_KEY,list);
+        }catch (Exception e){
+            log.error("删除商品信息到ES中失败");
+        }
 
 
         return R.ok("商品删除成功");
@@ -241,6 +260,14 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
             return R.error("商品更新失败");
         }
         log.info("商品更新成功");
+        ProductDTO productDTO = BeanUtil.copyProperties(products,ProductDTO.class);
+        try{
+            log.info("更新商品信息到ES中");
+            rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_PRODUCT_EXCHANGE_NAME,
+                    EsOperataionMQConstant.ES_UPDATE_PRODUCT_ROUTING_KEY,productDTO);
+        }catch (Exception e){
+            log.error("更新商品信息到ES中失败");
+        }
         return R.ok("商品更新成功");
     }
 
