@@ -15,8 +15,6 @@ import com.peacemall.logs.mapper.DeadLetterLogMapper;
 import com.peacemall.logs.service.DeadLetterLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -97,5 +95,20 @@ public class DeadLetterLogServiceImpl extends ServiceImpl<DeadLetterLogMapper, D
             throw new RuntimeException("保存死信日志失败");
         }
 
+    }
+
+    @Override
+    public void saveToDeadLetterDatabase(String message, String reason) {
+        log.info("saveToDeadLetterDatabase:message:{},reason:{}", message, reason);
+        DeadLetterLog deadLetterLog = new DeadLetterLog();
+        deadLetterLog.setReason(reason);
+        deadLetterLog.setMessage(message);
+        deadLetterLog.setStatus(DeadLetterLogStatus.PENDING);
+        boolean saved = this.save(deadLetterLog);
+        log.info("死信日志保存结果: {}", saved);
+        if (!saved) {
+            log.error("保存死信日志失败，详情: {}", deadLetterLog);
+            throw new RuntimeException("保存死信日志失败");
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.peachmall.search.listener;
 
 //监听商店服务中的商店数据变化,同步到es中
 
+import cn.hutool.json.JSONUtil;
 import com.peacemall.common.constant.EsOperataionMQConstant;
 import com.peacemall.common.domain.dto.ShopDTO;
 import com.peacemall.common.exception.DTONotFoundException;
@@ -31,16 +32,17 @@ public class EsShopOperationListener {
             exchange = @Exchange(name = EsOperataionMQConstant.ES_OPERATION_SHOP_EXCHANGE_NAME, durable = "true", type = ExchangeTypes.DIRECT),
             key = EsOperataionMQConstant.ES_ADD_SHOP_ROUTING_KEY
     ))
-    public void addShopDoc(@Payload ShopDTO shopDTO){
+    public void addShopDoc(@Payload String message){
 
-        if(shopDTO == null){
+        if(message == null){
             log.error("商家信息为空，无法添加到es中");
             return;
         }
         try{
+            ShopDTO shopDTO = JSONUtil.toBean(message, ShopDTO.class);
             esShopOperationService.addShopDoc(shopDTO);
         }catch (Exception e){
-            log.error("添加商家到es中失败，失败的商店日志信息为:{}",shopDTO);
+            log.error("添加商家到es中失败，失败的商店日志信息为:{}",message);
             throw new RuntimeException("添加商家到es中失败");
         }
 
@@ -56,18 +58,19 @@ public class EsShopOperationListener {
             exchange = @Exchange(name = EsOperataionMQConstant.ES_OPERATION_SHOP_EXCHANGE_NAME, durable = "true", type = ExchangeTypes.DIRECT),
             key = EsOperataionMQConstant.ES_UPDATE_SHOP_ROUTING_KEY
     ))
-    public void updateShopDoc(@Payload ShopDTO shopDTO){
-        if(shopDTO == null){
+    public void updateShopDoc(@Payload String message){
+        if(message == null){
             log.error("商店信息为空，无法更新到es中");
             return;
         }
         try{
+            ShopDTO shopDTO = JSONUtil.toBean(message, ShopDTO.class);
             esShopOperationService.updateShopDoc(shopDTO);
         }catch (DTONotFoundException e){
             //手动捕获异常，避免不必要的重试
-            log.error("更新商店到es中失败，失败的商店日志信息为:{}",shopDTO);
+            log.error("更新商店到es中失败，失败的商店日志信息为:{}",message);
         }catch (Exception e){
-            log.error("更新商店到es中失败，失败的商店日志信息为:{}",shopDTO);
+            log.error("更新商店到es中失败，失败的商店日志信息为:{}",message);
             throw new RuntimeException("更新商店到es中失败");
         }
     }
@@ -81,15 +84,20 @@ public class EsShopOperationListener {
             exchange = @Exchange(name = EsOperataionMQConstant.ES_OPERATION_SHOP_EXCHANGE_NAME, durable = "true", type = ExchangeTypes.DIRECT),
             key = EsOperataionMQConstant.ES_DELETE_SHOP_ROUTING_KEY
     ))
-    public void deleteShopDocs(@Payload List<Long> shopIds){
-        if(shopIds.isEmpty()){
+    public void deleteShopDocs(@Payload String message){
+        if(message == null){
+            log.error("商店id为空，无法删除");
+            return;
+        }
+        List<Long> shopIds = JSONUtil.toList(message, Long.class);
+        if (shopIds.isEmpty()){
             log.error("商店id为空，无法删除");
             return;
         }
         try{
             esShopOperationService.deleteShopDoc(shopIds);
         }catch (Exception e){
-            log.error("删除商店失败,{}",shopIds);
+            log.error("删除商店失败,{}",message);
             throw new RuntimeException("删除商店失败");
         }
     }

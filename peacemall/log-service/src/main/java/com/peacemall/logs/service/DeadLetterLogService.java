@@ -15,4 +15,6 @@ public interface DeadLetterLogService extends IService<DeadLetterLog> {
     R<String> updateDeadLetterLogStatus(Long deadLetterLogId, DeadLetterLogStatus status);
     //添加死信日志
     void saveToDeadLetterDatabase(FlowLogsDTO flowLogsDTO,String reason);
+
+    void saveToDeadLetterDatabase(String message,String reason);
 }

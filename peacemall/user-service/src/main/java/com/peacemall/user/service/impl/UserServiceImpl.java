@@ -3,6 +3,7 @@ package com.peacemall.user.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -91,11 +92,12 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         }
         UserDTO userDTO = BeanUtil.copyProperties(users, UserDTO.class);
 
+        String message = JSONUtil.toJsonStr(userDTO);
         try {
             rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_USER_EXCHANGE_NAME,
-                    EsOperataionMQConstant.ES_ADD_USER_ROUTING_KEY,userDTO);
+                    EsOperataionMQConstant.ES_ADD_USER_ROUTING_KEY,message);
         }catch (Exception e){
-            log.error("发送消息失败,失败的用户日志信息为:{}",userDTO);
+            log.error("发送消息失败,失败的用户日志信息为:{}",message);
             //todo 添加日志
         }
 
@@ -243,11 +245,12 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         }
 
         //异步删除es中的用户数据
+        String message = JSONUtil.toJsonStr(userIds);
         try{
             rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_USER_EXCHANGE_NAME,
-                    EsOperataionMQConstant.ES_DELETE_USER_ROUTING_KEY,userIds);
+                    EsOperataionMQConstant.ES_DELETE_USER_ROUTING_KEY,message);
         }catch (Exception e){
-            log.error("删除用户失败: adminUserId={}, userIds={}", currentUserId, userIds);
+            log.error("删除用户失败: adminUserId={}, userIds={}", currentUserId, message);
         }
 
 
@@ -305,11 +308,12 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
         log.info("管理员删除了 {} 个已注销的用户: adminUserId={}", userIds.size(), adminUserId);
 
         //异步删除es中的用户数据
+        String message = JSONUtil.toJsonStr(userIds);
         try{
             rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_USER_EXCHANGE_NAME,
-                    EsOperataionMQConstant.ES_DELETE_USER_ROUTING_KEY,userIds);
+                    EsOperataionMQConstant.ES_DELETE_USER_ROUTING_KEY,message);
         }catch (Exception e){
-            log.error("删除用户失败: adminUserId={}, userIds={}", adminUserId, userIds);
+            log.error("删除用户失败: adminUserId={}, userIds={}", adminUserId, message);
         }
         return R.ok("成功删除 " + userIds.size() + " 个用户");
     }
@@ -360,11 +364,12 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
 
         UserDTO userDTO = BeanUtil.copyProperties(updateUser, UserDTO.class);
         //异步删除es中的用户数据
+        String message = JSONUtil.toJsonStr(userDTO);
         try{
             rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_USER_EXCHANGE_NAME,
-                    EsOperataionMQConstant.ES_UPDATE_USER_ROUTING_KEY,userDTO);
+                    EsOperataionMQConstant.ES_UPDATE_USER_ROUTING_KEY,message);
         }catch (Exception e){
-            log.error(" 更新用户信息失败: userId={}, users={}", userId, users);
+            log.error(" 更新用户信息失败: userId={}, users={}", userId, message);
         }
         return R.ok("更新用户信息成功");
     }

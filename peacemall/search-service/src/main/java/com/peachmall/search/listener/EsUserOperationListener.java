@@ -1,6 +1,8 @@
 package com.peachmall.search.listener;
 
 
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.json.JSONUtil;
 import com.peacemall.common.constant.EsOperataionMQConstant;
 
 import com.peacemall.common.domain.dto.UserDTO;
@@ -32,16 +34,17 @@ public class EsUserOperationListener {
             exchange = @Exchange(name = EsOperataionMQConstant.ES_OPERATION_USER_EXCHANGE_NAME, durable = "true", type = ExchangeTypes.DIRECT),
             key = EsOperataionMQConstant.ES_ADD_USER_ROUTING_KEY
     ))
-    public void addUserDoc(@Payload UserDTO userDTO){
+    public void addUserDoc(@Payload String message){
 
-        if(userDTO == null){
+        if(message == null){
          log.error("用户信息为空，无法添加到es中");
          return;
         }
         try{
+            UserDTO userDTO = JSONUtil.toBean(message, UserDTO.class);
             esUserOperationService.addUserDoc(userDTO);
         }catch (Exception e){
-            log.error("添加用户到es中失败，失败的用户日志信息为:{}",userDTO);
+            log.error("添加用户到es中失败，失败的用户日志信息为:{}",message);
             throw new RuntimeException("添加用户到es中失败");
         }
 
@@ -57,18 +60,19 @@ public class EsUserOperationListener {
             exchange = @Exchange(name = EsOperataionMQConstant.ES_OPERATION_USER_EXCHANGE_NAME, durable = "true", type = ExchangeTypes.DIRECT),
             key = EsOperataionMQConstant.ES_UPDATE_USER_ROUTING_KEY
     ))
-    public void updateUserDoc(@Payload UserDTO userDTO){
-        if(userDTO == null){
+    public void updateUserDoc(@Payload String message){
+        if(message == null){
             log.error("用户信息为空，无法更新到es中");
             return;
         }
         try{
+            UserDTO userDTO = JSONUtil.toBean(message, UserDTO.class);
             esUserOperationService.updateUserDoc(userDTO);
         }catch (DTONotFoundException e){
             //手动捕获异常，避免不必要的重试
-            log.error("更新用户到es中失败，失败的用户日志信息为:{}",userDTO);
+            log.error("更新用户到es中失败，失败的用户日志信息为:{}",message);
         }catch (Exception e){
-            log.error("更新用户到es中失败，失败的用户日志信息为:{}",userDTO);
+            log.error("更新用户到es中失败，失败的用户日志信息为:{}",message);
             throw new RuntimeException("更新用户到es中失败");
         }
     }
@@ -82,8 +86,13 @@ public class EsUserOperationListener {
             exchange = @Exchange(name = EsOperataionMQConstant.ES_OPERATION_USER_EXCHANGE_NAME, durable = "true", type = ExchangeTypes.DIRECT),
             key = EsOperataionMQConstant.ES_DELETE_USER_ROUTING_KEY
     ))
-    public void deleteUserDocs(@Payload List<Long> userIds){
-        if(userIds.isEmpty()){
+    public void deleteUserDocs(@Payload String  message){
+        if(message == null){
+            log.error("用户id为空，无法删除");
+            return;
+        }
+        List<Long> userIds = JSONUtil.toList(message, Long.class);
+        if (CollectionUtil.isEmpty(userIds)){
             log.error("用户id为空，无法删除");
             return;
         }

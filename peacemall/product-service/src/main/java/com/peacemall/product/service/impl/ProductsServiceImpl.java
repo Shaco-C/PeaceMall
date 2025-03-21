@@ -1,6 +1,7 @@
 package com.peacemall.product.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -98,10 +99,11 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         }
         log.info("商品图片保存成功");
         ProductDTO productDTO = baseMapper.findProductDTOById(productId);
+        String message = JSONUtil.toJsonStr(productDTO);
         try{
             log.info("保存商品信息到ES中");
             rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_PRODUCT_EXCHANGE_NAME,
-                    EsOperataionMQConstant.ES_ADD_PRODUCT_ROUTING_KEY,productDTO);
+                    EsOperataionMQConstant.ES_ADD_PRODUCT_ROUTING_KEY,message);
         }catch (Exception e){
             log.error("保存商品信息到ES中失败");
         }
@@ -186,11 +188,11 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         }
         log.info("商品删除成功");
         List<Long> list = List.of(productId);
-
+        String listMessage = JSONUtil.toJsonStr(list);
         try{
             log.info("删除商品信息到ES中");
             rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_PRODUCT_EXCHANGE_NAME,
-                    EsOperataionMQConstant.ES_DELETE_PRODUCT_ROUTING_KEY,list);
+                    EsOperataionMQConstant.ES_DELETE_PRODUCT_ROUTING_KEY,listMessage);
         }catch (Exception e){
             log.error("删除商品信息到ES中失败");
         }
@@ -261,10 +263,11 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         }
         log.info("商品更新成功");
         ProductDTO productDTO = BeanUtil.copyProperties(products,ProductDTO.class);
+        String message = JSONUtil.toJsonStr(productDTO);
         try{
             log.info("更新商品信息到ES中");
             rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_PRODUCT_EXCHANGE_NAME,
-                    EsOperataionMQConstant.ES_UPDATE_PRODUCT_ROUTING_KEY,productDTO);
+                    EsOperataionMQConstant.ES_UPDATE_PRODUCT_ROUTING_KEY,message);
         }catch (Exception e){
             log.error("更新商品信息到ES中失败");
         }

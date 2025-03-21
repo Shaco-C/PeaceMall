@@ -1,6 +1,7 @@
 package com.peacemall.shop.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -51,9 +52,10 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
         }
         log.info("createUserShop method success,shops:{}", shops);
         ShopDTO shopDTO = BeanUtil.copyProperties(shops, ShopDTO.class);
+        String message = JSONUtil.toJsonStr(shopDTO);
         try{
             rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_SHOP_EXCHANGE_NAME,
-                    EsOperataionMQConstant.ES_ADD_SHOP_ROUTING_KEY,shopDTO);
+                    EsOperataionMQConstant.ES_ADD_SHOP_ROUTING_KEY,message);
         }catch (Exception e){
             log.error("createUserShop method failed,shops save failed");
         }
@@ -194,10 +196,11 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
         log.info("商店信息修改成功");
 
         ShopDTO shopDTO = BeanUtil.copyProperties(shops, ShopDTO.class);
+        String message= JSONUtil.toJsonStr(shopDTO);
         try{
             log.info("更新商店信息到ES");
             rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_SHOP_EXCHANGE_NAME,
-                    EsOperataionMQConstant.ES_UPDATE_SHOP_ROUTING_KEY,shopDTO);
+                    EsOperataionMQConstant.ES_UPDATE_SHOP_ROUTING_KEY,message);
         }catch (Exception e){
             log.error("更新商店信息到ES失败");
         }
@@ -249,10 +252,11 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
             throw new RuntimeException("商店删除失败");
         }
         log.info("商店删除成功");
+        String message = JSONUtil.toJsonStr(shopsIdList);
         try{
             log.info("删除商店信息到ES");
             rabbitMqHelper.sendMessage(EsOperataionMQConstant.ES_OPERATION_SHOP_EXCHANGE_NAME,
-                EsOperataionMQConstant.ES_DELETE_SHOP_ROUTING_KEY, shopsIdList);
+                EsOperataionMQConstant.ES_DELETE_SHOP_ROUTING_KEY, message);
         }catch (Exception e){
         log.error("删除商店信息到ES失败");
         }

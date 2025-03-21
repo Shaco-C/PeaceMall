@@ -2,6 +2,8 @@ package com.peachmall.search.listener;
 
 //监听商品服务中的商品数据变化,同步到es中
 
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.json.JSONUtil;
 import com.peacemall.common.constant.EsOperataionMQConstant;
 
 import com.peacemall.common.domain.dto.ProductDTO;
@@ -31,16 +33,19 @@ public class EsProductOperationListener {
             exchange = @Exchange(name = EsOperataionMQConstant.ES_OPERATION_PRODUCT_EXCHANGE_NAME, durable = "true", type = ExchangeTypes.DIRECT),
             key = EsOperataionMQConstant.ES_ADD_PRODUCT_ROUTING_KEY
     ))
-    public void addProductDoc(@Payload ProductDTO productDTO){
+    public void addProductDoc(@Payload String message){
+        log.info("接收到添加商品到es的消息:{}",message);
 
-        if(productDTO == null){
+
+        if(message == null){
             log.error("商品信息为空，无法添加到es中");
             return;
         }
         try{
+            ProductDTO productDTO = JSONUtil.toBean(message, ProductDTO.class);
             esProductOperationService.addProductDocs(productDTO);
         }catch (Exception e){
-            log.error("添加商品到es中失败，失败的商品日志信息为:{}",productDTO);
+            log.error("添加商品到es中失败，失败的商品日志信息为:{}",message);
             throw new RuntimeException("添加商品到es中失败");
         }
 
@@ -56,18 +61,19 @@ public class EsProductOperationListener {
             exchange = @Exchange(name = EsOperataionMQConstant.ES_OPERATION_PRODUCT_EXCHANGE_NAME, durable = "true", type = ExchangeTypes.DIRECT),
             key = EsOperataionMQConstant.ES_UPDATE_PRODUCT_ROUTING_KEY
     ))
-    public void updateProductDoc(@Payload ProductDTO productDTO){
-        if(productDTO == null){
+    public void updateProductDoc(@Payload String message){
+        if(message == null){
             log.error("商品信息为空，无法更新到es中");
             return;
         }
         try{
+            ProductDTO productDTO = JSONUtil.toBean(message, ProductDTO.class);
             esProductOperationService.updateProductDocs(productDTO);
         }catch (DTONotFoundException e){
             //手动捕获异常，避免不必要的重试
-            log.error("更新商品到es中失败，失败的商品日志信息为:{}",productDTO);
+            log.error("更新商品到es中失败，失败的商品日志信息为:{}",message);
         }catch (Exception e){
-            log.error("更新商品到es中失败，失败的商品日志信息为:{}",productDTO);
+            log.error("更新商品到es中失败，失败的商品日志信息为:{}",message);
             throw new RuntimeException("更新商品到es中失败");
         }
     }
@@ -81,15 +87,20 @@ public class EsProductOperationListener {
             exchange = @Exchange(name = EsOperataionMQConstant.ES_OPERATION_PRODUCT_EXCHANGE_NAME, durable = "true", type = ExchangeTypes.DIRECT),
             key = EsOperataionMQConstant.ES_DELETE_PRODUCT_ROUTING_KEY
     ))
-    public void deleteProductDocs(@Payload List<Long> productIds){
-        if(productIds.isEmpty()){
+    public void deleteProductDocs(@Payload String message){
+        if(message == null){
+            log.error("商品id为空，无法删除");
+            return;
+        }
+        List<Long> productIds = JSONUtil.toList(message, Long.class);
+        if (CollectionUtil.isEmpty(productIds)){
             log.error("商品id为空，无法删除");
             return;
         }
         try{
             esProductOperationService.deleteProductDocs(productIds);
         }catch (Exception e){
-            log.error("删除商品失败,{}",productIds);
+            log.error("删除商品失败,{}",message);
             throw new RuntimeException("删除商品失败");
         }
     }
