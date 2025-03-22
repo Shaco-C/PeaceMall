@@ -9,7 +9,9 @@ import com.peacemall.api.client.ShopClient;
 import com.peacemall.common.constant.EsOperataionMQConstant;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.ProductConfigurationDTO;
 import com.peacemall.common.domain.dto.ProductDTO;
+import com.peacemall.common.domain.dto.ProductDetailsDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.common.enums.UserRole;
@@ -18,6 +20,8 @@ import com.peacemall.common.utils.UserContext;
 import com.peacemall.product.domain.dto.AddProductDTO;
 
 import com.peacemall.product.domain.po.Categories;
+import com.peacemall.product.domain.po.ProductConfigurations;
+import com.peacemall.product.domain.po.ProductImages;
 import com.peacemall.product.domain.po.Products;
 import com.peacemall.product.domain.vo.ProductDetailsVO;
 import com.peacemall.product.enums.ProductStatus;
@@ -32,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -394,7 +399,6 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         log.info("shopId:{}",products.getShopId());
 
         //通过openfeign来查询商品的商家信息
-        //TODO 1
         try {
             ShopsInfoVO shopsInfoVO = shopClient.getShopInfoById(products.getShopId());
             if (shopsInfoVO != null) {
@@ -482,6 +486,74 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
 
         return PageDTO.of(pageResult);
     }
+
+    @Override
+    public Map<Long, ProductDetailsDTO> getProductDetailsByIds(List<Long> productIds, List<Long> configIds) {
+        log.info("getProductDetailsByIds, productIds:{}", productIds);
+        if (productIds == null || productIds.isEmpty()) {
+            log.error("参数错误");
+            return Collections.emptyMap();
+        }
+
+        // 1️⃣ 查询商品基本信息
+        List<Products> productsList = this.listByIds(productIds);
+        if (productsList.isEmpty()) {
+            log.warn("未查询到商品信息");
+            return Collections.emptyMap();
+        }
+
+        // 2️⃣ 查询商品配置信息
+        List<ProductConfigurations> productConfigurationsList = productConfigurationsService.listByIds(configIds);
+        List<ProductConfigurationDTO> productConfigurationDTOList = BeanUtil.copyToList(productConfigurationsList, ProductConfigurationDTO.class);
+        Map<Long, List<ProductConfigurationDTO>> productConfigurationsMap = productConfigurationDTOList.stream()
+                .collect(Collectors.groupingBy(ProductConfigurationDTO::getProductId));
+
+        // 3️⃣ 查询商品图片信息
+        List<ProductImages> productImagesList = productImagesService.list(
+                new LambdaQueryWrapper<ProductImages>().in(ProductImages::getProductId, productIds)
+        );
+        Map<Long, String> productImageMap = productImagesList.stream()
+                .collect(Collectors.groupingBy(ProductImages::getProductId))
+                .entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> {
+                            List<ProductImages> images = entry.getValue();
+                            return images.stream()
+                                    .filter(ProductImages::getIsMain)
+                                    .map(ProductImages::getUrl)
+                                    .findFirst()
+                                    .orElseGet(() -> images.stream()
+                                            .max(Comparator.comparingInt(ProductImages::getSortOrder))
+                                            .map(ProductImages::getUrl)
+                                            .orElse(null));
+                        }
+                ));
+
+        // 4️⃣ 查询商家信息（远程调用）
+        List<Long> shopIds = productsList.stream().map(Products::getShopId).distinct().collect(Collectors.toList());
+        Map<Long, ShopsInfoVO> shopInfoByIds = shopIds.isEmpty() ? Collections.emptyMap() : shopClient.getShopInfoByIds(shopIds);
+
+        // 5️⃣ 组装信息
+        List<ProductDetailsDTO> productDetailsDTOList = BeanUtil.copyToList(productsList, ProductDetailsDTO.class);
+        for (ProductDetailsDTO productDetailsDTO : productDetailsDTOList) {
+            // 设置商品配置信息
+            productDetailsDTO.setConfigurations(productConfigurationsMap.getOrDefault(productDetailsDTO.getProductId(), Collections.emptyList()));
+
+            // 设置商品图片
+            productDetailsDTO.setUrl(productImageMap.getOrDefault(productDetailsDTO.getProductId(), "默认图片URL"));
+
+            // 设置商家名称
+            ShopsInfoVO shopInfo = shopInfoByIds.get(productDetailsDTO.getShopId());
+            productDetailsDTO.setShopName(shopInfo != null ? shopInfo.getShopName() : "未知商家");
+        }
+
+        // 6️⃣ 转换为 Map
+        return productDetailsDTOList.stream()
+                .collect(Collectors.toMap(ProductDetailsDTO::getProductId, Function.identity(), (existing, replacement) -> existing));
+    }
+
+
 
     private List<Long> findAllChildCategoriesOptimized(Long parentId, List<Categories> allCategories) {
         List<Long> result = new ArrayList<>();

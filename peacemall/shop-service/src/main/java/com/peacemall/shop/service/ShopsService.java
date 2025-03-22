@@ -51,4 +51,5 @@ public interface ShopsService extends IService<Shops> {
 
     PageDTO<ShopDTO> findAllShopsWithPage(int page, int size);
 
+
 }

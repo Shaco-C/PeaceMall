@@ -27,9 +27,9 @@
             <groupId>com.watergun</groupId>
             <artifactId>pm-api</artifactId>
             <version>1.0.0</version>
-        </dependency>
+        </dependency><![CDATA[
 
-        <!--web-->
+        ]]><!--web-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

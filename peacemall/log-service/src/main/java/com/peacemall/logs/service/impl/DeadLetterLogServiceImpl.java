@@ -42,7 +42,6 @@ public class DeadLetterLogServiceImpl extends ServiceImpl<DeadLetterLogMapper, D
         Page<DeadLetterLog> deadLetterLogPage = new Page<>(page,pageSize);
         this.page(deadLetterLogPage, deadLetterLogLambdaQueryWrapper);
         return R.ok(PageDTO.of(deadLetterLogPage));
-
     }
 
     @Override
@@ -94,7 +93,6 @@ public class DeadLetterLogServiceImpl extends ServiceImpl<DeadLetterLogMapper, D
             log.error("保存死信日志失败，详情: {}", deadLetterLog);
             throw new RuntimeException("保存死信日志失败");
         }
-
     }
 
     @Override

@@ -104,5 +104,4 @@ public class EsProductOperationListener {
             throw new RuntimeException("删除商品失败");
         }
     }
-
 }

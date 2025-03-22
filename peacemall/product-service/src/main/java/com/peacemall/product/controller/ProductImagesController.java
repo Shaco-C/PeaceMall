@@ -33,4 +33,6 @@ public class ProductImagesController {
         return productImagesService.deleteProductImages(idsDTO.getIdsList());
     }
 
+    //通过商品ids获得大量商品的图片信息
+
 }

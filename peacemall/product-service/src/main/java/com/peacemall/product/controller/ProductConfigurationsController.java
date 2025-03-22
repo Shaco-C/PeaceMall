@@ -42,5 +42,7 @@ public class ProductConfigurationsController {
         return productConfigurationsService.merchantUpdateProductConfigurations(productConfigurations);
     }
 
+    //通过商品ids获得商品配置
+
 
 }

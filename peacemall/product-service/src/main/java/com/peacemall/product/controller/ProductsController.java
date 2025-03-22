@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.ProductDTO;
+import com.peacemall.common.domain.dto.ProductDetailsDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import com.peacemall.product.domain.dto.AddProductDTO;
 import com.peacemall.product.domain.po.Products;
@@ -52,11 +53,6 @@ public class ProductsController {
         return productsService.merchantDeleteProduct(productId);
     }
 
-    //todo 搜索商品 es
-
-    //todo 首页商品显示
-
-
     //分页查询查看某个分类下的产品
     @ApiOperation(value = "分页查询查看某个分类下的产品")
     @GetMapping("/getProductsByCategoryId")
@@ -96,6 +92,14 @@ public class ProductsController {
     @GetMapping("/getProductDetailsById/{productId}")
     public R<ProductDetailsVO> getProductDetailsById(@PathVariable Long productId){
         return productsService.getProductDetailsById(productId);
+    }
+
+    //根据id查看批量的商品信息
+    @ApiOperation(value = "根据id查看批量的商品信息")
+    @GetMapping("/getProductDetailsByIds")
+    public Map<Long, ProductDetailsDTO> getProductDetailsByIds(@RequestParam List<Long> productIds,
+                                                               @RequestParam List<Long> configIds){
+        return productsService.getProductDetailsByIds(productIds,configIds);
     }
 
     //管理员审核商品

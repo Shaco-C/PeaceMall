@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.ProductDTO;
+import com.peacemall.common.domain.dto.ProductDetailsDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import com.peacemall.product.domain.dto.AddProductDTO;
 import com.peacemall.product.domain.po.Products;
@@ -51,5 +52,9 @@ public interface ProductsService extends IService<Products> {
     //查看所有的商品信息
     //用于将信息保存到es中
     PageDTO<ProductDTO> findAllProductsWithPage(int page, int size);
+
+
+    //批量获取商品的信息
+    Map<Long, ProductDetailsDTO> getProductDetailsByIds(List<Long> productIds,List<Long> configIds);
 
 }

@@ -3,6 +3,7 @@ package com.peacemall.api.client;
 import com.peacemall.api.client.fallback.ProductClientFallbackFactory;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.ProductDTO;
+import com.peacemall.common.domain.dto.ProductDetailsDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,4 +24,8 @@ public interface ProductClient {
 
     @GetMapping("/categories/getSubCategoryIds")
     List<Long> getSubCategoryIds(@RequestParam("categoryId") Long categoryId);
+
+    @GetMapping("/products/getProductDetailsByIds")
+    Map<Long, ProductDetailsDTO> getProductDetailsByIds(@RequestParam List<Long> productIds,
+                                                               @RequestParam List<Long> configIds);
 }

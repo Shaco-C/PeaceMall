@@ -3,6 +3,7 @@ package com.peacemall.api.client.fallback;
 import com.peacemall.api.client.ProductClient;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.ProductDTO;
+import com.peacemall.common.domain.dto.ProductDetailsDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
@@ -33,6 +34,13 @@ public class ProductClientFallbackFactory implements FallbackFactory<ProductClie
                 log.error("获取子分类失败");
                 log.error("获取的id为:{}",categoryId);
                 throw new RuntimeException("获取子分类失败");
+            }
+
+            @Override
+            public Map<Long, ProductDetailsDTO> getProductDetailsByIds(List<Long> productIds, List<Long> configIds) {
+                log.error("获取商品详情失败");
+                log.error("获取的id为:{}",productIds);
+                throw new RuntimeException("获取商品详情失败");
             }
         };
     }

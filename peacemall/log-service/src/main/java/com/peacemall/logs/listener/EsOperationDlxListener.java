@@ -26,7 +26,6 @@ public class EsOperationDlxListener {
     public void processDeadLetter(String message) {
         log.warn("接收到死信队列消息: {}", message);
 
-        // todo
         try{
             deadLetterLogService.saveToDeadLetterDatabase(message,"信息存储到es中失败");
         }catch (Exception e){
