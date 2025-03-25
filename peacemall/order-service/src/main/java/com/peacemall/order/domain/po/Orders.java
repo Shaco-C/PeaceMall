@@ -41,7 +41,10 @@ public class Orders implements Serializable {
     private String logisticsCom;  // 物流公司名称
 
     @TableField("total_amount")
-    private BigDecimal totalAmount;  // 订单总金额
+    private BigDecimal totalAmount;  // 商品实付金额
+
+    @TableField("original_amount")
+    private BigDecimal originalAmount;  // 商品总金额
 
     @TableField("status")
     private OrderStatus status;  // 订单状态

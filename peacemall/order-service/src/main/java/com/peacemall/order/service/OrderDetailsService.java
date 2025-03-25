@@ -1,4 +1,9 @@
 package com.peacemall.order.service;
 
-public interface OrderDetailsService {
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.peacemall.order.domain.po.OrderDetails;
+
+public interface OrderDetailsService extends IService<OrderDetails> {
+
+
 }

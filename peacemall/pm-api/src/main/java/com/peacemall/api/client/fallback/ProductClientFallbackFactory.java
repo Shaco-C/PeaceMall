@@ -42,6 +42,13 @@ public class ProductClientFallbackFactory implements FallbackFactory<ProductClie
                 log.error("获取的id为:{}",productIds);
                 throw new RuntimeException("获取商品详情失败");
             }
+
+            @Override
+            public void updateProductConfigurationsQuantity(Map<Long, Integer> configIdAndQuantityMap) {
+                log.error("更新商品配置数量失败");
+                log.error("更新的map为:{}",configIdAndQuantityMap);
+                throw new RuntimeException("更新商品配置数量失败");
+            }
         };
     }
 }

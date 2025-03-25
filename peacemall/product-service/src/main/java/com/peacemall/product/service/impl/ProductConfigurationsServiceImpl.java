@@ -1,10 +1,8 @@
 package com.peacemall.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.common.domain.R;
-import com.peacemall.common.domain.dto.IdsDTO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.product.domain.dto.ProductConfigDTO;
@@ -16,7 +14,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -132,5 +132,70 @@ public class ProductConfigurationsServiceImpl extends ServiceImpl<ProductConfigu
         LambdaQueryWrapper<ProductConfigurations> productConfigurationsLambdaQueryWrapper =new LambdaQueryWrapper<>();
         productConfigurationsLambdaQueryWrapper.eq(ProductConfigurations::getProductId, productId);
         return this.list(productConfigurationsLambdaQueryWrapper);
+    }
+
+    /**
+     * 商品库存的扣减方法
+     * @param configIdAndQuantityMap 配置扣减Map (key: configId, value: 扣减库存)
+     * @author watergun
+     */
+    //todo 加锁
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateProductConfigurationsQuantity(Map<Long, Integer> configIdAndQuantityMap) {
+        log.info("【库存扣减】开始: {}", configIdAndQuantityMap);
+
+        if (configIdAndQuantityMap == null || configIdAndQuantityMap.isEmpty()) {
+            log.error("【库存扣减】参数为空");
+            throw new IllegalArgumentException("库存扣减参数不能为空");
+        }
+
+        // 获取配置ID列表
+        List<Long> configIdsList = new ArrayList<>(configIdAndQuantityMap.keySet());
+
+        // 查询库存
+        List<ProductConfigurations> productConfigurationsList = this.listByIds(configIdsList);
+        if (productConfigurationsList == null || productConfigurationsList.isEmpty()) {
+            log.error("【库存扣减】查询失败，未找到商品配置: {}", configIdsList);
+            throw new RuntimeException("库存查询失败，商品配置不存在");
+        }
+
+        // 遍历并更新库存
+        List<ProductConfigurations> updatedList = new ArrayList<>();
+        for (ProductConfigurations productConfigurations : productConfigurationsList) {
+            Long configId = productConfigurations.getConfigId();
+            Integer stockChange = configIdAndQuantityMap.get(configId);
+
+            if (stockChange == null) {
+                log.warn("【库存扣减】configId={} 的库存变更值为空，跳过", configId);
+                continue;
+            }
+
+            //判断是增加库存还是减少库存
+            if (stockChange < 0){
+                // 校验库存是否足够
+                if (productConfigurations.getStock() < stockChange) {
+                    log.error("【库存扣减失败】库存不足: configId={}, 当前库存={}, 需要扣减={}",
+                            configId, productConfigurations.getStock(), stockChange);
+                    throw new RuntimeException("库存不足，扣减失败");
+                }
+            }
+
+            // 更新库存
+            // Map中存储的value已经处理好，减少存储负值，增加存储正值。
+            productConfigurations.setStock(productConfigurations.getStock() + stockChange);
+            updatedList.add(productConfigurations);
+        }
+
+        // 批量更新数据库
+        if (!updatedList.isEmpty()) {
+            boolean updateBatchById = this.updateBatchById(updatedList);
+            if (!updateBatchById) {
+                log.error("【库存扣减】数据库更新失败");
+                throw new RuntimeException("库存更新失败");
+            }
+        }
+
+        log.info("【库存扣减】成功: {}", updatedList);
     }
 }

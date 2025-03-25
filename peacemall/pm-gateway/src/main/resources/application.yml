@@ -45,6 +45,11 @@ spring:
           predicates:
             - Path=/cartItem/**
 
+        - id: order
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/**
+
 pm:
   jwt:
     secret: "EBI0t1Rd1PchUR7RidJQo7QweK9ADXs0Kt/YG++d7II=" # 密钥

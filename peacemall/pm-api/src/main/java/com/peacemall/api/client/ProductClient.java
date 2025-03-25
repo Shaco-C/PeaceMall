@@ -7,6 +7,7 @@ import com.peacemall.common.domain.dto.ProductDetailsDTO;
 import com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -28,4 +29,7 @@ public interface ProductClient {
     @GetMapping("/products/getProductDetailsByIds")
     Map<Long, ProductDetailsDTO> getProductDetailsByIds(@RequestParam List<Long> productIds,
                                                                @RequestParam List<Long> configIds);
+
+    @PutMapping("/productsConfigurations/merchant/updateStock")
+    void updateProductConfigurationsQuantity(@RequestBody Map<Long,Integer> configIdAndQuantityMap);
 }

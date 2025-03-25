@@ -2,11 +2,11 @@ package com.peacemall.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
-import com.peacemall.common.domain.dto.IdsDTO;
 import com.peacemall.product.domain.dto.ProductConfigDTO;
 import com.peacemall.product.domain.po.ProductConfigurations;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author watergun
@@ -29,6 +29,6 @@ public interface ProductConfigurationsService extends IService<ProductConfigurat
     List<ProductConfigurations> queryProductConfigurationsByProductId(Long productId);
 
     //todo 商品配置数量的增减（购买，退货，补货）
-    //todo void updateProductConfigurationsQuantity(PurchaseDTO purchaseDTO);
     //todo 添加库存变化日志
+    void updateProductConfigurationsQuantity(Map<Long,Integer> configIdAndQuantityMap);
 }

@@ -25,4 +25,7 @@ public class ProductConfigurationDTO {
 
     @ApiModelProperty("商品价格")
     private BigDecimal price;
+
+    @ApiModelProperty("商品库存")
+    private Integer stock;
 }

@@ -11,6 +11,8 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * @author watergun
  */
@@ -42,7 +44,12 @@ public class ProductConfigurationsController {
         return productConfigurationsService.merchantUpdateProductConfigurations(productConfigurations);
     }
 
-    //通过商品ids获得商品配置
+    //修改商品的库存
+    @ApiOperation("修改商品的库存")
+    @PutMapping("/merchant/updateStock")
+    public void updateProductConfigurationsQuantity(@RequestBody Map<Long,Integer> configIdAndQuantityMap){
+        productConfigurationsService.updateProductConfigurationsQuantity(configIdAndQuantityMap);
+    }
 
 
 }
