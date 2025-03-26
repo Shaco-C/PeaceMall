@@ -36,25 +36,49 @@ public class CartItemServiceImpl extends ServiceImpl<CartItemMapper, CartItem> i
 
     @Override
     public R<String> addProductToCart(CartItemDTO cartItemDTO) {
-        log.info("addProductToCart: {}", cartItemDTO);
-        if (cartItemDTO == null) {
-            log.error("addProductToCart: cartItemDTO is null");
-            return R.error("商品信息为空");
+        log.info("【添加商品到购物车】请求参数: {}", cartItemDTO);
+
+        // 1. 参数校验
+        if (Objects.isNull(cartItemDTO) || Objects.isNull(cartItemDTO.getConfigId()) || cartItemDTO.getQuantity() <= 0) {
+            log.error("【添加商品到购物车】参数非法: {}", cartItemDTO);
+            return R.error("商品信息为空或数量非法");
         }
+
         Long userId = UserContext.getUserId();
-        if (userId == null) {
-            log.error("addProductToCart: userId is null");
+        if (Objects.isNull(userId)) {
+            log.error("【添加商品到购物车】用户未登录");
             return R.error("用户未登录");
         }
-        CartItem cartItem = BeanUtil.copyProperties(cartItemDTO, CartItem.class);
-        cartItem.setUserId(userId);
-        boolean save = this.save(cartItem);
-        if (!save) {
-            log.error("addProductToCart: save cartItem failed");
+
+        // 2. 查询购物车是否已有该商品
+        LambdaQueryWrapper<CartItem> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(CartItem::getUserId, userId)
+                .eq(CartItem::getConfigId, cartItemDTO.getConfigId());
+
+        CartItem existCartItem = this.getOne(queryWrapper);
+
+        boolean success;
+        if (existCartItem != null) {
+            // 3.1 购物车已存在该商品，更新数量
+            existCartItem.setQuantity(existCartItem.getQuantity() + cartItemDTO.getQuantity());
+            success = this.updateById(existCartItem);
+            log.info("【添加商品到购物车】更新购物车: {}, 更新结果: {}", existCartItem, success);
+        } else {
+            // 3.2 购物车不存在该商品，新增
+            CartItem cartItem = BeanUtil.copyProperties(cartItemDTO, CartItem.class);
+            cartItem.setUserId(userId);
+            success = this.save(cartItem);
+            log.info("【添加商品到购物车】新增购物车: {}, 添加结果: {}", cartItem, success);
+        }
+
+        if (!success) {
+            log.error("【添加商品到购物车】操作失败: userId={}, cartItemDTO={}", userId, cartItemDTO);
             return R.error("添加商品到购物车失败");
         }
+
         return R.ok("添加商品到购物车成功");
     }
+
 
     @Override
     public R<String> deleteProductFromCart(Long cartItemId) {
