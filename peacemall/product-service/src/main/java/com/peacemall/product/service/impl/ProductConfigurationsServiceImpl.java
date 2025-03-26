@@ -1,14 +1,20 @@
 package com.peacemall.product.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.peacemall.common.constant.StockChangeLogMQConstant;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.StockChangeLogDTO;
+import com.peacemall.common.enums.StockSourceType;
 import com.peacemall.common.enums.UserRole;
+import com.peacemall.common.utils.RabbitMqHelper;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.product.domain.dto.ProductConfigDTO;
 import com.peacemall.product.domain.po.ProductConfigurations;
 import com.peacemall.product.mapper.ProductConfigurationsMapper;
 import com.peacemall.product.service.ProductConfigurationsService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -24,7 +30,10 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ProductConfigurationsServiceImpl extends ServiceImpl<ProductConfigurationsMapper, ProductConfigurations> implements ProductConfigurationsService {
+
+    private final RabbitMqHelper rabbitMqHelper;
 
     //创建商品配置
     @Override
@@ -162,6 +171,7 @@ public class ProductConfigurationsServiceImpl extends ServiceImpl<ProductConfigu
 
         // 遍历并更新库存
         List<ProductConfigurations> updatedList = new ArrayList<>();
+
         for (ProductConfigurations productConfigurations : productConfigurationsList) {
             Long configId = productConfigurations.getConfigId();
             Integer stockChange = configIdAndQuantityMap.get(configId);
@@ -195,7 +205,30 @@ public class ProductConfigurationsServiceImpl extends ServiceImpl<ProductConfigu
                 throw new RuntimeException("库存更新失败");
             }
         }
+        // 发送消息到库存日志队列
 
-        log.info("【库存扣减】成功: {}", updatedList);
+        log.info("【库存变化】成功: {}", updatedList);
+        //定义库存变化日志列表
+        // 定义库存变化日志列表
+        log.info("【库存扣减】发送消息到库存日志队列");
+        List<StockChangeLogDTO> stockChangeLogDTOS = productConfigurationsList.stream()
+                .map(productConfigurations -> {
+                    Long configId = productConfigurations.getConfigId();
+                    Integer delta = configIdAndQuantityMap.getOrDefault(configId, 0); // 避免 NullPointerException
+
+                    return new StockChangeLogDTO(
+                            productConfigurations.getProductId(),
+                            configId,
+                            delta,
+                            StockSourceType.SALED
+                    );
+                })
+                .collect(Collectors.toList());
+        log.info("原始消息为stockChangeLogDTOS{}",stockChangeLogDTOS);
+        String stockMsg = JSONUtil.toJsonStr(stockChangeLogDTOS);
+        rabbitMqHelper.sendMessage(StockChangeLogMQConstant.STOCK_LOG_EXCHANGE,
+                StockChangeLogMQConstant.STOCK_LOG_ADD_ROUTING_KEY,stockMsg);
+        log.info("【库存扣减】发送消息到库存日志队列: {}", stockMsg);
+
     }
 }

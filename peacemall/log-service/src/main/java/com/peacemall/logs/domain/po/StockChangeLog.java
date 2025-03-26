@@ -20,6 +20,9 @@ public class StockChangeLog implements Serializable {
     @TableId(value = "log_id", type = IdType.ASSIGN_ID)
     private Long logId;
 
+    @TableField("product_id")
+    private Long productId;
+
     @TableField("config_id")
     private Long configId;
 

@@ -51,6 +51,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     @GlobalTransactional
     //todo 优惠券考虑
+    //todo Redis + Token解决业务幂等问题
     public R<String> createOrders(PurchaseDTO purchaseDTO) {
         log.info("createOrders: {}", purchaseDTO);
         if (purchaseDTO == null){
@@ -203,6 +204,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
 
         //todo 通过RabbitMQ发送消息,将商品从购物车中删除
+
         log.info("【库存扣减】开始: {}", configIdAndStockChange);
         //调用openfeign同步扣减库存
         productClient.updateProductConfigurationsQuantity(configIdAndStockChange);

@@ -51,5 +51,4 @@ public class ProductConfigurationsController {
         productConfigurationsService.updateProductConfigurationsQuantity(configIdAndQuantityMap);
     }
 
-
 }
