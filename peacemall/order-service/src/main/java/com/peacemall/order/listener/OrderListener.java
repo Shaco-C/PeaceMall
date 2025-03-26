@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -38,7 +39,7 @@ public class OrderListener {
             exchange = @Exchange(name = OrderListenerMQConstant.ORDER_DELAY_DIRECT_EXCHANGE,delayed = "true"),
             key = OrderListenerMQConstant.ORDER_DELAY_PAYMENT_STATUS_CHECK_ROUTING_KEY
     ))
-    public void checkOrderPaymentStatus(String message) {
+    public void checkOrderPaymentStatus(@Payload String message) {
         log.info("checkOrderPaymentStatus: received message: {}", message);
 
         // 转换消息

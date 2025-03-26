@@ -3,6 +3,7 @@ package com.peacemall.order.service.impl;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.ProductClient;
+import com.peacemall.common.constant.CartItemMQConstant;
 import com.peacemall.common.constant.OrderListenerMQConstant;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.*;
@@ -19,6 +20,7 @@ import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -200,18 +202,53 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     OrderListenerMQConstant.ORDER_DELAY_PAYMENT_STATUS_CHECK_ROUTING_KEY,
                     jsonMessage,
                     20000
-            );
+            );//延迟20秒
+            //todo 后续延迟要变为10分钟
         }
 
-        //todo 通过RabbitMQ发送消息,将商品从购物车中删除
+        // 通过RabbitMQ发送消息,将商品从购物车中删除
+        // 根据configIds和userId来进行删除
+        log.info("发送购物车删除消息");
+        sendDeleteCartMessage(configIds, userId);
+        log.info("发送完毕");
 
         log.info("【库存扣减】开始: {}", configIdAndStockChange);
         //调用openfeign同步扣减库存
         productClient.updateProductConfigurationsQuantity(configIdAndStockChange);
-
+        log.info("【库存扣减】结束: {}", configIdAndStockChange);
 
         return R.ok("创建订单成功");
     }
+
+
+    public void sendDeleteCartMessage(List<Long> configIds, Long userId) {
+        if (CollectionUtils.isEmpty(configIds) || userId == null) {
+            log.warn("sendDeleteCartMessage: 参数不合法, configIds={}, userId={}", configIds, userId);
+            return;
+        }
+
+        // 构造 DTO
+        CartMessageDTO cartMessageDTO = new CartMessageDTO();
+        cartMessageDTO.setConfigIds(configIds);
+        cartMessageDTO.setUserId(userId);
+        cartMessageDTO.setOperation("DELETE CART_ITEMS");
+
+        try {
+            String cartMsg = JSONUtil.toJsonStr(cartMessageDTO);
+            log.info("准备发送购物车删除消息: {}", cartMsg);
+
+            rabbitMqHelper.sendMessage(
+                    CartItemMQConstant.CART_ITEM_EXCHANGE,
+                    CartItemMQConstant.CART_ITEM_DELETE_ROUTING_KEY,
+                    cartMsg
+            );
+
+            log.info("购物车删除消息发送成功: {}", cartMsg);
+        } catch (Exception e) {
+            log.error("购物车删除消息发送失败, configIds={}, userId={}", configIds, userId, e);
+        }
+    }
+
 
 
 }

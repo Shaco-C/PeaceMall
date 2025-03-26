@@ -18,9 +18,11 @@ import com.peacemall.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -189,5 +191,29 @@ public class CartItemServiceImpl extends ServiceImpl<CartItemMapper, CartItem> i
         pageDTO.setPages(pageParam.getPages());
         return R.ok(pageDTO);
     }
+
+    @Override
+    public boolean deleteCartItemByConfigIds(List<Long> configIds, Long userId) {
+        log.info("deleteCartItemByConfigIds: configIds={}, userId={}", configIds, userId);
+
+        if (Objects.isNull(userId) || CollectionUtils.isEmpty(configIds)) {
+            log.error("deleteCartItemByConfigIds: 参数错误，configIds={}，userId={}", configIds, userId);
+            throw new IllegalArgumentException("参数错误：configIds 不能为空，userId 不能为空");
+        }
+
+        LambdaQueryWrapper<CartItem> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(CartItem::getConfigId, configIds)
+                .eq(CartItem::getUserId, userId);
+
+        boolean removed = this.remove(queryWrapper);
+        if (!removed) {
+            log.warn("deleteCartItemByConfigIds: 删除购物车商品失败, configIds={}, userId={}", configIds, userId);
+            throw new RuntimeException("删除购物车商品失败");
+        }
+
+        log.info("删除购物车商品成功, configIds={}, userId={}", configIds, userId);
+        return true;
+    }
+
 
 }

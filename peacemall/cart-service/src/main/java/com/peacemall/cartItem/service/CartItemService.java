@@ -23,5 +23,8 @@ public interface CartItemService extends IService<CartItem> {
     //获取购物车中的商品列表
     R<PageDTO<CartItemVO>> showCartItems(int page,int pageSize);
 
+    //通过configIds将购物车中的内容删除
+    boolean deleteCartItemByConfigIds(List<Long> configIds,Long userId);
+
 
 }

@@ -7,6 +7,8 @@ import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import java.util.Map;
+
 @Slf4j
 @RequiredArgsConstructor
 public class RabbitMqHelper {
@@ -24,6 +26,17 @@ public class RabbitMqHelper {
             return message;
         });
     }
+
+    public void sendMessageWithHeaders(String exchange, String routingKey, Object msg, Map<String, Object> headers) {
+        log.debug("准备发送消息，exchange:{}, routingKey:{}, msg:{}, headers:{}", exchange, routingKey, msg, headers);
+        rabbitTemplate.convertAndSend(exchange, routingKey, msg, message -> {
+            if (headers != null) {
+                headers.forEach((key, value) -> message.getMessageProperties().setHeader(key, value));
+            }
+            return message;
+        });
+    }
+
 
     public void sendMessageWithConfirm(String exchange, String routingKey, Object msg, int maxRetries){
         log.debug("准备发送消息，exchange:{}, routingKey:{}, msg:{}", exchange, routingKey, msg);
