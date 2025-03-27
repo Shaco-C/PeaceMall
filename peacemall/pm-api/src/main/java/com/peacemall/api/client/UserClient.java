@@ -2,6 +2,7 @@ package com.peacemall.api.client;
 
 import com.peacemall.api.client.fallback.UserClientFallbackFactory;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.UserAddressDTO;
 import com.peacemall.common.domain.dto.UserDTO;
 import com.peacemall.common.enums.UserRole;
 
@@ -23,4 +24,7 @@ public interface UserClient {
     PageDTO<UserDTO> findAllUsersWithPage(@RequestParam(value = "page",defaultValue = "1")int page,
                                                  @RequestParam(value = "pageSize",defaultValue = "1000")int pageSize);
 
+
+    @GetMapping("/addresses/getAddressById")
+    UserAddressDTO getUserAddressById(@RequestParam Long addressId);
 }

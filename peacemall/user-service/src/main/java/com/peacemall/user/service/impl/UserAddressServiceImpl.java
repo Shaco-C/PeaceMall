@@ -1,11 +1,13 @@
 package com.peacemall.user.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.UserAddressDTO;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.user.domain.po.UserAddress;
 import com.peacemall.common.enums.UserRole;
@@ -303,6 +305,28 @@ public class UserAddressServiceImpl extends ServiceImpl<UserAddressMapper, UserA
             log.error("adminPhysicallyDeleteAddressWith0Status failed: 数据库删除操作未生效");
             return R.error("删除失败");
         }
+    }
+
+    /**
+     * 根据addressId返回用户地址
+     * @param addressId 地址id
+     * @return UserAddressDTO  地址信息
+     * @author watergun
+     */
+    
+    @Override
+    public UserAddressDTO getUserAddressById(Long addressId) {
+        log.info("getUserAddressById is called, addressId: {}", addressId);
+        if (addressId == null) {
+            log.warn("getUserAddressById failed: 请求参数错误, addressId为空");
+            return new UserAddressDTO();
+        }
+        UserAddress address = this.getById(addressId);
+        if (address == null) {
+            log.warn("getUserAddressById failed: 地址不存在, addressId: {}", addressId);
+            return new UserAddressDTO();
+        }
+        return BeanUtil.copyProperties(address, UserAddressDTO.class);
     }
 
 

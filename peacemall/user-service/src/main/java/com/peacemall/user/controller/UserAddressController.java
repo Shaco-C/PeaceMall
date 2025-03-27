@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.IdsDTO;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.UserAddressDTO;
 import com.peacemall.user.domain.po.UserAddress;
 import com.peacemall.user.service.UserAddressService;
 import io.swagger.annotations.Api;
@@ -81,5 +82,12 @@ public class UserAddressController {
     @DeleteMapping("/admin/deleteDeletedAddress")
     public R<String> adminPhysicallyDeleteAddressWith0Status(){
         return userAddressService.adminPhysicallyDeleteAddressWith0Status();
+    }
+
+    //根据id获取用户地址
+    @ApiOperation(value = "根据id获取用户地址")
+    @GetMapping("/getAddressById")
+    public UserAddressDTO getUserAddressById(@RequestParam Long addressId){
+        return userAddressService.getUserAddressById(addressId);
     }
 }

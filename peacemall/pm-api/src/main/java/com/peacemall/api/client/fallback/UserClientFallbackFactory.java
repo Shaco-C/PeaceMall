@@ -2,6 +2,7 @@ package com.peacemall.api.client.fallback;
 
 import com.peacemall.api.client.UserClient;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.UserAddressDTO;
 import com.peacemall.common.domain.dto.UserDTO;
 import com.peacemall.common.enums.UserRole;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,13 @@ public class UserClientFallbackFactory implements FallbackFactory<UserClient> {
                 log.error("findAllUsersWithPage error cause", cause);
                 log.error("page:{},size:{},分页查询用户信息失败，请重试",page,pageSize);
                 throw new RuntimeException("page:{},size:{},分页查询用户信息失败，请重试"+cause);
+            }
+
+            @Override
+            public UserAddressDTO getUserAddressById(Long addressId) {
+                log.error("getUserAddressById error cause", cause);
+                log.error("addressId:{},获取用户地址信息失败，请重试",addressId);
+                return new UserAddressDTO();
             }
         };
     }

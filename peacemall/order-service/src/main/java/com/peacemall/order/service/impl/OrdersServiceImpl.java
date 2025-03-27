@@ -1,16 +1,20 @@
 package com.peacemall.order.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.ProductClient;
+import com.peacemall.api.client.UserClient;
 import com.peacemall.common.constant.CartItemMQConstant;
 import com.peacemall.common.constant.OrderListenerMQConstant;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.*;
 import com.peacemall.common.utils.RabbitMqHelper;
 import com.peacemall.common.utils.UserContext;
+import com.peacemall.order.domain.dto.OrderDetailsProductInfoDTO;
 import com.peacemall.order.domain.po.OrderDetails;
 import com.peacemall.order.domain.po.Orders;
+import com.peacemall.order.domain.vo.OrderDetailsVO;
 import com.peacemall.order.enums.OrderStatus;
 import com.peacemall.order.enums.ReturnStatus;
 import com.peacemall.order.mapper.OrdersMapper;
@@ -40,6 +44,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final ProductClient productClient;
 
     private final RabbitMqHelper rabbitMqHelper;
+
+    private final UserClient userClient;
 
 
 
@@ -218,6 +224,85 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         log.info("【库存扣减】结束: {}", configIdAndStockChange);
 
         return R.ok("创建订单成功");
+    }
+
+    /**
+     * 根据订单ID获取订单详情
+     * @param orderId 订单ID
+     * @return 订单详情信息
+     */
+    @Override
+    public R<OrderDetailsVO> getOrderDetailsById(Long orderId) {
+        log.info("查询订单详情, 订单ID: {}", orderId);
+
+        // 查询订单基本信息
+        Orders orders = this.getById(orderId);
+        if (orders == null) {
+            log.error("订单不存在, 订单ID: {}", orderId);
+            return R.error("订单不存在");
+        }
+
+        // 复制订单基本信息
+        OrderDetailsVO orderDetailsVO = new OrderDetailsVO();
+        BeanUtil.copyProperties(orders, orderDetailsVO);
+
+        // 查询订单详情列表
+        List<OrderDetails> orderDetailsList = orderDetailsService.getOrderDetailsByOrderId(orderId);
+        if (orderDetailsList.isEmpty()) {
+            log.warn("订单详情为空, 订单ID: {}", orderId);
+            return R.ok(orderDetailsVO);
+        }
+
+        // 获取所有商品 ID 和商品配置 ID
+        List<Long> productIdList = orderDetailsList.stream()
+                .map(OrderDetails::getProductId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Long> configIdList = orderDetailsList.stream()
+                .map(OrderDetails::getConfigId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // 远程调用查询商品详情
+        Map<Long, ProductDetailsDTO> productDetailsMap = productClient.getProductDetailsByIds(productIdList, configIdList);
+
+        // 得到任意一个productDetailsDTO
+        ProductDetailsDTO anyValue = productDetailsMap.values().iterator().next();
+        //设置店铺名称
+        orderDetailsVO.setShopName(anyValue.getShopName());
+
+        // 组装商品配置 Map
+        Map<Long, String> configDetailsMap = productDetailsMap.values().stream()
+                .flatMap(product -> product.getConfigurations().stream())
+                .collect(Collectors.toMap(ProductConfigurationDTO::getConfigId, ProductConfigurationDTO::getConfiguration));
+
+        // 组装订单详情商品信息列表
+        List<OrderDetailsProductInfoDTO> orderProductList = orderDetailsList.stream().map(orderDetail -> {
+            OrderDetailsProductInfoDTO productInfoDTO = new OrderDetailsProductInfoDTO();
+            BeanUtil.copyProperties(orderDetail, productInfoDTO);
+
+            ProductDetailsDTO productDetailsDTO = productDetailsMap.get(orderDetail.getProductId());
+            if (productDetailsDTO != null) {
+                productInfoDTO.setName(productDetailsDTO.getName());
+                productInfoDTO.setUrl(productDetailsDTO.getUrl());
+                productInfoDTO.setBrand(productDetailsDTO.getBrand());
+            }
+
+            // 设置商品配置详情
+            productInfoDTO.setConfiguration(configDetailsMap.get(orderDetail.getConfigId()));
+
+            return productInfoDTO;
+        }).collect(Collectors.toList());
+
+        // 设置订单详情的商品信息
+        orderDetailsVO.setOrderItemsList(orderProductList);
+
+        //查询地址信息
+        UserAddressDTO addressById = userClient.getUserAddressById(orders.getAddressId());
+        orderDetailsVO.setUserAddressDTO(addressById);
+
+        return R.ok(orderDetailsVO);
     }
 
 

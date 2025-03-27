@@ -1,9 +1,9 @@
 package com.peacemall.user.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.UserAddressDTO;
 import com.peacemall.user.domain.po.UserAddress;
 
 import java.util.List;
@@ -37,5 +37,9 @@ public interface UserAddressService extends IService<UserAddress> {
 
     //管理员删除用户删除的地址信息
     R<String> adminPhysicallyDeleteAddressWith0Status();
+
+
+    //根据id获取用户地址
+    UserAddressDTO getUserAddressById(Long addressId);
 
 }
