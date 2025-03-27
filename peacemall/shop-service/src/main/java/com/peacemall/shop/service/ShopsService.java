@@ -6,6 +6,7 @@ import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.ShopDTO;
 import com.peacemall.common.domain.dto.UserDTO;
+import com.peacemall.common.domain.dto.WalletAmountChangeDTO;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.shop.domain.po.Shops;
 import com.peacemall.shop.enums.ShopStatus;
@@ -50,6 +51,10 @@ public interface ShopsService extends IService<Shops> {
     R<String> adminCleanClosedShops();
 
     PageDTO<ShopDTO> findAllShopsWithPage(int page, int size);
+
+
+    //商家待确认余额的变化
+    void merchantPendingBalanceChange(WalletAmountChangeDTO walletAmountChangeDTO);
 
 
 }

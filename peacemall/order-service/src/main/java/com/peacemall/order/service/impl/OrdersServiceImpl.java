@@ -2,11 +2,12 @@ package com.peacemall.order.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.ProductClient;
 import com.peacemall.api.client.UserClient;
-import com.peacemall.common.constant.CartItemMQConstant;
-import com.peacemall.common.constant.OrderListenerMQConstant;
+import com.peacemall.common.constant.*;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.*;
 import com.peacemall.common.utils.RabbitMqHelper;
@@ -15,6 +16,7 @@ import com.peacemall.order.domain.dto.OrderDetailsProductInfoDTO;
 import com.peacemall.order.domain.po.OrderDetails;
 import com.peacemall.order.domain.po.Orders;
 import com.peacemall.order.domain.vo.OrderDetailsVO;
+import com.peacemall.order.domain.vo.OrdersHistoryVO;
 import com.peacemall.order.enums.OrderStatus;
 import com.peacemall.order.enums.ReturnStatus;
 import com.peacemall.order.mapper.OrdersMapper;
@@ -32,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -207,8 +210,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     OrderListenerMQConstant.ORDER_DELAY_DIRECT_EXCHANGE,
                     OrderListenerMQConstant.ORDER_DELAY_PAYMENT_STATUS_CHECK_ROUTING_KEY,
                     jsonMessage,
-                    20000
-            );//延迟20秒
+                    600000
+            );//延迟10分钟
             //todo 后续延迟要变为10分钟
         }
 
@@ -234,6 +237,16 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     public R<OrderDetailsVO> getOrderDetailsById(Long orderId) {
         log.info("查询订单详情, 订单ID: {}", orderId);
+        if(orderId == null){
+            log.error("订单ID为空");
+            return R.error("订单ID为空");
+        }
+
+        Long userId = UserContext.getUserId();
+        if(userId == null){
+            log.error("用户未登录");
+            return R.error("用户未登录");
+        }
 
         // 查询订单基本信息
         Orders orders = this.getById(orderId);
@@ -305,6 +318,164 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         return R.ok(orderDetailsVO);
     }
 
+    @Override
+    public R<PageDTO<OrdersHistoryVO>> getOrderHistoryList(int page, int pageSize) {
+        log.info("查询订单历史, page: {}, pageSize: {}", page, pageSize);
+        if(page <= 0 || pageSize <= 0){
+            log.error("分页参数不合法");
+            return R.error("分页参数不合法");
+        }
+        Long userId = UserContext.getUserId();
+        if(userId == null){
+            log.error("用户未登录");
+            return R.error("用户未登录");
+        }
+        Page<Orders> ordersPage = new Page<>(page, pageSize);
+        LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Orders::getUserId,userId)
+                .orderByDesc(Orders::getCreatedAt);
+        this.page(ordersPage, queryWrapper);
+        List<Orders> ordersList = ordersPage.getRecords();
+        Map<Long,Orders> ordersMap = ordersList.stream().collect(Collectors.toMap(Orders::getOrderId, Function.identity()));
+        if(ordersList.isEmpty()){
+            log.warn("订单历史为空");
+            return R.ok(new PageDTO<>());
+        }
+        List<OrdersHistoryVO> ordersHistoryVOList = new ArrayList<>();
+        List<Long> orderIdList = ordersList.stream().map(Orders::getOrderId).collect(Collectors.toList());
+        for (Long orderId : orderIdList) {
+            log.info("订单id: {}",orderId);
+            //todo
+            // 查询订单详情列表
+            List<OrderDetails> orderDetailsList = orderDetailsService.getOrderDetailsByOrderId(orderId);
+            if (orderDetailsList.isEmpty()) {
+                log.warn("订单详情为空, 订单ID: {}", orderId);
+                continue;
+            }
+
+            OrdersHistoryVO ordersHistoryVO = new OrdersHistoryVO();
+            BeanUtil.copyProperties(ordersMap.get(orderId),ordersHistoryVO);
+
+
+            // 获取所有商品 ID 和商品配置 ID
+            List<Long> productIdList = orderDetailsList.stream()
+                    .map(OrderDetails::getProductId)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            List<Long> configIdList = orderDetailsList.stream()
+                    .map(OrderDetails::getConfigId)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            // 远程调用查询商品详情
+            Map<Long, ProductDetailsDTO> productDetailsMap = productClient.getProductDetailsByIds(productIdList, configIdList);
+
+            // 得到任意一个productDetailsDTO
+            ProductDetailsDTO anyValue = productDetailsMap.values().iterator().next();
+            //设置店铺名称
+            ordersHistoryVO.setShopName(anyValue.getShopName());
+
+            // 组装商品配置 Map
+            Map<Long, String> configDetailsMap = productDetailsMap.values().stream()
+                    .flatMap(product -> product.getConfigurations().stream())
+                    .collect(Collectors.toMap(ProductConfigurationDTO::getConfigId, ProductConfigurationDTO::getConfiguration));
+
+            // 组装订单详情商品信息列表
+            List<OrderDetailsProductInfoDTO> orderProductList = orderDetailsList.stream().map(orderDetail -> {
+                OrderDetailsProductInfoDTO productInfoDTO = new OrderDetailsProductInfoDTO();
+                BeanUtil.copyProperties(orderDetail, productInfoDTO);
+
+                ProductDetailsDTO productDetailsDTO = productDetailsMap.get(orderDetail.getProductId());
+                if (productDetailsDTO != null) {
+                    productInfoDTO.setName(productDetailsDTO.getName());
+                    productInfoDTO.setUrl(productDetailsDTO.getUrl());
+                    productInfoDTO.setBrand(productDetailsDTO.getBrand());
+                }
+
+                // 设置商品配置详情
+                productInfoDTO.setConfiguration(configDetailsMap.get(orderDetail.getConfigId()));
+
+                return productInfoDTO;
+            }).collect(Collectors.toList());
+
+            // 设置订单详情的商品信息
+            ordersHistoryVO.setOrderItemsList(orderProductList);
+
+            ordersHistoryVOList.add(ordersHistoryVO);
+        }
+        PageDTO<OrdersHistoryVO> ordersHistoryVOPage = new PageDTO<>();
+        ordersHistoryVOPage.setList(ordersHistoryVOList);
+        ordersHistoryVOPage.setPages(ordersPage.getPages());
+        ordersHistoryVOPage.setTotal(ordersPage.getTotal());
+        return R.ok(ordersHistoryVOPage);
+    }
+
+    @Override
+    @GlobalTransactional
+    public R<String> cancelOrder(Long orderId) {
+        log.info("取消订单, 订单ID: {}", orderId);
+        if(orderId == null){
+            log.warn("订单ID为空");
+            return R.error("订单ID为空");
+        }
+        Long userId = UserContext.getUserId();
+        if(userId == null){
+            log.warn("用户ID为空");
+            return R.error("用户未登录");
+        }
+        Orders orders = this.getById(orderId);
+        if(orders == null){
+            log.warn("订单不存在, 订单ID: {}", orderId);
+            return R.error("订单不存在");
+        }
+        if(!orders.getUserId().equals(userId)){
+            log.warn("用户ID与订单用户ID不匹配, 用户ID: {}, 订单ID: {}", userId, orderId);
+            return R.error("订单不匹配");
+        }
+        if(orders.getStatus() != OrderStatus.PENDING_PAYMENT && orders.getStatus() != OrderStatus.PENDING){
+            log.warn("订单状态不正确, 订单ID: {}, 状态: {}", orderId, orders.getStatus());
+            return R.error("订单状态不正确，不能够取消");
+        }
+        orders.setStatus(OrderStatus.CANCELLED);
+        boolean update = this.updateById(orders);
+        if(!update){
+            log.warn("取消订单失败, 订单ID: {}", orderId);
+            return R.error("取消订单失败");
+        }
+
+        // 发送库存回退消息消息
+        // 组成Map<Long,Integer> configIdAndQuantityMap的关系
+        // 查询所有orderDetails
+        List<OrderDetails> orderDetailsByOrderId = orderDetailsService.getOrderDetailsByOrderId(orderId);
+        Map<Long,Integer> configIdAndQuantityMap = orderDetailsByOrderId.stream()
+                .collect(Collectors.toMap(OrderDetails::getConfigId, OrderDetails::getQuantity));
+        String stockMsg = JSONUtil.toJsonStr(configIdAndQuantityMap);
+        rabbitMqHelper.sendMessage(ProductConfigurationMQConstant.PRODUCT_CONFIGURATION_EXCHANGE,
+                ProductConfigurationMQConstant.PRODUCT_CONFIGURATION_UPDATE_ROUTING_KEY,stockMsg);
+
+        // 如果用户是在支付状态下取消订单的
+        if ( OrderStatus.PENDING_PAYMENT.equals(orders.getStatus())) {
+            // 余额需要回退给用户
+            WalletAmountChangeDTO userWalletChange = new WalletAmountChangeDTO();
+            userWalletChange.setId(orders.getUserId());
+            userWalletChange.setChangeAmount(orders.getTotalAmount());
+            String userPendingBalanceChangeMsg = JSONUtil.toJsonStr(userWalletChange);
+            rabbitMqHelper.sendMessage(WallerMQConstant.WALLET_EXCHANGE,
+                    WallerMQConstant.WALLET_UPDATE_PENDING_BALANCE_BY_USERID_ROUTING_KEY,userPendingBalanceChangeMsg);
+
+            // 商家的待处理金额需要扣减
+            WalletAmountChangeDTO merchantWalletChange = new WalletAmountChangeDTO();
+            merchantWalletChange.setId(orders.getShopId());
+            merchantWalletChange.setChangeAmount(orders.getTotalAmount().negate());
+            String shopPendingBalanceChangeMsg = JSONUtil.toJsonStr(merchantWalletChange);
+            rabbitMqHelper.sendMessage(ShopMQConstant.SHOP_EXCHANGE,
+                    ShopMQConstant.SHOP_UPDATE_PENDING_BALANCE_BY_SHOPID_ROUTING_KEY,shopPendingBalanceChangeMsg);
+        }
+
+        return R.ok("取消订单成功");
+    }
+
 
     public void sendDeleteCartMessage(List<Long> configIds, Long userId) {
         if (CollectionUtils.isEmpty(configIds) || userId == null) {
@@ -333,7 +504,5 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             log.error("购物车删除消息发送失败, configIds={}, userId={}", configIds, userId, e);
         }
     }
-
-
 
 }

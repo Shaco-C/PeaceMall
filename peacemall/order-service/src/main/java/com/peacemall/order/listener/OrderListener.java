@@ -10,7 +10,6 @@ import com.peacemall.order.enums.OrderStatus;
 import com.peacemall.order.service.OrdersService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;

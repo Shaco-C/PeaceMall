@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.common.constant.FlowLogsMQConstants;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.FlowLogsDTO;
+import com.peacemall.common.domain.dto.WalletAmountChangeDTO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.common.enums.WalletFlowType;
 import com.peacemall.common.exception.BadRequestException;
@@ -253,4 +254,40 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         }
         log.info("用户钱包删除成功");
     }
+
+    @Override
+    public void userWalletPendingAmountChange(WalletAmountChangeDTO walletAmountChangeDTO) {
+        log.info("userWalletAmountChange called with DTO: {}", walletAmountChangeDTO);
+
+        if (walletAmountChangeDTO == null || walletAmountChangeDTO.getId() == null || walletAmountChangeDTO.getChangeAmount() == null) {
+            log.error("参数错误: {}", walletAmountChangeDTO);
+            throw new BadRequestException("参数错误");
+        }
+
+        Long userId = walletAmountChangeDTO.getId();
+        BigDecimal amountChange = walletAmountChangeDTO.getChangeAmount();
+
+        LambdaQueryWrapper<Wallet> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Wallet::getUserId, userId);
+        Wallet wallet = this.getOne(queryWrapper);
+        if (wallet == null) {
+            log.error("用户钱包不存在, userId: {}", userId);
+            throw new BadRequestException("用户钱包不存在");
+        }
+
+        BigDecimal availableBalance = wallet.getAvailableBalance();
+        BigDecimal pendingBalance = wallet.getPendingBalance().add(amountChange);
+        wallet.setPendingBalance(pendingBalance);
+        wallet.setTotalBalance(availableBalance.add(pendingBalance));
+
+        boolean update = this.updateById(wallet);
+        if (!update) {
+            log.error("用户钱包更新失败, userId: {}", userId);
+            throw new RuntimeException("用户钱包更新失败");
+        }
+
+        log.info("用户钱包更新成功, userId: {}, pendingBalance: {}, totalBalance: {}",
+                userId, wallet.getPendingBalance(), wallet.getTotalBalance());
+    }
+
 }

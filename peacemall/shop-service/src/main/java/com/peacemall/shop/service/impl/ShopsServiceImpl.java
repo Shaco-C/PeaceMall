@@ -6,12 +6,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.UserClient;
+import com.peacemall.api.client.WalletClient;
 import com.peacemall.common.constant.EsOperataionMQConstant;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.ShopDTO;
+import com.peacemall.common.domain.dto.WalletAmountChangeDTO;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.common.enums.UserRole;
+import com.peacemall.common.exception.BadRequestException;
 import com.peacemall.common.utils.RabbitMqHelper;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.shop.domain.po.Shops;
@@ -24,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,6 +39,7 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
 
     private final UserClient userClient;
     private final RabbitMqHelper rabbitMqHelper;
+    private final WalletClient walletClient;
     @Override
     public boolean createUserShop(Shops shops) {
         log.info("createUserShop method is called,shops:{}", shops);
@@ -283,4 +288,40 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
 
         return PageDTO.of(pageResult);
     }
+
+    @Override
+    public void merchantPendingBalanceChange(WalletAmountChangeDTO walletAmountChangeDTO) {
+        log.info("merchantPendingBalanceChange method is called");
+
+        // 参数非空校验
+        if (walletAmountChangeDTO == null || walletAmountChangeDTO.getId() == null) {
+            log.error("Invalid walletAmountChangeDTO: {}", walletAmountChangeDTO);
+            throw new IllegalArgumentException("walletAmountChangeDTO or shopId is null");
+        }
+
+        Long shopId = walletAmountChangeDTO.getId();
+        log.info("Processing merchant pending balance change for shopId: {}", shopId);
+
+        // 查询商店信息
+        Shops shops = this.getById(shopId);
+        if (shops == null) {
+            log.error("Shop not found for shopId: {}", shopId);
+            throw new BadRequestException("Shop does not exist");
+        }
+        log.info("Shop found for shopId: {}", shopId);
+
+        // 校验金额是否为0
+        if (walletAmountChangeDTO.getChangeAmount() == null || walletAmountChangeDTO.getChangeAmount().compareTo(BigDecimal.ZERO) == 0) {
+            log.warn("Change amount is zero or null, no need to update");
+            return;
+        }
+
+        // 将walletAmountChangeDTO中的id换为userId
+        walletAmountChangeDTO.setId(shops.getUserId());
+        log.info("Calling userWalletPendingAmountChange for userId: {}", shops.getUserId());
+
+        walletClient.userWalletPendingAmountChange(walletAmountChangeDTO);
+        log.info("Pending balance change completed for userId: {}", shops.getUserId());
+    }
+
 }

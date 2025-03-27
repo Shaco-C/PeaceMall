@@ -152,11 +152,11 @@ public class ProductConfigurationsServiceImpl extends ServiceImpl<ProductConfigu
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateProductConfigurationsQuantity(Map<Long, Integer> configIdAndQuantityMap) {
-        log.info("【库存扣减】开始: {}", configIdAndQuantityMap);
+        log.info("【库存更新】开始: {}", configIdAndQuantityMap);
 
         if (configIdAndQuantityMap == null || configIdAndQuantityMap.isEmpty()) {
-            log.error("【库存扣减】参数为空");
-            throw new IllegalArgumentException("库存扣减参数不能为空");
+            log.error("【库存更新】参数为空");
+            throw new IllegalArgumentException("库存更新参数不能为空");
         }
 
         // 获取配置ID列表
@@ -165,7 +165,7 @@ public class ProductConfigurationsServiceImpl extends ServiceImpl<ProductConfigu
         // 查询库存
         List<ProductConfigurations> productConfigurationsList = this.listByIds(configIdsList);
         if (productConfigurationsList == null || productConfigurationsList.isEmpty()) {
-            log.error("【库存扣减】查询失败，未找到商品配置: {}", configIdsList);
+            log.error("【库存更新】查询失败，未找到商品配置: {}", configIdsList);
             throw new RuntimeException("库存查询失败，商品配置不存在");
         }
 
@@ -177,7 +177,7 @@ public class ProductConfigurationsServiceImpl extends ServiceImpl<ProductConfigu
             Integer stockChange = configIdAndQuantityMap.get(configId);
 
             if (stockChange == null) {
-                log.warn("【库存扣减】configId={} 的库存变更值为空，跳过", configId);
+                log.warn("【库存更新】configId={} 的库存变更值为空，跳过", configId);
                 continue;
             }
 

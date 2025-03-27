@@ -6,8 +6,6 @@ server:
     accept-count: 50 # 最大排队等待数量
     max-connections: 100 # 允许的最大连接
 spring:
-  elasticsearch:
-    uris: http://192.168.145.134:9200
   rabbitmq:
     host: ${pm.mq.host:192.168.145.134} # 主机名
     listener:

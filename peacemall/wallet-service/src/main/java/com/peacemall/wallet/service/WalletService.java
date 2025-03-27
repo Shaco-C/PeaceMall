@@ -2,6 +2,7 @@ package com.peacemall.wallet.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
+import com.peacemall.common.domain.dto.WalletAmountChangeDTO;
 import com.peacemall.wallet.domain.po.Wallet;
 import com.peacemall.common.domain.vo.WalletVO;
 
@@ -32,4 +33,6 @@ public interface WalletService extends IService<Wallet> {
     //管理员删除用户的钱包
     void adminDeleteWallet(List<Long> userId);
 
+    //用户余额的变化
+    void userWalletPendingAmountChange(WalletAmountChangeDTO walletAmountChangeDTO);
 }

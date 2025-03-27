@@ -28,7 +28,7 @@ public interface ProductConfigurationsService extends IService<ProductConfigurat
     //根据商品id查询商品配置
     List<ProductConfigurations> queryProductConfigurationsByProductId(Long productId);
 
-    //todo 商品配置数量的增减（购买，退货，补货）
-    //todo 添加库存变化日志
+    // 商品配置数量的增减（购买，退货，补货）
+    // 添加库存变化日志
     void updateProductConfigurationsQuantity(Map<Long,Integer> configIdAndQuantityMap);
 }

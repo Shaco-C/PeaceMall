@@ -3,6 +3,7 @@ package com.peacemall.wallet.controller;
 
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.IdsDTO;
+import com.peacemall.common.domain.dto.WalletAmountChangeDTO;
 import com.peacemall.common.domain.vo.WalletVO;
 import com.peacemall.wallet.service.WalletService;
 import io.swagger.annotations.Api;
@@ -71,5 +72,13 @@ public class WalletController {
     public void adminDeleteWallet(@RequestBody List<Long> userId){
 
         walletService.adminDeleteWallet(userId);
+    }
+
+
+    //用户钱包待处理金额变化
+    @ApiOperation("用户钱包待处理金额变化")
+    @PutMapping("/userWalletPendingAmountChange")
+    public void userWalletPendingAmountChange(@RequestBody WalletAmountChangeDTO walletAmountChangeDTO){
+        walletService.userWalletPendingAmountChange(walletAmountChangeDTO);
     }
 }
