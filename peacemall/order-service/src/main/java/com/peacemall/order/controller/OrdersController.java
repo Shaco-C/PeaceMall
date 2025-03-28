@@ -6,6 +6,7 @@ import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.PurchaseDTO;
 import com.peacemall.order.domain.vo.OrderDetailsVO;
 import com.peacemall.order.domain.vo.OrdersHistoryVO;
+import com.peacemall.order.enums.ReturnStatus;
 import com.peacemall.order.service.OrdersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -47,5 +48,34 @@ public class OrdersController {
     @PostMapping("/cancelOrder/{orderId}")
     public R<String> cancelOrder(@PathVariable Long orderId){
         return ordersService.cancelOrder(orderId);
+    }
+
+    //支付订单
+    @ApiOperation(value = "支付订单")
+    @PutMapping("/payOrder/{orderId}")
+    public R<String> payOrder(@PathVariable("orderId") Long orderId){
+        return ordersService.payOrder(orderId);
+    }
+
+    //删除订单
+    @ApiOperation(value = "删除订单")
+    @DeleteMapping("/deleteOrder/{orderId}")
+    public R<String> deleteOrder(@PathVariable("orderId") Long orderId){
+        return ordersService.deleteOrder(orderId);
+    }
+
+    //用户申请退货
+    @ApiOperation(value = "用户申请退货")
+    @PutMapping("/userApplyForReturn/{orderId}")
+    public R<String> userApplyForReturn(@PathVariable("orderId") Long orderId){
+        return ordersService.userApplyForReturn(orderId);
+    }
+
+    //商家审核退货申请
+    @ApiOperation(value = "商家审核退货申请")
+    @PutMapping("/merchant/merchantAuditReturnApplication")
+    public R<String> merchantAuditReturnApplication(@RequestParam("orderId")Long orderId,
+                                                    @RequestParam("returnStatus")ReturnStatus returnStatus){
+        return ordersService.merchantAuditReturnApplication(orderId,returnStatus);
     }
 }

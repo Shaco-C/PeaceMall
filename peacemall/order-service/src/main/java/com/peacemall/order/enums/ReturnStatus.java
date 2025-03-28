@@ -12,7 +12,8 @@ public enum ReturnStatus {
     REQUESTED("REQUESTED"),          // 申请退货
     APPROVED("APPROVED"),            // 退货请求通过
     REJECTED("REJECTED"),            // 退货请求被拒绝
-    RETURNED("RETURNED");            // 已退货
+    RETURNED("RETURNED"),            // 已退货
+    RECEIVED("RECEIVED");            //商家收货
 
     @EnumValue
     private final String value;

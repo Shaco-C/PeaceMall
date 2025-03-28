@@ -54,7 +54,7 @@ public interface ShopsService extends IService<Shops> {
 
 
     //商家待确认余额的变化
-    void merchantPendingBalanceChange(WalletAmountChangeDTO walletAmountChangeDTO);
+    //void merchantPendingBalanceChange(WalletAmountChangeDTO walletAmountChangeDTO);
 
 
 }

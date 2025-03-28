@@ -169,12 +169,12 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         log.info("userPay method is called");
         if ((amount == null) || (amount.compareTo(BigDecimal.valueOf(0))<=0)) {
             log.error("用户支付金额不合法");
-            return R.error("支付金额不合法");
+            throw new RuntimeException("用户支付金额不合法");
         }
         Long userId = UserContext.getUserId();
         if (userId == null) {
             log.error("用户未登录");
-            return R.error("用户未登录");
+            throw new RuntimeException("用户未登录");
         }
         log.info("userId:{}", userId);
         LambdaQueryWrapper<Wallet> walletLambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -182,18 +182,18 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         Wallet wallet = this.getOne(walletLambdaQueryWrapper);
         if (wallet == null) {
             log.error("用户钱包不存在");
-            return R.error("用户钱包不存在，系统错误");
+            throw new RuntimeException("用户钱包不存在，系统错误");
         }
         if (wallet.getAvailableBalance().compareTo(amount) < 0) {
             log.error("用户余额不足");
-            return R.error("用户余额不足");
+            throw new RuntimeException("用户余额不足");
         }
         wallet.setAvailableBalance(wallet.getAvailableBalance().subtract(amount));
-        wallet.setTotalBalance(wallet.getTotalBalance().subtract(amount));
+        wallet.setTotalBalance(wallet.getAvailableBalance().add(wallet.getPendingBalance()));
         boolean update = this.updateById(wallet);
         if (!update) {
             log.error("用户支付失败");
-            return R.error("用户支付失败");
+            throw new RuntimeException("用户支付失败");
         }
 
         //添加流水日志
@@ -288,6 +288,8 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
 
         log.info("用户钱包更新成功, userId: {}, pendingBalance: {}, totalBalance: {}",
                 userId, wallet.getPendingBalance(), wallet.getTotalBalance());
+
+        //todo 发送流水消息
     }
 
 }

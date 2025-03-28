@@ -7,6 +7,7 @@ import com.peacemall.common.domain.vo.WalletVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FallbackFactory;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Slf4j
@@ -39,6 +40,13 @@ public class WalletClientFallbackFacktory implements FallbackFactory<WalletClien
                 log.error("userWalletPendingAmountChange error cause", cause);
                 log.info("userWalletPendingAmountChange error cause，请重试");
                 throw new RuntimeException("用户钱包待处理金额变化失败，请重试"+cause);
+            }
+
+            @Override
+            public R<String> userPay(BigDecimal amount) {
+                log.error("userPay error cause", cause);
+                log.info("userPay error cause，请重试");
+                throw new RuntimeException("用户钱包支付失败，请重试"+cause);
             }
         };
     }

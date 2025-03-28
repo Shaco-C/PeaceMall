@@ -6,10 +6,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.ProductClient;
+import com.peacemall.api.client.ShopClient;
 import com.peacemall.api.client.UserClient;
+import com.peacemall.api.client.WalletClient;
 import com.peacemall.common.constant.*;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.*;
+import com.peacemall.common.domain.vo.ShopsInfoVO;
+import com.peacemall.common.enums.UserRole;
 import com.peacemall.common.utils.RabbitMqHelper;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.order.domain.dto.OrderDetailsProductInfoDTO;
@@ -26,6 +30,7 @@ import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -49,6 +54,10 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private final RabbitMqHelper rabbitMqHelper;
 
     private final UserClient userClient;
+
+    private final WalletClient walletClient;
+
+    private final ShopClient shopClient;
 
 
 
@@ -465,15 +474,231 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                     WallerMQConstant.WALLET_UPDATE_PENDING_BALANCE_BY_USERID_ROUTING_KEY,userPendingBalanceChangeMsg);
 
             // 商家的待处理金额需要扣减
+            ShopsInfoVO shopsInfoVO = shopClient.getShopInfoById(orders.getShopId());
             WalletAmountChangeDTO merchantWalletChange = new WalletAmountChangeDTO();
-            merchantWalletChange.setId(orders.getShopId());
+            merchantWalletChange.setId(shopsInfoVO.getUserId());
             merchantWalletChange.setChangeAmount(orders.getTotalAmount().negate());
             String shopPendingBalanceChangeMsg = JSONUtil.toJsonStr(merchantWalletChange);
-            rabbitMqHelper.sendMessage(ShopMQConstant.SHOP_EXCHANGE,
-                    ShopMQConstant.SHOP_UPDATE_PENDING_BALANCE_BY_SHOPID_ROUTING_KEY,shopPendingBalanceChangeMsg);
+            rabbitMqHelper.sendMessage(WallerMQConstant.WALLET_EXCHANGE,
+                    WallerMQConstant.WALLET_UPDATE_PENDING_BALANCE_BY_USERID_ROUTING_KEY,shopPendingBalanceChangeMsg);
         }
 
         return R.ok("取消订单成功");
+    }
+
+    /**
+     * 用户支付订单
+     * @param orderId 订单ID
+     * @return String 是否成功的信息
+     * @author watergun
+     */
+
+    @Override
+    @GlobalTransactional
+    public R<String> payOrder(Long orderId) {
+        log.info("支付订单, 订单ID: {}", orderId);
+        if(orderId == null){
+            log.warn("订单ID为空");
+            return R.error("订单ID为空");
+        }
+        Long userId = UserContext.getUserId();
+        if(userId == null){
+            log.warn("用户ID为空");
+            return R.error("用户未登录");
+        }
+        //获取订单的信息
+        Orders orders = this.getById(orderId);
+        if(orders == null){
+            log.warn("订单不存在, 订单ID: {}", orderId);
+            return R.error("订单不存在");
+        }
+        if(!orders.getUserId().equals(userId)){
+            log.warn("用户ID与订单用户ID不匹配, 用户ID: {}, 订单ID: {}", userId, orderId);
+            return R.error("订单不匹配");
+        }
+        //查看订单是否在待支付状态
+        if(orders.getStatus() != OrderStatus.PENDING_PAYMENT){
+            log.warn("订单状态不正确, 订单ID: {}, 状态: {}", orderId, orders.getStatus());
+            return R.error("订单状态不正确，不能够支付");
+        }
+        //todo 查看用户是否使用了优惠券
+
+        //openfeign调用waller-service来进行支付
+        try{
+            walletClient.userPay(orders.getTotalAmount());
+        }catch (Exception e){
+            log.error("用户支付失败, 订单ID: {}, 用户ID: {}, 异常: {}", orderId, userId, e.getMessage());
+            throw new RuntimeException("用户支付失败");
+        }
+
+        //商家的待确认金额要增加
+        ShopsInfoVO shopsInfoVO = shopClient.getShopInfoById(orders.getShopId());
+        WalletAmountChangeDTO walletAmountChangeDTO = new WalletAmountChangeDTO();
+        walletAmountChangeDTO.setId(shopsInfoVO.getUserId());
+        walletAmountChangeDTO.setChangeAmount(orders.getTotalAmount());
+        walletClient.userWalletPendingAmountChange(walletAmountChangeDTO);
+
+        orders.setStatus(OrderStatus.PENDING);
+        boolean update = this.updateById(orders);
+        if (!update) {
+            log.warn("支付订单失败, 订单ID: {}", orderId);
+            throw new RuntimeException("支付订单失败");
+        }
+        return R.ok("支付订单成功");
+    }
+
+    /**
+     * 用户删除订单
+     * @param orderId 订单ID
+     * @return String 是否成功的信息
+     * @author watergun
+     */
+
+    @Override
+    @Transactional
+    public R<String> deleteOrder(Long orderId) {
+        log.info("删除订单, 订单ID: {}", orderId);
+        if(orderId == null){
+            log.warn("订单ID为空");
+            return R.error("订单ID为空");
+        }
+        Long userId = UserContext.getUserId();
+        if(userId == null){
+            log.warn("用户ID为空");
+            return R.error("用户未登录");
+        }
+        //获取订单的信息
+        Orders orders = this.getById(orderId);
+        if(orders == null){
+            log.warn("订单不存在, 订单ID: {}", orderId);
+            return R.error("订单不存在");
+        }
+        if(!orders.getUserId().equals(userId)){
+            log.warn("用户ID与订单用户ID不匹配, 用户ID: {}, 订单ID: {}", userId, orderId);
+            return R.error("订单不匹配");
+        }
+        //查看订单是否为可以删除的状态
+        //先检查这是否为申请了退货的订单
+        if (orders.getReturnStatus().equals(ReturnStatus.NOT_REQUESTED)){
+            //查看订单是否为可以删除的状态
+            //只有取消的订单或者完成的订单可以删除
+            if(!orders.getStatus().equals(OrderStatus.CANCELLED) && !orders.getStatus().equals( OrderStatus.RECEIVED)){
+                log.warn("订单状态不正确, 订单ID: {}, 状态: {}", orderId, orders.getStatus());
+                return R.error("订单状态不正确，不能够删除,否则会影响售后权益");
+            }
+        }else {
+        //申请了退货的订单，只有退货完成的订单可以删除
+            if(!orders.getReturnStatus().equals(ReturnStatus.RETURNED)){
+                log.warn("订单状态不正确, 订单ID: {}, 状态: {}", orderId, orders.getStatus());
+                return R.error("订单状态不正确，不能够删除,否则会影响售后权益");
+            }
+        }
+        //先删除订单详情信息
+        boolean b = orderDetailsService.deleteOrderDetailsByOrderId(orderId);
+        if(!b){
+            log.warn("删除订单详情失败, 订单ID: {}", orderId);
+            return R.error("删除订单详情失败");
+        }
+
+        //可以开始删除订单
+        boolean remove = this.removeById(orderId);
+        if(!remove){
+            log.warn("删除订单失败, 订单ID: {}", orderId);
+            return R.error("删除订单失败");
+        }
+        return R.ok("删除订单成功");
+    }
+
+    /**
+     * 用户申请退货
+     * @param orderId 订单ID
+     * @return R<String> 是否成功的信息
+     * @author watergun
+     */
+    @Override
+    public R<String> userApplyForReturn(Long orderId) {
+        log.info("用户申请退货, 订单ID: {}", orderId);
+        if(orderId == null){
+            log.warn("订单ID为空");
+            return R.error("订单ID为空");
+        }
+        Long userId = UserContext.getUserId();
+        if(userId == null){
+            log.warn("用户ID为空");
+            return R.error("用户未登录");
+        }
+        //获取订单的信息
+        Orders orders = this.getById(orderId);
+        if(orders == null){
+            log.warn("订单不存在, 订单ID: {}", orderId);
+            return R.error("订单不存在");
+        }
+        if(!orders.getUserId().equals(userId)){
+            log.warn("用户ID与订单用户ID不匹配, 用户ID: {}, 订单ID: {}", userId, orderId);
+            return R.error("订单不匹配");
+        }
+        //查看订单是否为可以退货的状态
+        if(!orders.getStatus().equals(OrderStatus.RECEIVED)){
+            log.warn("订单状态不正确, 订单ID: {}, 状态: {}", orderId, orders.getStatus());
+            return R.error("请先收货再申请退货");
+        }
+        //可以开始申请退货
+        orders.setReturnStatus(ReturnStatus.REQUESTED);
+        boolean update = this.updateById(orders);
+        if (!update) {
+            log.warn("申请退货失败, 订单ID: {}", orderId);
+            return R.error("申请退货失败，请重试");
+        }
+        return R.ok("申请退货成功");
+    }
+
+    @Override
+    public R<String> merchantAuditReturnApplication(Long orderId, ReturnStatus returnStatus) {
+        log.info("商家审核退货申请, 订单ID: {}, 状态: {}", orderId, returnStatus);
+        Long userId = UserContext.getUserId();
+        String currentUserRole = UserContext.getUserRole();
+        if(userId == null && !UserRole.MERCHANT.name().equals(currentUserRole)){
+            log.warn("用户ID为空或者用户角色不是商家, 用户ID: {}, 用户角色: {}", userId, currentUserRole);
+            return R.error("用户未登录或者用户角色不是商家");
+        }
+        if(orderId == null){
+            log.warn("订单ID为空");
+            return R.error("订单ID为空");
+        }
+        if(!ReturnStatus.APPROVED.equals(returnStatus)&&!ReturnStatus.REJECTED.equals(returnStatus)){
+            log.warn("商家设置退货状态不正确, 状态: {}", returnStatus);
+            return R.error("商家设置退货状态不正确");
+        }
+
+        //开始处理订单申请
+        //获取该订单详情
+        Orders orders = this.getById(orderId);
+
+        //获得当前商家信息
+        ShopsInfoVO shopsInfoVO = shopClient.getShopInfoById(orders.getShopId());
+
+        //判断订单是否为该商家的订单
+        if(!shopsInfoVO.getShopId().equals(userId)){
+            log.warn("商家ID与订单商家ID不匹配, 商家ID: {}, 订单ID: {}", userId, orderId);
+            return R.error("订单不匹配");
+        }
+
+        //判断该订单是否为申请退货的订单
+        if(!orders.getReturnStatus().equals(ReturnStatus.REQUESTED)){
+            log.warn("订单状态不正确, 订单ID: {}, 状态: {}", orderId, orders.getStatus());
+            return R.error("订单已经处理过");
+        }
+
+        //改变订单状态
+        orders.setReturnStatus(returnStatus);
+
+        boolean update = this.updateById(orders);
+        if (!update) {
+            log.warn("商家审核退货申请失败, 订单ID: {}", orderId);
+            return R.error("商家审核退货申请失败，请重试");
+        }
+        return R.ok("商家审核退货申请成功:"+returnStatus);
+
     }
 
 

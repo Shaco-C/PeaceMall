@@ -37,6 +37,9 @@ public class Orders implements Serializable {
     @TableField("logistics_number")
     private String logisticsNumber;  // 物流单号
 
+    @TableField("shipper_address_id")
+    private Long shipperAddressId;  // 发货地址ID
+
     @TableField("logistics_com")
     private String logisticsCom;  // 物流公司名称
 

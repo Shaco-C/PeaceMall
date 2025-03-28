@@ -289,39 +289,39 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
         return PageDTO.of(pageResult);
     }
 
-    @Override
-    public void merchantPendingBalanceChange(WalletAmountChangeDTO walletAmountChangeDTO) {
-        log.info("merchantPendingBalanceChange method is called");
-
-        // 参数非空校验
-        if (walletAmountChangeDTO == null || walletAmountChangeDTO.getId() == null) {
-            log.error("Invalid walletAmountChangeDTO: {}", walletAmountChangeDTO);
-            throw new IllegalArgumentException("walletAmountChangeDTO or shopId is null");
-        }
-
-        Long shopId = walletAmountChangeDTO.getId();
-        log.info("Processing merchant pending balance change for shopId: {}", shopId);
-
-        // 查询商店信息
-        Shops shops = this.getById(shopId);
-        if (shops == null) {
-            log.error("Shop not found for shopId: {}", shopId);
-            throw new BadRequestException("Shop does not exist");
-        }
-        log.info("Shop found for shopId: {}", shopId);
-
-        // 校验金额是否为0
-        if (walletAmountChangeDTO.getChangeAmount() == null || walletAmountChangeDTO.getChangeAmount().compareTo(BigDecimal.ZERO) == 0) {
-            log.warn("Change amount is zero or null, no need to update");
-            return;
-        }
-
-        // 将walletAmountChangeDTO中的id换为userId
-        walletAmountChangeDTO.setId(shops.getUserId());
-        log.info("Calling userWalletPendingAmountChange for userId: {}", shops.getUserId());
-
-        walletClient.userWalletPendingAmountChange(walletAmountChangeDTO);
-        log.info("Pending balance change completed for userId: {}", shops.getUserId());
-    }
+//    @Override
+//    public void merchantPendingBalanceChange(WalletAmountChangeDTO walletAmountChangeDTO) {
+//        log.info("merchantPendingBalanceChange method is called");
+//
+//        // 参数非空校验
+//        if (walletAmountChangeDTO == null || walletAmountChangeDTO.getId() == null) {
+//            log.error("Invalid walletAmountChangeDTO: {}", walletAmountChangeDTO);
+//            throw new IllegalArgumentException("walletAmountChangeDTO or shopId is null");
+//        }
+//
+//        Long shopId = walletAmountChangeDTO.getId();
+//        log.info("Processing merchant pending balance change for shopId: {}", shopId);
+//
+//        // 查询商店信息
+//        Shops shops = this.getById(shopId);
+//        if (shops == null) {
+//            log.error("Shop not found for shopId: {}", shopId);
+//            throw new BadRequestException("Shop does not exist");
+//        }
+//        log.info("Shop found for shopId: {}", shopId);
+//
+//        // 校验金额是否为0
+//        if (walletAmountChangeDTO.getChangeAmount() == null || walletAmountChangeDTO.getChangeAmount().compareTo(BigDecimal.ZERO) == 0) {
+//            log.warn("Change amount is zero or null, no need to update");
+//            return;
+//        }
+//
+//        // 将walletAmountChangeDTO中的id换为userId
+//        walletAmountChangeDTO.setId(shops.getUserId());
+//        log.info("Calling userWalletPendingAmountChange for userId: {}", shops.getUserId());
+//
+//        walletClient.userWalletPendingAmountChange(walletAmountChangeDTO);
+//        log.info("Pending balance change completed for userId: {}", shops.getUserId());
+//    }
 
 }

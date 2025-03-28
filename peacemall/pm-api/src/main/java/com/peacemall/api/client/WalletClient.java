@@ -8,6 +8,7 @@ import com.peacemall.common.domain.vo.WalletVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @FeignClient(value = "wallet-service",fallbackFactory = WalletClientFallbackFacktory.class)
@@ -25,4 +26,7 @@ public interface WalletClient {
 
     @PutMapping("/wallet/userWalletPendingAmountChange")
     void userWalletPendingAmountChange(@RequestBody WalletAmountChangeDTO walletAmountChangeDTO);
+
+    @PutMapping("/wallet/userPay")
+    R<String> userPay(@RequestParam("amount") BigDecimal amount);
 }
