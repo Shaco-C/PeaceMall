@@ -29,7 +29,7 @@ public class FileController {
 
     @ApiOperation("上传多个文件到阿里云OSS")
     @PostMapping("/uploadToAliOSS/multi")
-    public R<List<String>> uploadFilesToAliOSS(MultipartFile[] files){
+    public R<List<String>> uploadFilesToAliOSS(@RequestParam("files")MultipartFile[] files){
         return fileService.uploadFilesToAliOSS(files);
     }
 }
