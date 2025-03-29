@@ -1,0 +1,36 @@
+server:
+  port: 8090
+  tomcat:
+    threads:
+      max: 50 # 允许的最大线程数
+    accept-count: 50 # 最大排队等待数量
+    max-connections: 100 # 允许的最大连接
+#spring:
+#  rabbitmq:
+#    host: ${pm.mq.host:192.168.145.134} # 主机名
+#    listener:
+#      simple:
+#        acknowledge-mode: auto # 自动ack
+#        retry:
+#          enabled: true # 开启消费者失败重试
+#          initial-interval: 1000ms # 初识的失败等待时长为1秒
+#          multiplier: 1 # 失败的等待时长倍数，下次等待时长 = multiplier * last-interval
+#          max-attempts: 3 # 最大重试次数
+#          stateless: true # true无状态；false有状态。如果业务中包含事务，这里改为false
+#自定义的阿里云OSS配置信息
+aliyun:
+  oss:
+    endpoint: ${aliyun.oss.endpoint}  # 阿里云OSS地址
+    accessKeyId: ${aliyun.oss.accessKeyId}  # 阿里云OSS的accessKeyId
+    accessKeySecret: ${aliyun.oss.accessKeySecret}  # 阿里云OSS的accessKeySecret
+    bucketName: ${aliyun.oss.bucketName}  # 阿里云OSS的bucketName
+
+feign:
+  okhttp:
+    enabled: true
+  sentinel:
+    enabled: true # 开启feign对sentinel的支持
+pm:
+  swagger:
+    title: 和平商城订单服务接口文档
+    package: com.peacemall.order.controller

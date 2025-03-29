@@ -24,6 +24,7 @@
         <module>product-service</module>
         <module>favorite-service</module>
         <module>search-service</module>
+        <module>file-service</module>
     </modules>
 
     <parent>
