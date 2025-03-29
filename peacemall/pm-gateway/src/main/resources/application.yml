@@ -48,7 +48,14 @@ spring:
         - id: order
           uri: lb://order-service
           predicates:
-            - Path=/orders/**
+            - Path=/orders/**,/orderDetails/**
+
+        - id: file
+          uri: lb://file-service
+          predicates:
+            - Path=/file/**
+
+
 
 pm:
   jwt:

@@ -18,12 +18,21 @@ server:
 #          max-attempts: 3 # 最大重试次数
 #          stateless: true # true无状态；false有状态。如果业务中包含事务，这里改为false
 #自定义的阿里云OSS配置信息
+#spring:
+#  config:
+#    import: "classpath:.env"
+
 aliyun:
   oss:
-    endpoint: ${aliyun.oss.endpoint}  # 阿里云OSS地址
-    accessKeyId: ${aliyun.oss.accessKeyId}  # 阿里云OSS的accessKeyId
-    accessKeySecret: ${aliyun.oss.accessKeySecret}  # 阿里云OSS的accessKeySecret
-    bucketName: ${aliyun.oss.bucketName}  # 阿里云OSS的bucketName
+    endpoint: ${env.oss.endpoint}  # 阿里云OSS地址
+    accessKeyId: ${env.oss.accessKeyId}  # 阿里云OSS的accessKeyId
+    accessKeySecret: ${env.oss.accessKeySecret}  # 阿里云OSS的accessKeySecret
+    bucketName: ${env.oss.bucketName}  # 阿里云OSS的bucketName
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB        # 单个文件最大限制
+      max-request-size: 100MB    # 总请求大小限制
 
 feign:
   okhttp:
