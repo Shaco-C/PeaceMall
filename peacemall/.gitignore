@@ -29,7 +29,7 @@ target/
 /target/
 /target
 mobile.sql
-
+.env
 ### Eclipse ###
 .apt_generated
 .classpath
