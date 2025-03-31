@@ -7,6 +7,7 @@ import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.UserDTO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.user.domain.dto.LoginFormDTO;
+import com.peacemall.user.domain.dto.UpdateUserInfoDTO;
 import com.peacemall.user.domain.po.Users;
 import com.peacemall.user.domain.vo.UserInfoVO;
 import com.peacemall.user.domain.vo.UserLoginVO;
@@ -30,7 +31,7 @@ public interface UserService extends IService<Users> {
     R<String> deleteUserWithClosedState();
 
     // 更新用户信息
-    R<String> updateUserInfos(Users users);
+    R<String> updateUserInfos(UpdateUserInfoDTO users);
 
     // 更新用户密码
     R<String> updatePassword(String oldPassword, String newPassword);

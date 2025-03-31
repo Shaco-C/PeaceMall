@@ -1,10 +1,11 @@
 package com.peacemall.user.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.IdsDTO;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.UserAddressDTO;
+import com.peacemall.user.domain.dto.UserAddressInfoDTO;
 import com.peacemall.user.domain.po.UserAddress;
 import com.peacemall.user.service.UserAddressService;
 import io.swagger.annotations.Api;
@@ -35,7 +36,7 @@ public class UserAddressController {
     //一个用户最多有8条地址信息
     @ApiOperation(value = "增加用户地址信息")
     @PostMapping("/add")
-    public R<String> addUserAddress(@RequestBody UserAddress userAddress) {
+    public R<String> addUserAddress(@RequestBody UserAddressInfoDTO userAddress) {
         return userAddressService.addUserAddress(userAddress);
     }
 
@@ -50,7 +51,7 @@ public class UserAddressController {
     //用户修改地址信息
     @ApiOperation(value = "修改用户地址信息")
     @PutMapping("/update")
-    public R<String> updateUserAddress(@RequestBody UserAddress userAddress){
+    public R<String> updateUserAddress(@RequestBody UserAddressInfoDTO userAddress){
         return userAddressService.updateUserAddress(userAddress);
     }
 

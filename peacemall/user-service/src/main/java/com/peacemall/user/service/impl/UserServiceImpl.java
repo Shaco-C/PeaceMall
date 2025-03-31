@@ -17,6 +17,7 @@ import com.peacemall.common.exception.ForbiddenException;
 import com.peacemall.common.utils.RabbitMqHelper;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.user.domain.dto.LoginFormDTO;
+import com.peacemall.user.domain.dto.UpdateUserInfoDTO;
 import com.peacemall.user.domain.po.Users;
 import com.peacemall.user.domain.vo.UserInfoVO;
 import com.peacemall.user.domain.vo.UserLoginVO;
@@ -321,7 +322,7 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
 
     // 更新用户信息
     @Override
-    public R<String> updateUserInfos(Users users) {
+    public R<String> updateUserInfos(UpdateUserInfoDTO users) {
         log.info("updateUserInfos: users={}", users);
         Long userId = UserContext.getUserId();
 
@@ -331,12 +332,6 @@ public class UserServiceImpl extends ServiceImpl<UsersMapper, Users> implements 
             return R.error("用户未登录");
         }
 
-        // 2. 检查用户是否尝试修改受限字段
-        if (users.getStatus() != null || users.getRole() != null ||
-                StrUtil.isNotEmpty(users.getPhoneNumber()) || StrUtil.isNotEmpty(users.getEmail())) {
-            log.error("用户尝试修改受限字段: userId={}, users={}", userId, users);
-            return R.error("请勿在此修改手机号、邮箱或用户权限");
-        }
 
         // 3. 只更新允许修改的字段
         Users updateUser = new Users();

@@ -5,6 +5,7 @@ import com.peacemall.common.domain.R;
 import com.peacemall.product.domain.po.ProductImages;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author watergun
@@ -26,4 +27,5 @@ public interface ProductImagesService extends IService<ProductImages> {
     //根据商品id查询所有商品图片
     List<ProductImages> getProductImagesByProductId(Long productId);
 
+    Map<Long, String> getMainImageUrlsByProductIds(List<Long> productIds);
 }

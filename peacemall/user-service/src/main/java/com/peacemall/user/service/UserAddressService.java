@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.UserAddressDTO;
+import com.peacemall.user.domain.dto.UserAddressInfoDTO;
 import com.peacemall.user.domain.po.UserAddress;
 
 import java.util.List;
@@ -17,14 +18,14 @@ public interface UserAddressService extends IService<UserAddress> {
 
     //用户增加地址信息
     //一个用户最多有8条地址信息
-    R<String> addUserAddress(UserAddress userAddress);
+    R<String> addUserAddress(UserAddressInfoDTO userAddress);
 
     //用户将地址信息设置为删除状态
     // 批量删除地址（用户侧软删除）
     R<String> batchDeleteAddress(List<Long> addressIds);
 
     //用户修改地址信息
-    R<String> updateUserAddress(UserAddress userAddress);
+    R<String> updateUserAddress(UserAddressInfoDTO userAddress);
 
     //用户设置默认地址
     R<String> setDefaultAddress(Long userAddressId);

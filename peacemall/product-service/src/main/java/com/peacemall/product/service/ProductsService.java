@@ -29,7 +29,7 @@ public interface ProductsService extends IService<Products> {
     R<String> merchantDeleteProduct(Long productId);
 
     //分页查询查看某个分类下的产品
-    R<PageDTO<Products>> getProductsByCategoryId(int page, int pageSize, Long categoryId);
+    R<PageDTO<ProductDTO>> getProductsByCategoryId(int page, int pageSize, Long categoryId);
 
     //修改商品基本信息
     R<String> merchantUpdateProduct(Products products);

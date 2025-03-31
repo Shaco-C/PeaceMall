@@ -25,13 +25,13 @@ public class EsSearchController {
 
     @ApiOperation("用户输入框搜索商品")
     @GetMapping("/userInput")
-    R<PageDTO<ProductVO>> searchProduct(@ModelAttribute ProductPageQuery query){
+    public R<PageDTO<ProductVO>> searchProduct(@ModelAttribute ProductPageQuery query){
         return esSearchService.searchProduct(query);
     }
 
     @ApiOperation("根据分类搜索商品")
     @GetMapping("/category")
-    R<PageDTO<ProductVO>> searchProductsByCategory(@RequestParam  Long categoryId, @ModelAttribute PageQuery query){
+    public R<PageDTO<ProductVO>> searchProductsByCategory(@RequestParam  Long categoryId, @ModelAttribute PageQuery query){
         return esSearchService.searchProductsByCategory(categoryId, query);
     }
 
@@ -40,7 +40,7 @@ public class EsSearchController {
     //当用户点击具体品牌之后，调用searchProduct，然后添加一个brand属性再去搜索
     @ApiOperation("根据搜索关键字获取品牌")
     @GetMapping("/brand")
-    R<List<String>> getBrandsBySearchKey(@RequestParam String key){
+    public R<List<String>> getBrandsBySearchKey(@RequestParam String key){
         return esSearchService.getBrandsBySearchKey(key);
     }
 }

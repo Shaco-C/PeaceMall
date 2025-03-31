@@ -1,6 +1,5 @@
 package com.peacemall.product.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
@@ -18,6 +17,9 @@ public interface CategoriesService extends IService<Categories> {
     //类别按parentId分组
     R<Map<String, List<Categories>>> getCategoriesByParentId();
 
+    //用户查看分类
+    //类别按parentId分组
+    R<List<Categories>> getCategoriesInfoByParentId(Long parentId);
     //管理员创建分类
     R<String> createCategories(Categories categories);
     //管理员删除分类

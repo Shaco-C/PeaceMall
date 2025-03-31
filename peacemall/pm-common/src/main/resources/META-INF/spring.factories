@@ -2,4 +2,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.peacemall.common.config.MyBatisConfig,\
   com.peacemall.common.config.MvcConfig,\
   com.peacemall.common.config.RabbitMqHelperAutoConfiguration,\
-  com.peacemall.common.config.MyMetaObjectHandler
+  com.peacemall.common.config.MyMetaObjectHandler,\
+  com.peacemall.common.config.JacksonConfig

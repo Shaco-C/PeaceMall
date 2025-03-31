@@ -1,6 +1,5 @@
 package com.peacemall.product.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.ProductDTO;
@@ -57,9 +56,9 @@ public class ProductsController {
     @ApiOperation(value = "分页查询查看某个分类下的产品")
     @GetMapping("/getProductsByCategoryId")
 
-    R<PageDTO<Products>> getProductsByCategoryId(@RequestParam(value = "page",defaultValue = "1") int page,
-                                                 @RequestParam(value = "pageSize",defaultValue = "20")int pageSize,
-                                                 @RequestParam("categoryId") Long categoryId){
+    R<PageDTO<ProductDTO>> getProductsByCategoryId(@RequestParam(value = "page",defaultValue = "1") int page,
+                                                            @RequestParam(value = "pageSize",defaultValue = "20")int pageSize,
+                                                            @RequestParam("categoryId") Long categoryId){
         return productsService.getProductsByCategoryId(page,pageSize,categoryId);
     }
 

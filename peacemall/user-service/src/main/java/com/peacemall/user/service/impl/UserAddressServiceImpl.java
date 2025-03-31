@@ -9,6 +9,7 @@ import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.UserAddressDTO;
 import com.peacemall.common.utils.UserContext;
+import com.peacemall.user.domain.dto.UserAddressInfoDTO;
 import com.peacemall.user.domain.po.UserAddress;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.user.mapper.UserAddressMapper;
@@ -53,7 +54,7 @@ public class UserAddressServiceImpl extends ServiceImpl<UserAddressMapper, UserA
     //一个用户最多有8条地址信息
     @Override
     @Transactional
-    public R<String> addUserAddress(UserAddress userAddress) {
+    public R<String> addUserAddress(UserAddressInfoDTO userAddress) {
         log.info("addUserAddress is called, userAddress: {}", userAddress);
         if (userAddress == null) {
             log.info("addUserAddress failed: 请求参数为空");
@@ -87,7 +88,9 @@ public class UserAddressServiceImpl extends ServiceImpl<UserAddressMapper, UserA
             setAllAddressesToNotDefault(userId);
         }
 
-        boolean save = this.save(userAddress);
+        UserAddress updateAddress = BeanUtil.copyProperties(userAddress, UserAddress.class);
+
+        boolean save = this.save(updateAddress);
         return save ? R.ok("添加地址成功") : R.error("添加地址失败");
     }
 
@@ -136,7 +139,7 @@ public class UserAddressServiceImpl extends ServiceImpl<UserAddressMapper, UserA
 
     @Override
     @Transactional
-    public R<String> updateUserAddress(UserAddress userAddress) {
+    public R<String> updateUserAddress(UserAddressInfoDTO userAddress) {
         log.info("updateUserAddress is called, userAddress: {}", userAddress);
         if (userAddress == null) {
             log.info("updateUserAddress failed: 请求参数为空");
@@ -172,7 +175,8 @@ public class UserAddressServiceImpl extends ServiceImpl<UserAddressMapper, UserA
             setAllAddressesToNotDefault(userId);
         }
 
-        boolean res = this.updateById(userAddress);
+        UserAddress updateAddress = BeanUtil.copyProperties(userAddress, UserAddress.class);
+        boolean res = this.updateById(updateAddress);
         return res ? R.ok("修改地址成功") : R.error("修改地址失败");
     }
 

@@ -69,6 +69,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
 
         Long userId = UserContext.getUserId();
         String userRole =UserContext.getUserRole();
+        log.info("用户信息: userId:{},userRole:{}", userId, userRole);
 
         //校验用户权限
         if (userId == null || !UserRole.MERCHANT.name().equals(userRole)){
@@ -207,37 +208,55 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
     }
 
     @Override
-    public R<PageDTO<Products>> getProductsByCategoryId(int page, int pageSize, Long categoryId) {
-        log.info("getProductsByCategoryId,page:{},pageSize:{},categoryId:{}", page, pageSize, categoryId);
+    public R<PageDTO<ProductDTO>> getProductsByCategoryId(int page, int pageSize, Long categoryId) {
+        log.info("查询分类下的商品 - page: {}, pageSize: {}, categoryId: {}", page, pageSize, categoryId);
+
+        // 参数校验
         if (page <= 0 || pageSize <= 0 || categoryId == null) {
-            log.error("参数错误");
+            log.error("查询分类商品失败 - 参数错误");
             return R.error("参数错误");
         }
 
+        // 获取当前用户 ID（确保用户已登录）
         Long userId = UserContext.getUserId();
         if (userId == null) {
-            log.error("用户未登录");
+            log.error("查询分类商品失败 - 用户未登录");
             return R.error("用户未登录");
         }
-        log.info("用户信息正常");
 
-        // 查询所有分类信息
+        log.debug("用户 ID: {}", userId);
+
+        // 获取所有分类信息，并递归查找当前分类的所有子分类 ID
         List<Categories> allCategories = categoriesService.list();
+        List<Long> categoryIds = new ArrayList<>(findAllChildCategoriesOptimized(categoryId, allCategories));
+        categoryIds.add(categoryId); // 添加当前分类 ID
 
-        // 获取当前分类及其所有子分类、孙分类的ID列表
-        List<Long> categoryIds = new ArrayList<>();
-        categoryIds.add(categoryId); // 添加当前分类ID
-        categoryIds.addAll(findAllChildCategoriesOptimized(categoryId, allCategories));
+        log.debug("当前分类及其子分类 IDs: {}", categoryIds);
 
-        log.info("查询分类及其子分类IDs: {}", categoryIds);
+        // 构建查询条件，查询符合分类 ID 的商品
+        LambdaQueryWrapper<Products> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Products::getCategoryId, categoryIds);
 
-        // 查询这些分类下的所有商品
-        LambdaQueryWrapper<Products> productsLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        productsLambdaQueryWrapper.in(Products::getCategoryId, categoryIds);
+        // 分页查询商品数据
+        Page<Products> productsPage = this.page(new Page<>(page, pageSize), queryWrapper);
 
-        Page<Products> productsPage = this.page(new Page<>(page, pageSize), productsLambdaQueryWrapper);
-        return R.ok(PageDTO.of(productsPage));
+        // 转换实体类为 DTO
+        List<ProductDTO> productDTOs = BeanUtil.copyToList(productsPage.getRecords(), ProductDTO.class);
+
+        // 批量查询商品主图
+        if (!productDTOs.isEmpty()) {
+            List<Long> productIds = productDTOs.stream().map(ProductDTO::getProductId).collect(Collectors.toList());
+            Map<Long, String> mainImageUrls = productImagesService.getMainImageUrlsByProductIds(productIds);
+
+            // 赋值图片 URL
+            productDTOs.forEach(product -> product.setImageUrl(mainImageUrls.get(product.getProductId())));
+        }
+
+        // 组装分页返回对象
+        log.info("查询分类商品成功 - 查询到 {} 条数据", productDTOs.size());
+        return R.ok(PageDTO.of(productsPage,productDTOs));
     }
+
 
     //修改商品基本信息
     @Override

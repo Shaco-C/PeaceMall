@@ -1,6 +1,5 @@
 package com.peacemall.product.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.product.domain.po.Categories;
@@ -32,6 +31,13 @@ public class CategoriesController {
         return categoriesService.getCategoriesByParentId();
     }
 
+    //用户查看分类
+    //类别按parentId分组
+    @GetMapping("/getCategoriesInfoByParentId")
+    R<List<Categories>> getCategoriesInfoByParentId(@RequestParam("parentId") Long parentId){
+        return categoriesService.getCategoriesInfoByParentId(parentId);
+    }
+
     //管理员创建分类
     @ApiOperation(value = "管理员创建分类")
     @PostMapping("/admin/createCategories")
@@ -39,6 +45,8 @@ public class CategoriesController {
         return categoriesService.createCategories(categories);
 
     }
+
+
     //管理员删除分类
     @ApiOperation("管理员删除分类")
     @DeleteMapping("/admin/deleteCategories/{categoryId}")

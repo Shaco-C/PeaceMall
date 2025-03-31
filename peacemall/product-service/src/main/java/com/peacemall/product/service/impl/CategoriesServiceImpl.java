@@ -1,5 +1,6 @@
 package com.peacemall.product.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.common.domain.R;
@@ -44,6 +45,15 @@ public class CategoriesServiceImpl extends ServiceImpl<CategoriesMapper, Categor
                         category.getParentId() == null ? "parent" : category.getParentId().toString()));
 
         return R.ok(categoryMap);
+    }
+
+    @Override
+    public R<List<Categories>> getCategoriesInfoByParentId(Long parentId) {
+        log.info("getCategoriesInfoByParentId: parentId={}", parentId);
+        LambdaQueryWrapper<Categories> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Categories::getParentId, parentId);
+        List<Categories> categoriesList = this.list(queryWrapper);
+        return R.ok(categoriesList);
     }
 
 

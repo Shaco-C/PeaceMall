@@ -5,14 +5,20 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.common.utils.UserContext;
+import com.peacemall.product.domain.dto.ProductImageDTO;
 import com.peacemall.product.domain.po.ProductImages;
 import com.peacemall.product.mapper.ProductImagesMapper;
 import com.peacemall.product.service.ProductImagesService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author watergun
@@ -82,4 +88,27 @@ public class ProductImagesServiceImpl extends ServiceImpl<ProductImagesMapper, P
         productImagesLambdaQueryWrapper.eq(ProductImages::getProductId, productId);
         return this.list(productImagesLambdaQueryWrapper);
     }
+
+    @Override
+    public Map<Long, String> getMainImageUrlsByProductIds(List<Long> productIds) {
+        if (CollectionUtils.isEmpty(productIds)) {
+            return Collections.emptyMap();
+        }
+
+        // 查询每个 productId 的主图（优先 is_main=true，其次 sort_order 最大）
+        List<ProductImages> images = baseMapper.selectList(new LambdaQueryWrapper<ProductImages>()
+                .in(ProductImages::getProductId, productIds)
+                .orderByDesc(ProductImages::getIsMain)  // 先按 is_main = true 排序
+                .orderByDesc(ProductImages::getSortOrder)  // 再按 sort_order 降序
+        );
+
+        // 用 LinkedHashMap 记录每个 productId 的第一张图
+        Map<Long, String> imageMap = new LinkedHashMap<>();
+        for (ProductImages image : images) {
+            imageMap.putIfAbsent(image.getProductId(), image.getUrl());  // 只存第一张符合条件的图片
+        }
+
+        return imageMap;
+    }
+
 }

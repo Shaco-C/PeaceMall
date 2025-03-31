@@ -8,6 +8,7 @@ import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.UserDTO;
 import com.peacemall.common.enums.UserRole;
 import com.peacemall.user.domain.dto.LoginFormDTO;
+import com.peacemall.user.domain.dto.UpdateUserInfoDTO;
 import com.peacemall.user.domain.dto.VerifyInfosDTO;
 import com.peacemall.user.domain.po.Users;
 import com.peacemall.user.domain.vo.UserInfoVO;
@@ -52,7 +53,7 @@ public class UsersController {
     //更新用户信息
     @ApiOperation(value = "更新用户信息")
     @PutMapping("/updateUserInfo")
-    public R<String> updateUserInfo(@RequestBody Users users) {
+    public R<String> updateUserInfo(@RequestBody UpdateUserInfoDTO users) {
         return userService.updateUserInfos(users);
     }
 
@@ -85,6 +86,7 @@ public class UsersController {
     }
 
 
+    //todo 前端待实现
     //删除用户
     @ApiOperation(value = "管理员批量删除用户")
     @DeleteMapping("/admin/deleteUsers")
@@ -118,7 +120,7 @@ public class UsersController {
 
     //分页查询所有的用户信息
     //用于es数据的批量插入
-    @ApiOperation(value = "分页查询所有的商品信息")
+    @ApiOperation(value = "分页查询所有的用户信息")
     @GetMapping("/admin/findAllUsersWithPage")
     public PageDTO<UserDTO> findAllUsersWithPage(@RequestParam(value = "page",defaultValue = "1")int page,
                                                     @RequestParam(value = "pageSize",defaultValue = "1000")int pageSize){
