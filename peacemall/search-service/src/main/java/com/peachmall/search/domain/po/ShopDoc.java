@@ -29,8 +29,6 @@ public class ShopDoc {
     @Field(type = FieldType.Text, analyzer = "ik_smart")
     private String shopDescription;  // 店铺简介，支持全文搜索
 
-    @Field(type = FieldType.Date)
-    private Date updatedAt;  // 店铺信息更新时间
 
     @Field(type = FieldType.Keyword, index = false)
     private String shopAvatarUrl;  // 店铺头像URL，不索引

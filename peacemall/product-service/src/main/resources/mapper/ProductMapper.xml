@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peacemall.product.mapper.ProductsMapper">
+
+    <select id="findProductDTOByIds" resultType="com.peacemall.common.domain.dto.ProductDTO">
+        SELECT
+        p.product_id, p.brand, p.name, p.description, p.sales, p.updated_at,
+        c.category_id, c.category_name,
+        (SELECT img.url
+        FROM product_images img
+        WHERE img.product_id = p.product_id
+        ORDER BY img.is_main DESC, img.sort_order ASC
+        LIMIT 1) AS image_url,
+        (SELECT COALESCE(MIN(pc.price), 0)
+        FROM product_configurations pc
+        WHERE pc.product_id = p.product_id) AS price
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.category_id
+        WHERE p.product_id IN
+        <foreach collection="productIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+</mapper>

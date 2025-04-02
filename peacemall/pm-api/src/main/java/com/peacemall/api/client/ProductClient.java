@@ -32,4 +32,9 @@ public interface ProductClient {
 
     @PutMapping("/productsConfigurations/merchant/updateStock")
     void updateProductConfigurationsQuantity(@RequestBody Map<Long,Integer> configIdAndQuantityMap);
+
+    @GetMapping("/products/getProductByShopId")
+    PageDTO<ProductDTO> getProductByShopId(@RequestParam(value = "page",defaultValue = "1") int page,
+                                                  @RequestParam(value = "pageSize",defaultValue = "20") int pageSize,
+                                                  @RequestParam("shopId") Long shopId);
 }

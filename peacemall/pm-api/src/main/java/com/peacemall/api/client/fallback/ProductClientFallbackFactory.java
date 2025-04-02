@@ -49,6 +49,13 @@ public class ProductClientFallbackFactory implements FallbackFactory<ProductClie
                 log.error("更新的map为:{}",configIdAndQuantityMap);
                 throw new RuntimeException("更新商品配置数量失败");
             }
+
+            @Override
+            public PageDTO<ProductDTO> getProductByShopId(int page, int pageSize, Long shopId) {
+                log.error("获取店铺商品失败");
+                log.error("获取的页数为page:{},size:{},shopId:{}",page,pageSize,shopId);
+                return null;
+            }
         };
     }
 }

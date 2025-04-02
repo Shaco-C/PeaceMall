@@ -5,11 +5,13 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.peacemall.api.client.ProductClient;
 import com.peacemall.api.client.UserClient;
 import com.peacemall.api.client.WalletClient;
 import com.peacemall.common.constant.EsOperataionMQConstant;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
+import com.peacemall.common.domain.dto.ProductDTO;
 import com.peacemall.common.domain.dto.ShopDTO;
 import com.peacemall.common.domain.dto.WalletAmountChangeDTO;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
@@ -18,6 +20,7 @@ import com.peacemall.common.exception.BadRequestException;
 import com.peacemall.common.utils.RabbitMqHelper;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.shop.domain.po.Shops;
+import com.peacemall.shop.domain.vo.ShopPageInfosVO;
 import com.peacemall.shop.enums.ShopStatus;
 import com.peacemall.shop.mapper.ShopsMapper;
 import com.peacemall.shop.service.ShopsService;
@@ -40,6 +43,7 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
     private final UserClient userClient;
     private final RabbitMqHelper rabbitMqHelper;
     private final WalletClient walletClient;
+    private final ProductClient productClient;
     @Override
     public boolean createUserShop(Shops shops) {
         log.info("createUserShop method is called,shops:{}", shops);
@@ -211,6 +215,36 @@ public class ShopsServiceImpl extends ServiceImpl<ShopsMapper, Shops> implements
         }
         return R.ok("商店信息修改成功");
     }
+
+    @Override
+    public R<ShopPageInfosVO> getShopPageInfoByShopId(int page, int pageSize, Long shopId) {
+        log.info("getShopPageInfoByShopId method is called, shopId: {}", shopId);
+
+        if (shopId == null) {
+            log.error("shopId 不能为空");
+            return R.error("shopId不能为空");
+        }
+
+        Shops shops = this.getById(shopId);
+        if (shops == null) {
+            log.error("shopId 不存在");
+            return R.error("shopId不存在");
+        }
+
+        log.info("shopId存在，开始查询商品信息");
+
+        // 复制 Shop 数据到 VO
+        ShopPageInfosVO shopPageInfosVO = BeanUtil.copyProperties(shops, ShopPageInfosVO.class);
+
+        // 查询商家商品数据
+        PageDTO<ProductDTO> productPageDTO = productClient.getProductByShopId(page, pageSize, shopId);
+
+        // **避免 null 赋值**
+        shopPageInfosVO.setProductPageDTO(productPageDTO != null ? productPageDTO : new PageDTO<>());
+
+        return R.ok(shopPageInfosVO);
+    }
+
 
     @Override
     public R<PageDTO<Shops>> adminGetShopsWithStatus(int page, int pageSize, ShopStatus shopStatus) {

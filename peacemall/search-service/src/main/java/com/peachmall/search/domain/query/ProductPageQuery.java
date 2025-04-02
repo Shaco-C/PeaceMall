@@ -13,8 +13,7 @@ import lombok.EqualsAndHashCode;
 public class ProductPageQuery extends PageQuery {
     @ApiModelProperty("搜索关键字")
     private String key;
-    @ApiModelProperty("商品分类")
-    private String category;
-    @ApiModelProperty("商品品牌")
+
+    @ApiModelProperty("品牌")
     private String brand;
 }

@@ -8,6 +8,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Data
@@ -32,6 +33,9 @@ public class ProductDoc {
     @Field(type = FieldType.Text, analyzer = "ik_smart")
     private String name;
 
+    @Field(type = FieldType.Scaled_Float, scalingFactor = 100)
+    private BigDecimal price;
+
     @Field(type = FieldType.Keyword, index = false)
     private String imageUrl;
 
@@ -41,6 +45,4 @@ public class ProductDoc {
     @Field(type = FieldType.Integer)
     private Integer sales;
 
-    @Field(type = FieldType.Date)
-    private Timestamp updatedAt;
 }

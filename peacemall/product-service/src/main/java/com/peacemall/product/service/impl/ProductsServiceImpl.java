@@ -240,21 +240,29 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         // 分页查询商品数据
         Page<Products> productsPage = this.page(new Page<>(page, pageSize), queryWrapper);
 
-        // 转换实体类为 DTO
-        List<ProductDTO> productDTOs = BeanUtil.copyToList(productsPage.getRecords(), ProductDTO.class);
+        List<Long> productIds = productsPage.getRecords().stream().map(Products::getProductId).collect(Collectors.toList());
+        log.info("查询到的商品Id:{}",productIds);
+        List<ProductDTO> productDTOByIds = baseMapper.findProductDTOByIds(productIds);
 
-        // 批量查询商品主图
-        if (!productDTOs.isEmpty()) {
-            List<Long> productIds = productDTOs.stream().map(ProductDTO::getProductId).collect(Collectors.toList());
-            Map<Long, String> mainImageUrls = productImagesService.getMainImageUrlsByProductIds(productIds);
+        PageDTO<ProductDTO> pageDTO = PageDTO.of(productsPage, productDTOByIds);
+        log.info("查询分类商品成功 - 查询到 {} 条数据", productDTOByIds.size());
+        return R.ok(pageDTO);
 
-            // 赋值图片 URL
-            productDTOs.forEach(product -> product.setImageUrl(mainImageUrls.get(product.getProductId())));
-        }
-
-        // 组装分页返回对象
-        log.info("查询分类商品成功 - 查询到 {} 条数据", productDTOs.size());
-        return R.ok(PageDTO.of(productsPage,productDTOs));
+//        // 转换实体类为 DTO
+//        List<ProductDTO> productDTOs = BeanUtil.copyToList(productsPage.getRecords(), ProductDTO.class);
+//
+//        // 批量查询商品主图
+//        if (!productDTOs.isEmpty()) {
+//            List<Long> productIds = productDTOs.stream().map(ProductDTO::getProductId).collect(Collectors.toList());
+//            Map<Long, String> mainImageUrls = productImagesService.getMainImageUrlsByProductIds(productIds);
+//
+//            // 赋值图片 URL
+//            productDTOs.forEach(product -> product.setImageUrl(mainImageUrls.get(product.getProductId())));
+//        }
+//
+//        // 组装分页返回对象
+//        log.info("查询分类商品成功 - 查询到 {} 条数据", productDTOs.size());
+//        return R.ok(PageDTO.of(productsPage,productDTOs));
     }
 
 
@@ -489,7 +497,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
     public PageDTO<ProductDTO> findAllProductsWithPage(int page, int size) {
         // 创建分页对象
         Page<ProductDTO> pageResult = new Page<>(page, size);
-
+        log.info("findAllProductsWithPage,page:{},size:{}", page, size);
         // 计算偏移量
         int offset = (page - 1) * size;
 
@@ -498,11 +506,11 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
 
         // 查询当前页数据
         List<ProductDTO> pageRecords = baseMapper.findProductsWithPage(offset, size);
-
+        log.info("pageRecords:{}", pageRecords);
         // 设置分页结果
         pageResult.setRecords(pageRecords);
         pageResult.setTotal(total);
-
+        log.info("pageResult:{}", pageResult);
         return PageDTO.of(pageResult);
     }
 
@@ -570,6 +578,39 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         // 6️⃣ 转换为 Map
         return productDetailsDTOList.stream()
                 .collect(Collectors.toMap(ProductDetailsDTO::getProductId, Function.identity(), (existing, replacement) -> existing));
+    }
+
+    @Override
+    public PageDTO<ProductDTO> getProductByShopId(int page, int size, Long shopId) {
+        log.info("getProductByShopId, shopId: {}", shopId);
+        log.info("getProductByShopId, page: {}, size: {}", page, size);
+
+        if (shopId == null || page <= 0 || size <= 0) {
+            log.error("参数错误");
+            return new PageDTO<>();  // 返回空分页对象，避免空指针
+        }
+
+        // 构建查询信息
+        LambdaQueryWrapper<Products> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Products::getShopId, shopId);
+        queryWrapper.orderByDesc(Products::getCreatedAt);
+
+        // 执行分页查询
+        Page<Products> productsPage = this.page(new Page<>(page, size), queryWrapper);
+
+        if (productsPage.getRecords().isEmpty()) {
+            log.info("没有查询到店铺 {} 的商品", shopId);
+            return new PageDTO<>(); // 直接返回空分页对象
+        }
+
+        List<Long> productIdList = productsPage.getRecords()
+                .stream()
+                .map(Products::getProductId)
+                .collect(Collectors.toList());
+
+        List<ProductDTO> productDTOS = baseMapper.findProductDTOByIds(productIdList);
+
+        return PageDTO.of(productsPage, productDTOS);
     }
 
 

@@ -1,14 +1,12 @@
 package com.peacemall.shop.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.common.domain.dto.ShopDTO;
-import com.peacemall.common.domain.dto.UserDTO;
-import com.peacemall.common.domain.dto.WalletAmountChangeDTO;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.shop.domain.po.Shops;
+import com.peacemall.shop.domain.vo.ShopPageInfosVO;
 import com.peacemall.shop.enums.ShopStatus;
 
 import java.util.List;
@@ -43,6 +41,7 @@ public interface ShopsService extends IService<Shops> {
     //todo 后续需要通过openfeign调用 来获取这个商家的所有商品信息
     //todo 然后聚合在一个ShopDTO中，返回给用户
     //todo 需要考虑的是，如果这个商家没有商品，那么就不需要返回商品信息
+    R<ShopPageInfosVO> getShopPageInfoByShopId(int page,int pageSize,Long shopId);
 
     //管理员查看特定状态的商家信息
     R<PageDTO<Shops>> adminGetShopsWithStatus(int page, int pageSize, ShopStatus shopStatus);

@@ -56,7 +56,7 @@ public class ProductsController {
     @ApiOperation(value = "分页查询查看某个分类下的产品")
     @GetMapping("/getProductsByCategoryId")
 
-    R<PageDTO<ProductDTO>> getProductsByCategoryId(@RequestParam(value = "page",defaultValue = "1") int page,
+    public R<PageDTO<ProductDTO>> getProductsByCategoryId(@RequestParam(value = "page",defaultValue = "1") int page,
                                                             @RequestParam(value = "pageSize",defaultValue = "20")int pageSize,
                                                             @RequestParam("categoryId") Long categoryId){
         return productsService.getProductsByCategoryId(page,pageSize,categoryId);
@@ -81,8 +81,17 @@ public class ProductsController {
     //根据商品id查询基本信息
     @ApiOperation(value = "根据商品id查询基本信息")
     @GetMapping("/getProductBasicInfosAndShopInfosById")
-    Map<Long, ProductBasicInfosAndShopInfos> getProductBasicInfosAndShopInfosById(@RequestParam List<Long> productIds){
+    public Map<Long, ProductBasicInfosAndShopInfos> getProductBasicInfosAndShopInfosById(@RequestParam List<Long> productIds){
         return productsService.getProductBasicInfosAndShopInfosById(productIds);
+    }
+
+    //通过shopId分页查询商品信息
+    @ApiOperation(value = "通过shopId分页查询商品信息")
+    @GetMapping("/getProductByShopId")
+    public PageDTO<ProductDTO> getProductByShopId(@RequestParam(value = "page",defaultValue = "1") int page,
+                                                  @RequestParam(value = "pageSize",defaultValue = "20") int pageSize,
+                                                  @RequestParam("shopId") Long shopId){
+        return productsService.getProductByShopId(page,pageSize,shopId);
     }
 
     //根据id查看基本详细信息，以及其配置

@@ -57,4 +57,7 @@ public interface ProductsService extends IService<Products> {
     //批量获取商品的信息
     Map<Long, ProductDetailsDTO> getProductDetailsByIds(List<Long> productIds,List<Long> configIds);
 
+    //通过shopId分页查询商品信息
+    PageDTO<ProductDTO> getProductByShopId(int page, int size, Long shopId);
+
 }

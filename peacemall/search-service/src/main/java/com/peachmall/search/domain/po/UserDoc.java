@@ -9,6 +9,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
 @Data
@@ -36,6 +37,4 @@ public class UserDoc {
     @Field(type = FieldType.Keyword)
     private String status; // 添加用户状态字段
 
-    @Field(type = FieldType.Date)
-    private Timestamp lastLogin;
 }

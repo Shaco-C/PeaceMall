@@ -15,6 +15,17 @@ public interface EsSearchService {
      * @return 分页结果
      */
     R<PageDTO<ProductVO>> searchProduct(ProductPageQuery query);
+    
+    /**
+     * 首页热销商品推荐
+     * @param 
+     * @return 
+     * @author watergun
+     */
+    R<List<ProductVO>> getHotSalesProducts(int topN);
+
+    R<List<ProductVO>> getProductListBySearchAfter(Long lastProductId, int size);
+    
 
     //根据分类查询商品
     R<PageDTO<ProductVO>> searchProductsByCategory(Long categoryId, PageQuery query);
