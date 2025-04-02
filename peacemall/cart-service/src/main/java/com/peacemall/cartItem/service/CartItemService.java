@@ -14,11 +14,12 @@ public interface CartItemService extends IService<CartItem> {
     //将商品加入购物车
     R<String> addProductToCart(CartItemDTO cartItemDTO);
 
-    //将商品从购物车中删除
-    R<String> deleteProductFromCart(Long cartItemId);
+
+    //批量删除购物车中的商品
+    R<String> deleteProductFromCartBatch(List<Long> cartItemIds);
 
     //修改购物车中商品的数量
-    R<String> updateProductQuantity(Long cartItemId, Integer quantity);
+    R<String> updateProductQuantity(List<CartItemDTO> cartItemDTOList);
 
     //获取购物车中的商品列表
     R<PageDTO<CartItemVO>> showCartItems(int page,int pageSize);

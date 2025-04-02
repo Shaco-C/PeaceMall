@@ -31,6 +31,8 @@ public class CartItemVO {
     private String configuration;
     @ApiModelProperty("商品价格")
     private BigDecimal price;
+    @ApiModelProperty("商品数量")
+    private Integer quantity;
 
     //商家信息
     @ApiModelProperty("商家id")

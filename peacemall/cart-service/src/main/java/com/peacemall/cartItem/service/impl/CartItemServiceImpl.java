@@ -2,6 +2,7 @@ package com.peacemall.cartItem.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.api.client.ProductClient;
@@ -20,9 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -81,55 +80,93 @@ public class CartItemServiceImpl extends ServiceImpl<CartItemMapper, CartItem> i
 
 
     @Override
-    public R<String> deleteProductFromCart(Long cartItemId) {
-        log.info("deleteProductFromCart: {}", cartItemId);
-        if (cartItemId == null) {
-            log.error("deleteProductFromCart: cartItemId is null");
+    public R<String> deleteProductFromCartBatch(List<Long> cartItemIds) {
+        log.info("deleteProductFromCartBatch: {}", cartItemIds);
+        if (CollectionUtils.isEmpty(cartItemIds)) {
+            log.error("deleteProductFromCartBatch: cartItemIds is empty");
             return R.error("商品信息为空");
         }
-        CartItem cartItem = this.getById(cartItemId);
-        if (cartItem == null) {
-            log.error("deleteProductFromCart: cartItem is null");
-            return R.error("商品不存在，请刷新重试");
-        }
         Long userId = UserContext.getUserId();
-        if (!cartItem.getUserId().equals(userId)) {
-            log.error("deleteProductFromCart: userId is not match");
-            return R.error("用户信息不匹配");
-        }
-        boolean remove = this.removeById(cartItemId);
+        LambdaQueryWrapper<CartItem> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(CartItem::getUserId, userId).in(CartItem::getCartItemId, cartItemIds);
+        boolean remove = this.remove(queryWrapper);
         if (!remove) {
-            log.error("deleteProductFromCart: remove cartItem failed");
+            log.error("deleteProductFromCartBatch: remove cartItem failed");
             return R.error("删除商品失败");
         }
         return R.ok("删除商品成功");
     }
 
     @Override
-    public R<String> updateProductQuantity(Long cartItemId, Integer quantity) {
-        log.info("updateProductQuantity: {}, {}", cartItemId, quantity);
-        if (cartItemId == null || quantity == null ||quantity<=0) {
-            log.error("updateProductQuantity: cartItemId or quantity is null");
+    public R<String> updateProductQuantity(List<CartItemDTO> cartItemDTOList) {
+        if (cartItemDTOList == null || cartItemDTOList.isEmpty()) {
+            log.error("updateProductQuantity: 购物车商品列表为空");
             return R.error("参数错误");
         }
-        CartItem cartItem = this.getById(cartItemId);
-        if (cartItem == null) {
-            log.error("updateProductQuantity: cartItem is null");
-            return R.error("商品不存在，请刷新重试");
-        }
+
         Long userId = UserContext.getUserId();
-        if (!cartItem.getUserId().equals(userId)) {
-            log.error("updateProductQuantity: userId is not match");
-            return R.error("用户信息不匹配");
+        Map<String, CartItem> cartItemMap = new HashMap<>(); // Key: productId_configId
+        List<CartItem> updatedCartItems = new ArrayList<>();
+
+        // 1. 批量查询所有购物车商品，减少 SQL 查询次数
+        List<Long> productIds = cartItemDTOList.stream()
+                .map(CartItemDTO::getProductId)
+                .filter(Objects::nonNull) // 过滤 null 值，避免 SQL 报错
+                .collect(Collectors.toList());
+
+        List<Long> configIds = cartItemDTOList.stream()
+                .map(CartItemDTO::getConfigId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        List<CartItem> cartItems = this.list(new LambdaQueryWrapper<CartItem>()
+                .eq(CartItem::getUserId, userId)
+                .in(!productIds.isEmpty(), CartItem::getProductId, productIds)
+                .and(!configIds.isEmpty(), q -> q.in(CartItem::getConfigId, configIds).or().isNull(CartItem::getConfigId))
+        );
+
+        // 存入 Map，Key 采用 "productId_configId"
+        for (CartItem cartItem : cartItems) {
+            String key = cartItem.getProductId() + "_" + (cartItem.getConfigId() == null ? "null" : cartItem.getConfigId());
+            cartItemMap.put(key, cartItem);
         }
-        cartItem.setQuantity(quantity);
-        boolean update = this.updateById(cartItem);
-        if (!update) {
-            log.error("updateProductQuantity: update cartItem failed");
-            return R.error("更新商品数量失败");
+
+        // 2. 遍历 DTO，查找对应的 CartItem 并更新数量
+        for (CartItemDTO dto : cartItemDTOList) {
+            if (dto.getProductId() == null || dto.getQuantity() == null || dto.getQuantity() <= 0) {
+                log.warn("updateProductQuantity: 跳过参数错误的数据，productId={}, quantity={}", dto.getProductId(), dto.getQuantity());
+                continue; // 跳过错误数据，而不是返回错误
+            }
+
+            String key = dto.getProductId() + "_" + (dto.getConfigId() == null ? "null" : dto.getConfigId());
+            CartItem cartItem = cartItemMap.get(key);
+
+            if (cartItem == null) {
+                log.warn("updateProductQuantity: 购物车商品不存在，跳过 productId={}, configId={}", dto.getProductId(), dto.getConfigId());
+                continue; // 跳过不存在的商品
+            }
+
+            cartItem.setQuantity(dto.getQuantity());
+            updatedCartItems.add(cartItem);
         }
+
+        // 3. 批量更新数据库
+        if (!updatedCartItems.isEmpty()) {
+            boolean updated = this.updateBatchById(updatedCartItems);
+            if (!updated) {
+                log.error("updateProductQuantity: 批量更新购物车商品失败");
+                return R.error("更新商品数量失败");
+            }
+            log.info("updateProductQuantity: 成功更新 {} 个商品", updatedCartItems.size());
+        } else {
+            log.warn("updateProductQuantity: 没有任何商品被更新");
+        }
+
         return R.ok("更新商品数量成功");
     }
+
+
+
 
     @Override
     public R<PageDTO<CartItemVO>> showCartItems(int page, int pageSize) {
