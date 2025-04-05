@@ -1,6 +1,5 @@
 package com.peacemall.order.domain.vo;
 
-import com.peacemall.common.domain.dto.UserAddressDTO;
 import com.peacemall.order.domain.dto.OrderDetailsProductInfoDTO;
 import com.peacemall.order.enums.OrderStatus;
 import com.peacemall.order.enums.ReturnStatus;
@@ -18,6 +17,7 @@ public class OrdersHistoryVO {
     private BigDecimal originalAmount;  // 商品总金额
     private OrderStatus status;  // 订单状态
     private ReturnStatus returnStatus;  // 退货状态
+    private String createdAt;  // 下单时间
 
     // 商家信息
     private Long shopId;  // 商家ID

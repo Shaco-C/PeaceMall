@@ -45,7 +45,7 @@ public class OrdersController {
 
     //取消订单
     @ApiOperation(value = "取消订单")
-    @PostMapping("/cancelOrder/{orderId}")
+    @PutMapping("/cancelOrder/{orderId}")
     public R<String> cancelOrder(@PathVariable Long orderId){
         return ordersService.cancelOrder(orderId);
     }

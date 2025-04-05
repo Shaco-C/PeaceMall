@@ -446,13 +446,13 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             log.warn("订单状态不正确, 订单ID: {}, 状态: {}", orderId, orders.getStatus());
             return R.error("订单状态不正确，不能够取消");
         }
+        OrderStatus oldStatus = orders.getStatus();
         orders.setStatus(OrderStatus.CANCELLED);
         boolean update = this.updateById(orders);
         if(!update){
             log.warn("取消订单失败, 订单ID: {}", orderId);
             return R.error("取消订单失败");
         }
-
         // 发送库存回退消息消息
         // 组成Map<Long,Integer> configIdAndQuantityMap的关系
         // 查询所有orderDetails
@@ -462,9 +462,10 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         String stockMsg = JSONUtil.toJsonStr(configIdAndQuantityMap);
         rabbitMqHelper.sendMessage(ProductConfigurationMQConstant.PRODUCT_CONFIGURATION_EXCHANGE,
                 ProductConfigurationMQConstant.PRODUCT_CONFIGURATION_UPDATE_ROUTING_KEY,stockMsg);
-
+        log.info("发送库存回退消息成功, 订单ID: {}", orderId);
+        log.info("Orderstatus:{}",orders.getStatus());
         // 如果用户是在支付状态下取消订单的
-        if ( OrderStatus.PENDING_PAYMENT.equals(orders.getStatus())) {
+        if ( OrderStatus.PENDING.equals(oldStatus)) {
             // 余额需要回退给用户
             WalletAmountChangeDTO userWalletChange = new WalletAmountChangeDTO();
             userWalletChange.setId(orders.getUserId());
@@ -472,7 +473,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             String userPendingBalanceChangeMsg = JSONUtil.toJsonStr(userWalletChange);
             rabbitMqHelper.sendMessage(WallerMQConstant.WALLET_EXCHANGE,
                     WallerMQConstant.WALLET_UPDATE_PENDING_BALANCE_BY_USERID_ROUTING_KEY,userPendingBalanceChangeMsg);
-
+            log.info("发送用户余额回退消息成功, 订单ID: {}", orderId);
+            log.info("userWalletChange: {}", userWalletChange);
             // 商家的待处理金额需要扣减
             ShopsInfoVO shopsInfoVO = shopClient.getShopInfoById(orders.getShopId());
             WalletAmountChangeDTO merchantWalletChange = new WalletAmountChangeDTO();
@@ -481,6 +483,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             String shopPendingBalanceChangeMsg = JSONUtil.toJsonStr(merchantWalletChange);
             rabbitMqHelper.sendMessage(WallerMQConstant.WALLET_EXCHANGE,
                     WallerMQConstant.WALLET_UPDATE_PENDING_BALANCE_BY_USERID_ROUTING_KEY,shopPendingBalanceChangeMsg);
+            log.info("merchantWalletChange: {}", merchantWalletChange);
         }
 
         return R.ok("取消订单成功");

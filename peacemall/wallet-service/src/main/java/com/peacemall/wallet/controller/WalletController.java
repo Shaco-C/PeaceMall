@@ -2,7 +2,6 @@ package com.peacemall.wallet.controller;
 
 
 import com.peacemall.common.domain.R;
-import com.peacemall.common.domain.dto.IdsDTO;
 import com.peacemall.common.domain.dto.WalletAmountChangeDTO;
 import com.peacemall.common.domain.vo.WalletVO;
 import com.peacemall.wallet.service.WalletService;
@@ -67,6 +66,7 @@ public class WalletController {
     }
 
     //管理员删除用户的钱包
+    //todo 用户余额的显示
     @ApiOperation("管理员删除用户的钱包")
     @DeleteMapping("/admin/adminDeleteWallet")
     public void adminDeleteWallet(@RequestBody List<Long> userId){

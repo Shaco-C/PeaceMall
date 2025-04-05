@@ -31,6 +31,7 @@ public class WalletListener {
     ))
     public void updateUserPendingBalance(@Payload String message) {
         log.info("updateUserPendingBalance: received message: {}", message);
+        log.info("=============================================================");
         if (StrUtil.isEmpty(message)) {
             log.error("updateUserPendingBalance: message is empty");
             throw new RuntimeException("消息为空");

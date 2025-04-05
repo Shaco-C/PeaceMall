@@ -85,9 +85,8 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         }
 
         WalletVO walletVO = new WalletVO();
-        log.info("wallet:{}", walletVO);
         BeanUtil.copyProperties(wallet, walletVO);
-
+        log.info("wallet:{}", walletVO);
         return R.ok(walletVO);
     }
 
