@@ -1,5 +1,4 @@
 package com.peacemall.favorite.controller;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.PageDTO;
 import com.peacemall.favorite.domain.vo.FavoriteProductVO;

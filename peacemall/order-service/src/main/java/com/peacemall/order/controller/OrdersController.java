@@ -50,6 +50,12 @@ public class OrdersController {
         return ordersService.cancelOrder(orderId);
     }
 
+    //确认收货
+    @ApiOperation(value = "确认收货")
+    @PutMapping("/userConfirmReceipt/{orderId}")
+    public R<String> userConfirmReceipt(@PathVariable Long orderId){
+        return ordersService.userConfirmReceipt(orderId);
+    }
     //支付订单
     @ApiOperation(value = "支付订单")
     @PutMapping("/payOrder/{orderId}")

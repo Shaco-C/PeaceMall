@@ -14,6 +14,7 @@ import com.peacemall.common.domain.R;
 import com.peacemall.common.domain.dto.*;
 import com.peacemall.common.domain.vo.ShopsInfoVO;
 import com.peacemall.common.enums.UserRole;
+import com.peacemall.common.enums.WalletFlowType;
 import com.peacemall.common.utils.RabbitMqHelper;
 import com.peacemall.common.utils.UserContext;
 import com.peacemall.order.domain.dto.OrderDetailsProductInfoDTO;
@@ -470,6 +471,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             WalletAmountChangeDTO userWalletChange = new WalletAmountChangeDTO();
             userWalletChange.setId(orders.getUserId());
             userWalletChange.setChangeAmount(orders.getTotalAmount());
+            userWalletChange.setWalletFlowType(WalletFlowType.REFUND);
+            userWalletChange.setRelatedOrderId(orderId);
             String userPendingBalanceChangeMsg = JSONUtil.toJsonStr(userWalletChange);
             rabbitMqHelper.sendMessage(WallerMQConstant.WALLET_EXCHANGE,
                     WallerMQConstant.WALLET_UPDATE_PENDING_BALANCE_BY_USERID_ROUTING_KEY,userPendingBalanceChangeMsg);
@@ -480,6 +483,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             WalletAmountChangeDTO merchantWalletChange = new WalletAmountChangeDTO();
             merchantWalletChange.setId(shopsInfoVO.getUserId());
             merchantWalletChange.setChangeAmount(orders.getTotalAmount().negate());
+            merchantWalletChange.setWalletFlowType(WalletFlowType.REFUND);
+            merchantWalletChange.setRelatedOrderId(orderId);
             String shopPendingBalanceChangeMsg = JSONUtil.toJsonStr(merchantWalletChange);
             rabbitMqHelper.sendMessage(WallerMQConstant.WALLET_EXCHANGE,
                     WallerMQConstant.WALLET_UPDATE_PENDING_BALANCE_BY_USERID_ROUTING_KEY,shopPendingBalanceChangeMsg);
@@ -539,8 +544,10 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         WalletAmountChangeDTO walletAmountChangeDTO = new WalletAmountChangeDTO();
         walletAmountChangeDTO.setId(shopsInfoVO.getUserId());
         walletAmountChangeDTO.setChangeAmount(orders.getTotalAmount());
+        walletAmountChangeDTO.setRelatedOrderId(orderId);
+        walletAmountChangeDTO.setWalletFlowType(WalletFlowType.EXPENSE);
         walletClient.userWalletPendingAmountChange(walletAmountChangeDTO);
-
+        log.info("商家待确认金额增加成功, 订单ID: {}, 用户ID: {}", orderId, userId);
         orders.setStatus(OrderStatus.PENDING);
         boolean update = this.updateById(orders);
         if (!update) {
@@ -702,6 +709,41 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
         return R.ok("商家审核退货申请成功:"+returnStatus);
 
+    }
+
+    @Override
+    public R<String> userConfirmReceipt(Long orderId) {
+        log.info("用户确认收货, 订单ID: {}", orderId);
+        Long userId = UserContext.getUserId();
+        if(userId == null){
+            log.warn("用户ID为空");
+            return R.error("用户未登录");
+        }
+        if(orderId == null){
+            log.warn("订单ID为空");
+            return R.error("订单ID为空");
+        }
+        //开始处理订单申请
+        //获取该订单详情
+        Orders orders = this.getById(orderId);
+        //判断订单是否为该用户的订单
+        if(!orders.getUserId().equals(userId)){
+            log.warn("用户ID与订单用户ID不匹配, 用户ID: {}, 订单ID: {}", userId, orderId);
+            return R.error("订单不匹配");
+        }
+        //判断该订单是否为送达状态的订单
+        if(!orders.getStatus().equals(OrderStatus.DELIVERED)){
+            log.warn("订单状态不正确, 订单ID: {}, 状态: {}", orderId, orders.getStatus());
+            return R.error("订单未送达");
+        }
+        //改变订单状态
+        orders.setStatus(OrderStatus.RECEIVED);
+        boolean update = this.updateById(orders);
+        if (!update) {
+            log.warn("用户确认收货失败, 订单ID: {}", orderId);
+            return R.error("用户确认收货失败，请重试");
+        }
+        return R.ok("用户确认收货成功");
     }
 
 

@@ -45,6 +45,6 @@ public interface OrdersService extends IService<Orders> {
 
 
     //用户确认收货
-
+    R<String> userConfirmReceipt(Long orderId);
 
 }

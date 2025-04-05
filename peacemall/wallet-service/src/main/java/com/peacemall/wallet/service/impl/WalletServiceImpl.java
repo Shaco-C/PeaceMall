@@ -1,6 +1,7 @@
 package com.peacemall.wallet.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.peacemall.common.constant.FlowLogsMQConstants;
@@ -195,7 +196,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
             throw new RuntimeException("用户支付失败");
         }
 
-        //添加流水日志
+        //添加用户流水日志
         //todo 需要修改
         FlowLogsDTO flowLogsDTO = new FlowLogsDTO();
         flowLogsDTO.setWalletId(wallet.getWalletId());
@@ -209,6 +210,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         }catch (Exception e){
             log.error("发送消息失败,失败的流水日志信息为:{}",flowLogsDTO);
         }
+        log.info("发送支付流水信息成功:{}",flowLogsDTO);
 
         return R.ok("用户支付成功");
     }
@@ -255,6 +257,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
     }
 
     @Override
+    @Transactional
     public void userWalletPendingAmountChange(WalletAmountChangeDTO walletAmountChangeDTO) {
         log.info("userWalletAmountChange called with DTO: {}", walletAmountChangeDTO);
 
@@ -288,7 +291,18 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         log.info("用户钱包更新成功, userId: {}, pendingBalance: {}, totalBalance: {}",
                 userId, wallet.getPendingBalance(), wallet.getTotalBalance());
 
-        //todo 发送流水消息
+        // 发送流水消息
+        FlowLogsDTO flowLogsDTO = new FlowLogsDTO(
+                wallet.getWalletId(),
+                userId,
+                walletAmountChangeDTO.getRelatedOrderId(),
+                walletAmountChangeDTO.getWalletFlowType(),
+                walletAmountChangeDTO.getChangeAmount(),
+                wallet.getTotalBalance()
+        );
+        rabbitMqHelper.sendMessage(FlowLogsMQConstants.FLOW_LOGS_EXCHANGE_NAME,
+                FlowLogsMQConstants.FLOW_LOGS_ROUTING_KEY,flowLogsDTO);
+        log.info("发送流水消息成功, flowLogsDTO: {}", flowLogsDTO);
     }
 
 }

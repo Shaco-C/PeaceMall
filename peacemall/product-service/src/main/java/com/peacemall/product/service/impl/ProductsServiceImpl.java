@@ -342,45 +342,17 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         }
 
         // 批量查询商品信息
-        List<Products> productsList = this.listByIds(productIds);
-        if (productsList == null || productsList.isEmpty()) {
+        List<ProductBasicInfosAndShopInfos> productAndShopInfosByIds = baseMapper.findProductAndShopInfosByIds(productIds);
+        if (productAndShopInfosByIds == null || productAndShopInfosByIds.isEmpty()) {
             log.error("查询不到商品信息");
             throw new RuntimeException("商品不存在");
         }
+        //组合为productId - ProductBasicInfosAndShopInfos
+        Map<Long, ProductBasicInfosAndShopInfos> productBasicInfosAndShopInfosMap = productAndShopInfosByIds.stream()
+                .collect(Collectors.toMap(ProductBasicInfosAndShopInfos::getProductId, Function.identity()));
 
-        // 获取所有商家 ID（去重，防止重复查询）
-        List<Long> shopIdList = productsList.stream()
-                .map(Products::getShopId)
-                .distinct()
-                .collect(Collectors.toList());
-
-        // 通过 Feign 调用商家信息
-        Map<Long, ShopsInfoVO> shopInfoMap = shopClient.getShopInfoByIds(shopIdList);
-
-        // 组装商品和商家信息，并转换为 Map<productId, ProductBasicInfosAndShopInfos>
-        Map<Long, ProductBasicInfosAndShopInfos> productInfoMap = productsList.stream()
-                .collect(Collectors.toMap(
-                        Products::getProductId,
-                        product -> {
-                            ProductBasicInfosAndShopInfos vo = new ProductBasicInfosAndShopInfos();
-                            BeanUtil.copyProperties(product, vo);
-
-                            // 获取商家信息并填充
-                            ShopsInfoVO shopInfo = shopInfoMap.get(product.getShopId());
-                            if (shopInfo != null) {
-                                vo.setShopName(shopInfo.getShopName());
-                                vo.setShopDescription(shopInfo.getShopDescription());
-                                vo.setShopAvatarUrl(shopInfo.getShopAvatarUrl());
-                            } else {
-                                log.warn("商家 ID {} 对应的商家信息不存在", product.getShopId());
-                            }
-
-                            return vo;
-                        }
-                ));
-
-        log.info("getProductBasicInfosAndShopInfosById success, result size: {}", productInfoMap.size());
-        return productInfoMap;
+        log.info("getProductBasicInfosAndShopInfosById success, result size: {}", productBasicInfosAndShopInfosMap.size());
+        return productBasicInfosAndShopInfosMap;
     }
 
 

@@ -24,4 +24,47 @@
         </foreach>
     </select>
 
+    <select id="findProductAndShopInfosByIds" resultType="com.peacemall.common.domain.vo.ProductBasicInfosAndShopInfos">
+        SELECT
+        p.product_id,
+        p.category_id,
+        c.category_name,
+        p.brand,
+        p.name,
+        p.description,
+        p.sales,
+        p.updated_at,
+
+        -- 主图
+        (
+        SELECT img.url
+        FROM product_images img
+        WHERE img.product_id = p.product_id
+        ORDER BY img.is_main DESC, img.sort_order ASC
+        LIMIT 1
+        ) AS image_url,
+
+        -- 最低价格
+        (
+        SELECT COALESCE(MIN(pc.price), 0)
+        FROM product_configurations pc
+        WHERE pc.product_id = p.product_id
+        ) AS price,
+
+        -- 商店信息
+        s.shop_id,
+        s.shop_name,
+        s.shop_avatar_url
+
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.category_id
+        LEFT JOIN shops s ON p.shop_id = s.shop_id
+
+        WHERE p.product_id IN
+        <foreach collection="productIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+
 </mapper>
