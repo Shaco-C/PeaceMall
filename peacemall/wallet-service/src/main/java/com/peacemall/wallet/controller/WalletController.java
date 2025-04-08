@@ -60,13 +60,13 @@ public class WalletController {
     //todo 后续要修改
     @ApiOperation("用户支付")
     @PutMapping("/userPay")
-    public R<String> userPay(@RequestParam("amount")BigDecimal amount){
+    public R<String> userPay(@RequestParam("amount")BigDecimal amount,
+                             @RequestParam("orderId")Long orderId){
 
-        return walletService.userPay(amount);
+        return walletService.userPay(amount,orderId);
     }
 
     //管理员删除用户的钱包
-    //todo 用户余额的显示
     @ApiOperation("管理员删除用户的钱包")
     @DeleteMapping("/admin/adminDeleteWallet")
     public void adminDeleteWallet(@RequestBody List<Long> userId){

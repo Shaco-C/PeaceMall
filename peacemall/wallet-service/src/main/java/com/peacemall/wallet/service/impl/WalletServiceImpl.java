@@ -165,7 +165,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
     //用户支付
     @Override
     @Transactional
-    public R<String> userPay(BigDecimal amount) {
+    public R<String> userPay(BigDecimal amount,Long orderId) {
         log.info("userPay method is called");
         if ((amount == null) || (amount.compareTo(BigDecimal.valueOf(0))<=0)) {
             log.error("用户支付金额不合法");
@@ -203,6 +203,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         flowLogsDTO.setFlowType(WalletFlowType.EXPENSE);
         flowLogsDTO.setBalanceChange(amount.negate());
         flowLogsDTO.setUserId(userId);
+        flowLogsDTO.setRelatedOrder(orderId);
         flowLogsDTO.setBalanceAfter(wallet.getTotalBalance());
         try{
             rabbitMqHelper.sendMessage(FlowLogsMQConstants.FLOW_LOGS_EXCHANGE_NAME,

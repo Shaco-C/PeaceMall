@@ -533,7 +533,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 
         //openfeign调用waller-service来进行支付
         try{
-            walletClient.userPay(orders.getTotalAmount());
+            walletClient.userPay(orders.getTotalAmount(),orderId);
         }catch (Exception e){
             log.error("用户支付失败, 订单ID: {}, 用户ID: {}, 异常: {}", orderId, userId, e.getMessage());
             throw new RuntimeException("用户支付失败");

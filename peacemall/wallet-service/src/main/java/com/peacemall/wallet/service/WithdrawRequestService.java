@@ -25,7 +25,7 @@ public interface WithdrawRequestService extends IService<WithdrawRequest> {
     R<String> adminCheckWithdrawRequest(Long id, WithDrawRequestStatus withDrawRequestStatus);
 
     //用户查询自己的提现申请
-    R<PageDTO<WithdrawRequest>> userGetWithdrawRequest(int page, int pageSize);
+    R<PageDTO<WithdrawRequest>> userGetWithdrawRequest(int page, int pageSize,WithDrawRequestStatus withDrawRequestStatus);
 
     //用户取消提现申请
     R<String> userCancelWithdrawRequest(Long withdrawRequestId);

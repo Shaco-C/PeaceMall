@@ -130,7 +130,8 @@ public class MerchantApplicationsServiceImpl extends ServiceImpl<MerchantApplica
 
         //根据当前登陆的userId来返回Application
         LambdaQueryWrapper<MerchantApplications> merchantApplicationsLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        merchantApplicationsLambdaQueryWrapper.eq(MerchantApplications::getUserId, userId);
+        merchantApplicationsLambdaQueryWrapper.eq(MerchantApplications::getUserId, userId)
+                .orderByDesc(MerchantApplications::getCreatedAt);
         List<MerchantApplications> merchantApplications = this.list(merchantApplicationsLambdaQueryWrapper);
         if (merchantApplications.isEmpty()) {
             log.error("用户未申请过商家");

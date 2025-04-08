@@ -54,9 +54,10 @@ public class WithdrawRequestController {
     @ApiOperation(value = "用户查询自己的提现申请")
     @GetMapping("/userGetWithdrawRequest")
     public R<PageDTO<WithdrawRequest>> userGetWithdrawRequest(@RequestParam(value = "page",defaultValue = "1") int page,
-                                                           @RequestParam(value = "pageSize",defaultValue = "20")int pageSize){
+                                                           @RequestParam(value = "pageSize",defaultValue = "20")int pageSize,
+                                                              @RequestParam(value = "withDrawRequestStatus",defaultValue = "PENDING")WithDrawRequestStatus withDrawRequestStatus){
 
-        return withdrawRequestService.userGetWithdrawRequest(page,pageSize);
+        return withdrawRequestService.userGetWithdrawRequest(page,pageSize,withDrawRequestStatus);
     }
 
     //用户取消提现申请

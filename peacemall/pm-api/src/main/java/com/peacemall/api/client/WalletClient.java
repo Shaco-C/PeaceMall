@@ -28,5 +28,6 @@ public interface WalletClient {
     void userWalletPendingAmountChange(@RequestBody WalletAmountChangeDTO walletAmountChangeDTO);
 
     @PutMapping("/wallet/userPay")
-    R<String> userPay(@RequestParam("amount") BigDecimal amount);
+    R<String> userPay(@RequestParam("amount") BigDecimal amount,
+                      @RequestParam("orderId") Long orderId);
 }

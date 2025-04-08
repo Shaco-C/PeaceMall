@@ -43,7 +43,7 @@ public class WalletClientFallbackFacktory implements FallbackFactory<WalletClien
             }
 
             @Override
-            public R<String> userPay(BigDecimal amount) {
+            public R<String> userPay(BigDecimal amount,Long orderId) {
                 log.error("userPay error cause", cause);
                 log.info("userPay error cause，请重试");
                 throw new RuntimeException("用户钱包支付失败，请重试"+cause);

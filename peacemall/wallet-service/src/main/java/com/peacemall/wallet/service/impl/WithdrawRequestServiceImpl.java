@@ -171,7 +171,7 @@ public class WithdrawRequestServiceImpl extends ServiceImpl<WithdrawRequestMappe
 
     //用户查询自己的提现申请
     @Override
-    public R<PageDTO<WithdrawRequest>> userGetWithdrawRequest(int page, int pageSize) {
+    public R<PageDTO<WithdrawRequest>> userGetWithdrawRequest(int page, int pageSize,WithDrawRequestStatus withDrawRequestStatus) {
         log.info("userGetWithdrawRequest method is called");
         if (page < 1 || pageSize < 1) {
             return R.error("分页参数无效");
@@ -185,7 +185,9 @@ public class WithdrawRequestServiceImpl extends ServiceImpl<WithdrawRequestMappe
         }
         //构造查询条件
         LambdaQueryWrapper<WithdrawRequest> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(WithdrawRequest::getUserId,userId);
+        queryWrapper.eq(WithdrawRequest::getUserId,userId)
+                .eq(WithdrawRequest::getStatus,withDrawRequestStatus)
+                .orderByDesc(WithdrawRequest::getCreatedAt);
 
         //分页查询
         Page<WithdrawRequest> withdrawRequestPage = new Page<>(page, pageSize);

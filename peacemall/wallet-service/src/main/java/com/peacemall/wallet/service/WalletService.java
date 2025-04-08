@@ -27,7 +27,7 @@ public interface WalletService extends IService<Wallet> {
     R<String> userRechargeWallet(BigDecimal amount);
 
     //用户支付
-    R<String> userPay(BigDecimal amount);
+    R<String> userPay(BigDecimal amount,Long orderId);
 
 
     //管理员删除用户的钱包
