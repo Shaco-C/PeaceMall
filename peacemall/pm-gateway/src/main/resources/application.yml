@@ -55,6 +55,11 @@ spring:
           predicates:
             - Path=/file/**
 
+        - id: reviews
+          uri: lb://review-service
+          predicates:
+            - Path=/reviews/**
+
 
 
 pm:
