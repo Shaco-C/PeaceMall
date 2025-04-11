@@ -4,6 +4,8 @@
 
 PeaceMall 是一个基于微服务架构的现代化电子商务平台，提供完整的在线购物解决方案。系统支持用户注册登录、商品浏览购买、订单管理、商家入驻、支付结算等核心功能，为消费者、商家和平台管理员提供全方位的服务。
 
+![](https://github.com/Shaco-C/PeaceMall/blob/main/documents/sql_and_configurationsInfo/er.png)
+
 ## 技术栈
 
 ### 后端技术栈
